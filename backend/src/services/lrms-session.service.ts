@@ -1,8 +1,6 @@
 import { LRMSClient, LRMSSessionState } from "../upstream/lrms.client.js";
-
 import { SessionRepository } from "../repositories/session.repository.js";
-
-import { MemorySessionRepository } from "../repositories/memory-session.repository.js";
+import { RedisSessionRepository } from "../repositories/redis-session.repository.js";
 
 class LRMSSessionService {
   constructor(private readonly repository: SessionRepository) {}
@@ -27,5 +25,5 @@ class LRMSSessionService {
 }
 
 export const lrmsSessionService = new LRMSSessionService(
-  new MemorySessionRepository(),
+  new RedisSessionRepository(),
 );
