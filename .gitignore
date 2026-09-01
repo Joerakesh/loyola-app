@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
+
+# Logs
+*.log
+
+# LRMS captured/session data
+cookies.txt
+attendance.json
+login.html
+
+# Local test artifacts
+dummy.txt
