@@ -6,7 +6,7 @@ interface LRMSDashboardData {
   studentname?: string;
 }
 
-interface LRMSDashboardResponse {
+export interface LRMSDashboardResponse {
   data: LRMSDashboardData;
   status: string;
 }

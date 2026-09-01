@@ -6,7 +6,7 @@ interface LRMSSubject {
   facultyname: string;
 }
 
-interface LRMSSubjectsResponse {
+export interface LRMSSubjectsResponse {
   data: LRMSSubject[];
   success: boolean;
 }

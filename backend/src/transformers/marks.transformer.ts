@@ -32,7 +32,7 @@ export interface LRMSMarkCourse {
   };
 }
 
-interface LRMSMarksResponse {
+export interface LRMSMarksResponse {
   data: LRMSMarkCourse[];
   success: boolean;
 }

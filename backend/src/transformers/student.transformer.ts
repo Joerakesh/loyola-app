@@ -9,7 +9,7 @@ interface LRMSStudentProfile {
   studentid: string;
 }
 
-interface LRMSStudentProfileResponse {
+export interface LRMSStudentProfileResponse {
   data: LRMSStudentProfile;
   status: string;
 }

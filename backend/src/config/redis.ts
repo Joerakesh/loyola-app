@@ -16,9 +16,9 @@ redis.on("error", (error) => {
 
 let connectionPromise: Promise<void> | null = null;
 
-export function connectRedis() {
+export function connectRedis(): Promise<void> {
   if (!connectionPromise) {
-    connectionPromise = redis.connect();
+    connectionPromise = redis.connect().then(() => undefined);
   }
 
   return connectionPromise;

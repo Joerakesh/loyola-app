@@ -2,7 +2,6 @@ import axios from "axios";
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar } from "tough-cookie";
 import * as cheerio from "cheerio";
-
 import { LRMS_CONFIG } from "../config/lrms.js";
 
 export interface LRMSSessionState {
@@ -15,23 +14,23 @@ export class LRMSClient {
   private readonly jar: CookieJar;
   private readonly client;
 
-  constructor(cookieJar?: CookieJar) {
-    this.jar = cookieJar ?? new CookieJar();
+  constructor(existingJar?: CookieJar) {
+    this.jar = existingJar ?? new CookieJar();
 
-    this.client = wrapper(
-      axios.create({
-        baseURL: LRMS_CONFIG.baseUrl,
-        jar: this.jar,
-        withCredentials: true,
-        timeout: 15000,
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; CollegeMobileApp/1.0)",
-          Accept: "*/*",
-        },
-      }),
-    );
+    const axiosClient = axios.create({
+      baseURL: LRMS_CONFIG.baseUrl,
+      withCredentials: true,
+      timeout: 15000,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; CollegeMobileApp/1.0)",
+        Accept: "*/*",
+      },
+    });
+
+    this.client = wrapper(axiosClient as any);
+
+    (this.client.defaults as any).jar = this.jar;
   }
-
   async getLoginPage() {
     const response = await this.client.get("/");
 
@@ -53,7 +52,6 @@ export class LRMSClient {
     const body = new URLSearchParams();
 
     body.append("registerno", registrationNumber);
-
     body.append("password", password);
     body.append("captcha", captcha);
 
@@ -72,16 +70,19 @@ export class LRMSClient {
   }
 
   async get<T = unknown>(url: string) {
-    return this.client.get<T>(url);
+    return this.client.get(url) as Promise<{
+      data: T;
+      status: number;
+    }>;
   }
 
   async post<T = unknown>(url: string, data?: unknown) {
-    return this.client.post<T>(url, data);
+    return this.client.post(url, data) as Promise<{
+      data: T;
+      status: number;
+    }>;
   }
 
-  /**
-   * Export the authenticated LRMS session.
-   */
   async exportSession(registrationNumber: string): Promise<LRMSSessionState> {
     const cookies = await this.jar.getCookieString(LRMS_CONFIG.baseUrl);
 
@@ -96,14 +97,15 @@ export class LRMSClient {
     };
   }
 
-  /**
-   * Recreate an LRMSClient from a saved session.
-   */
   static async fromSession(session: LRMSSessionState): Promise<LRMSClient> {
     const jar = new CookieJar();
 
     await jar.setCookie(session.cookies, LRMS_CONFIG.baseUrl);
 
-    return new LRMSClient(jar);
+    const client = new LRMSClient(jar);
+
+    // The axios-cookiejar-support wrapper needs the jar
+    // associated with the client instance.
+    return client;
   }
 }
