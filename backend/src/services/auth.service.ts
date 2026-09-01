@@ -38,7 +38,7 @@ export class AuthService {
     const session = await client.exportSession(registrationNumber);
 
     // Store session state.
-    lrmsSessionService.createSession(token, session);
+    await lrmsSessionService.createSession(token, session);
 
     return {
       token,
