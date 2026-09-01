@@ -1,6 +1,4 @@
 import axios from "axios";
-import { wrapper } from "axios-cookiejar-support";
-import { CookieJar } from "tough-cookie";
 import * as cheerio from "cheerio";
 import { LRMS_CONFIG } from "../config/lrms.js";
 
@@ -11,28 +9,56 @@ export interface LRMSSessionState {
 }
 
 export class LRMSClient {
-  private readonly jar: CookieJar;
   private readonly client;
+  private cookies = "";
 
-  constructor(existingJar?: CookieJar) {
-    this.jar = existingJar ?? new CookieJar();
+  constructor(cookies = "") {
+    this.cookies = cookies;
 
-    const axiosClient = axios.create({
+    this.client = axios.create({
       baseURL: LRMS_CONFIG.baseUrl,
-      withCredentials: true,
       timeout: 15000,
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; CollegeMobileApp/1.0)",
         Accept: "*/*",
       },
     });
-
-    this.client = wrapper(axiosClient as any);
-
-    (this.client.defaults as any).jar = this.jar;
   }
+
+  private getHeaders() {
+    return this.cookies
+      ? {
+          Cookie: this.cookies,
+        }
+      : {};
+  }
+
+  private updateCookies(response: {
+    headers: {
+      "set-cookie"?: string[];
+    };
+  }) {
+    const setCookie = response.headers["set-cookie"];
+
+    if (!setCookie) {
+      return;
+    }
+
+    const newCookies = setCookie
+      .map((cookie) => cookie.split(";")[0])
+      .join("; ");
+
+    if (newCookies) {
+      this.cookies = newCookies;
+    }
+  }
+
   async getLoginPage() {
-    const response = await this.client.get("/");
+    const response = await this.client.get("/", {
+      headers: this.getHeaders(),
+    });
+
+    this.updateCookies(response);
 
     const $ = cheerio.load(response.data);
 
@@ -60,52 +86,51 @@ export class LRMSClient {
       body.toString(),
       {
         headers: {
+          ...this.getHeaders(),
           "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           "X-Requested-With": "XMLHttpRequest",
         },
       },
     );
 
+    this.updateCookies(response);
+
     return response.data;
   }
 
   async get<T = unknown>(url: string) {
-    return this.client.get(url) as Promise<{
-      data: T;
-      status: number;
-    }>;
+    const response = await this.client.get<T>(url, {
+      headers: this.getHeaders(),
+    });
+
+    this.updateCookies(response);
+
+    return response;
   }
 
   async post<T = unknown>(url: string, data?: unknown) {
-    return this.client.post(url, data) as Promise<{
-      data: T;
-      status: number;
-    }>;
+    const response = await this.client.post<T>(url, data, {
+      headers: this.getHeaders(),
+    });
+
+    this.updateCookies(response);
+
+    return response;
   }
 
   async exportSession(registrationNumber: string): Promise<LRMSSessionState> {
-    const cookies = await this.jar.getCookieString(LRMS_CONFIG.baseUrl);
-
-    if (!cookies) {
+    if (!this.cookies) {
       throw new Error("Cannot export LRMS session: no cookies found");
     }
 
     return {
-      cookies,
+      cookies: this.cookies,
       registrationNumber,
       createdAt: Date.now(),
     };
   }
 
-  static async fromSession(session: LRMSSessionState): Promise<LRMSClient> {
-    const jar = new CookieJar();
-
-    await jar.setCookie(session.cookies, LRMS_CONFIG.baseUrl);
-
-    const client = new LRMSClient(jar);
-
-    // The axios-cookiejar-support wrapper needs the jar
-    // associated with the client instance.
-    return client;
+  static fromSession(session: LRMSSessionState): LRMSClient {
+    return new LRMSClient(session.cookies);
   }
 }
