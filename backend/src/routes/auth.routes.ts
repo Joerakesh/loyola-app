@@ -8,5 +8,6 @@ router.post("/login", authController.login.bind(authController));
 router.post("/logout", requireAuth, (req, res) =>
   authController.logout(req, res),
 );
+router.post("/refresh", (req, res) => authController.refresh(req, res));
 
 export default router;

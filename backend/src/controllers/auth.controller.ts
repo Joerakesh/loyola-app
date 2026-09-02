@@ -22,6 +22,7 @@ export class AuthController {
         authentication: {
           token: result.token,
           tokenType: "Bearer",
+          expiresAt: result.expiresAt,
         },
       });
     } catch (error: any) {
@@ -59,6 +60,37 @@ export class AuthController {
       return res.status(500).json({
         status: "error",
         message: "Unable to logout",
+      });
+    }
+  }
+
+  async refresh(req: Request, res: Response) {
+    try {
+      const { registrationNumber, password } = req.body;
+
+      if (!registrationNumber || !password) {
+        return res.status(400).json({
+          status: "error",
+          message: "registrationNumber and password are required",
+        });
+      }
+
+      const result = await authService.refresh(registrationNumber, password);
+
+      return res.json({
+        status: "success",
+        authentication: {
+          token: result.token,
+          tokenType: "Bearer",
+          expiresAt: result.expiresAt,
+        },
+      });
+    } catch (error) {
+      console.error("Refresh authentication error:", error);
+
+      return res.status(401).json({
+        status: "error",
+        message: "Unable to refresh session",
       });
     }
   }

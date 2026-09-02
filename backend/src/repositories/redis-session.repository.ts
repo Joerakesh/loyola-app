@@ -13,7 +13,7 @@ export class RedisSessionRepository implements SessionRepository {
     await connectRedis();
 
     await redis.set(this.key(token), JSON.stringify(session), {
-      EX: 60 * 60 * 24 * 7,
+      EX: 60 * 60 * 24,
     });
   }
 
