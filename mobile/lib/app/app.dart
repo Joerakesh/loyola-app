@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../core/theme/app_theme.dart';
 import 'app_router.dart';
 
 class LoyolaApp extends StatelessWidget {
@@ -8,16 +10,11 @@ class LoyolaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Loyola ERP',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF8B0000)),
-      ),
-      initialRoute: AppRouter.login,
-      onGenerateRoute: appRouter.generateRoute,
+      theme: AppTheme.dark(),
+      routerConfig: appRouter.router,
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../constants/api_constants.dart';
 import '../storage/secure_storage.dart';
@@ -16,7 +17,12 @@ class ApiClient {
           },
         ),
       ) {
-    _dio.interceptors.add(
+    _dio.interceptors.addAll([
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        logPrint: (obj) => debugPrint(obj.toString()),
+      ),
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await _storage.getToken();
@@ -28,7 +34,7 @@ class ApiClient {
           handler.next(options);
         },
       ),
-    );
+    ]);
   }
 
   final Dio _dio;
