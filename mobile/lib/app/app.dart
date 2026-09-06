@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-
-import '../features/auth/presentation/login_screen.dart';
+import 'app_router.dart';
 
 class LoyolaApp extends StatelessWidget {
-  const LoyolaApp({super.key});
+  const LoyolaApp({super.key, required this.appRouter});
+
+  final AppRouter appRouter;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,8 @@ class LoyolaApp extends StatelessWidget {
         fontFamily: 'Roboto',
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF8B0000)),
       ),
-      home: const LoginScreen(),
+      initialRoute: AppRouter.login,
+      onGenerateRoute: appRouter.generateRoute,
     );
   }
 }

@@ -14,9 +14,7 @@ class DashboardModel {
       student: StudentModel.fromJson(
         json['student'] as Map<String, dynamic>? ?? {},
       ),
-      fees: FeesModel.fromJson(
-        json['fees'] as Map<String, dynamic>? ?? {},
-      ),
+      fees: FeesModel.fromJson(json['fees'] as Map<String, dynamic>? ?? {}),
       documents: DocumentsModel.fromJson(
         json['documents'] as Map<String, dynamic>? ?? {},
       ),
@@ -27,17 +25,20 @@ class DashboardModel {
 class StudentModel {
   const StudentModel({
     required this.name,
+    required this.department,
     required this.mobile,
     required this.email,
   });
 
   final String name;
+  final String department;
   final String mobile;
   final String email;
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
     return StudentModel(
       name: json['name']?.toString() ?? '',
+      department: json['department']?.toString() ?? '',
       mobile: json['mobile']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
     );
@@ -45,9 +46,7 @@ class StudentModel {
 }
 
 class FeesModel {
-  const FeesModel({
-    required this.totalPaid,
-  });
+  const FeesModel({required this.totalPaid});
 
   final double totalPaid;
 
@@ -63,9 +62,7 @@ class FeesModel {
 }
 
 class DocumentsModel {
-  const DocumentsModel({
-    required this.twelfthCertificate,
-  });
+  const DocumentsModel({required this.twelfthCertificate});
 
   final String? twelfthCertificate;
 

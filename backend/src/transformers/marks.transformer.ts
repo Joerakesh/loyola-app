@@ -48,7 +48,20 @@ function parseMark(value: string): number | null {
 
   return Number.isNaN(parsed) ? null : parsed;
 }
-
+function mapComponentName(rawName: string): string {
+  switch (rawName.trim()) {
+    case "Comp 1":
+      return "CIA 1";
+    case "Comp 2":
+      return "CIA 2";
+    case "Comp 3a":
+      return "Comp 1";
+    case "Comp 3b":
+      return "Comp 2";
+    default:
+      return rawName;
+  }
+}
 export function transformInternalMarks(response: LRMSMarksResponse) {
   return response.data.map((course) => {
     const student = course.marks.students[0];
@@ -60,11 +73,8 @@ export function transformInternalMarks(response: LRMSMarksResponse) {
         semester: course.semester,
         credits: course.credit,
         faculty: course.facultyname.trim(),
-
         marksAvailable: false,
-
         components: [],
-
         totals: null,
       };
     }
@@ -75,12 +85,12 @@ export function transformInternalMarks(response: LRMSMarksResponse) {
       semester: course.semester,
       credits: course.credit,
       faculty: course.facultyname.trim(),
-
       marksAvailable: true,
 
       components: student.marks.map((component) => ({
         id: component.componentId,
-        name: component.displayName,
+        // Use the mapping function here
+        name: mapComponentName(component.displayName),
         mark: parseMark(component.mark),
         maxMark: component.maxMark,
       })),

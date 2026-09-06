@@ -1,0 +1,785 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "date": "02/09/2026",
+      "dayOrder": 6,
+      "week": 10,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "01/09/2026",
+      "dayOrder": 5,
+      "week": 10,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "31/08/2026",
+      "dayOrder": 4,
+      "week": 10,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "29/08/2026",
+      "dayOrder": 3,
+      "week": 10,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "28/08/2026",
+      "dayOrder": 2,
+      "week": 10,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "absent" },
+        { "hour": 5, "status": "absent" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "27/08/2026",
+      "dayOrder": 1,
+      "week": 10,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "25/08/2026",
+      "dayOrder": 6,
+      "week": 9,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "24/08/2026",
+      "dayOrder": 5,
+      "week": 9,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "22/08/2026",
+      "dayOrder": 4,
+      "week": 9,
+      "hours": [
+        { "hour": 1, "status": "absent" },
+        { "hour": 2, "status": "absent" },
+        { "hour": 3, "status": "absent" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "21/08/2026",
+      "dayOrder": 3,
+      "week": 9,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "20/08/2026",
+      "dayOrder": 2,
+      "week": 9,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "19/08/2026",
+      "dayOrder": 1,
+      "week": 9,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "18/08/2026",
+      "dayOrder": 6,
+      "week": 8,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "17/08/2026",
+      "dayOrder": 5,
+      "week": 8,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "14/08/2026",
+      "dayOrder": 4,
+      "week": 8,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "13/08/2026",
+      "dayOrder": 3,
+      "week": 8,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "12/08/2026",
+      "dayOrder": 2,
+      "week": 8,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "11/08/2026",
+      "dayOrder": 1,
+      "week": 8,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "10/08/2026",
+      "dayOrder": 6,
+      "week": 7,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "absent" },
+        { "hour": 5, "status": "absent" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "07/08/2026",
+      "dayOrder": 5,
+      "week": 7,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "06/08/2026",
+      "dayOrder": 4,
+      "week": 7,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "05/08/2026",
+      "dayOrder": 3,
+      "week": 7,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "04/08/2026",
+      "dayOrder": 2,
+      "week": 7,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "03/08/2026",
+      "dayOrder": 1,
+      "week": 7,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "30/07/2026",
+      "dayOrder": 6,
+      "week": 6,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "29/07/2026",
+      "dayOrder": 5,
+      "week": 6,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "28/07/2026",
+      "dayOrder": 4,
+      "week": 6,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "27/07/2026",
+      "dayOrder": 3,
+      "week": 6,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "24/07/2026",
+      "dayOrder": 2,
+      "week": 6,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "23/07/2026",
+      "dayOrder": 1,
+      "week": 6,
+      "hours": [
+        { "hour": 1, "status": "absent" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "22/07/2026",
+      "dayOrder": 6,
+      "week": 5,
+      "hours": [
+        { "hour": 1, "status": "absent" },
+        { "hour": 2, "status": "absent" },
+        { "hour": 3, "status": "absent" },
+        { "hour": 4, "status": "absent" },
+        { "hour": 5, "status": "absent" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "21/07/2026",
+      "dayOrder": 5,
+      "week": 5,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "20/07/2026",
+      "dayOrder": 4,
+      "week": 5,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "18/07/2026",
+      "dayOrder": 3,
+      "week": 5,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "17/07/2026",
+      "dayOrder": 2,
+      "week": 5,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "16/07/2026",
+      "dayOrder": 1,
+      "week": 5,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "15/07/2026",
+      "dayOrder": 6,
+      "week": 4,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "14/07/2026",
+      "dayOrder": 5,
+      "week": 4,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "13/07/2026",
+      "dayOrder": 4,
+      "week": 4,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "10/07/2026",
+      "dayOrder": 3,
+      "week": 4,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "09/07/2026",
+      "dayOrder": 2,
+      "week": 4,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "08/07/2026",
+      "dayOrder": 1,
+      "week": 4,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "07/07/2026",
+      "dayOrder": 6,
+      "week": 3,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "06/07/2026",
+      "dayOrder": 5,
+      "week": 3,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "03/07/2026",
+      "dayOrder": 4,
+      "week": 3,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "02/07/2026",
+      "dayOrder": 3,
+      "week": 3,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "01/07/2026",
+      "dayOrder": 2,
+      "week": 3,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "30/06/2026",
+      "dayOrder": 1,
+      "week": 3,
+      "hours": [
+        { "hour": 1, "status": "present" },
+        { "hour": 2, "status": "present" },
+        { "hour": 3, "status": "present" },
+        { "hour": 4, "status": "present" },
+        { "hour": 5, "status": "present" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "29/06/2026",
+      "dayOrder": 6,
+      "week": 2,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "27/06/2026",
+      "dayOrder": 5,
+      "week": 2,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "25/06/2026",
+      "dayOrder": 4,
+      "week": 2,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "24/06/2026",
+      "dayOrder": 3,
+      "week": 2,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "23/06/2026",
+      "dayOrder": 2,
+      "week": 2,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "22/06/2026",
+      "dayOrder": 1,
+      "week": 2,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "20/06/2026",
+      "dayOrder": 6,
+      "week": 1,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "19/06/2026",
+      "dayOrder": 5,
+      "week": 1,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "18/06/2026",
+      "dayOrder": 4,
+      "week": 1,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "17/06/2026",
+      "dayOrder": 3,
+      "week": 1,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "16/06/2026",
+      "dayOrder": 2,
+      "week": 1,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    },
+    {
+      "date": "15/06/2026",
+      "dayOrder": 1,
+      "week": 1,
+      "hours": [
+        { "hour": 1, "status": "not_scheduled" },
+        { "hour": 2, "status": "not_scheduled" },
+        { "hour": 3, "status": "not_scheduled" },
+        { "hour": 4, "status": "not_scheduled" },
+        { "hour": 5, "status": "not_scheduled" },
+        { "hour": 6, "status": "not_scheduled" }
+      ]
+    }
+  ]
+}

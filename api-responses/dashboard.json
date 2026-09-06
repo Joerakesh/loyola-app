@@ -1,0 +1,12 @@
+{
+  "status": "success",
+  "data": {
+    "student": {
+      "name": "JOE RAKESH A",
+      "mobile": "6381574827",
+      "email": "rakeshjoe52@gmail.com"
+    },
+    "fees": { "totalPaid": 220065 },
+    "documents": { "twelfthCertificate": "fDd0KbhB1NTDC8DHqvltug__.pdf" }
+  }
+}

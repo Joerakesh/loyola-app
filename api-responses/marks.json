@@ -1,0 +1,145 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "courseCode": "PDS1MC11",
+      "courseName": "Fundamentals of Mathematics",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Dr. Maria Jesu Raja S",
+      "marksAvailable": true,
+      "components": [
+        { "id": "cia-1", "name": "Comp 1", "mark": 16.2, "maxMark": 30 },
+        { "id": "cia-2", "name": "Comp 2", "mark": null, "maxMark": 30 },
+        { "id": "3a", "name": "Comp 3a", "mark": 15, "maxMark": 20 },
+        { "id": "3b", "name": "Comp 3b", "mark": null, "maxMark": 20 }
+      ],
+      "totals": {
+        "outOf50": 15.6,
+        "outOf100": 31.2,
+        "attendance": 0,
+        "final": 0
+      }
+    },
+    {
+      "courseCode": "PDS1MC12",
+      "courseName": "Statistics and Probability",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Dr. Muthu. C",
+      "marksAvailable": true,
+      "components": [
+        { "id": "cia-1", "name": "Comp 1", "mark": 17.4, "maxMark": 30 },
+        { "id": "cia-2", "name": "Comp 2", "mark": null, "maxMark": 30 },
+        { "id": "3a", "name": "Comp 3a", "mark": 13, "maxMark": 20 },
+        { "id": "3b", "name": "Comp 3b", "mark": null, "maxMark": 20 }
+      ],
+      "totals": {
+        "outOf50": 15.2,
+        "outOf100": 30.4,
+        "attendance": 0,
+        "final": 0
+      }
+    },
+    {
+      "courseCode": "PDS1MC13",
+      "courseName": "Python for data Science",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Rev. Dr. Maria Wenisch SJ",
+      "marksAvailable": true,
+      "components": [
+        { "id": "cia-1", "name": "Comp 1", "mark": 28.79, "maxMark": 30 },
+        { "id": "cia-2", "name": "Comp 2", "mark": null, "maxMark": 30 },
+        { "id": "3a", "name": "Comp 3a", "mark": 20, "maxMark": 20 },
+        { "id": "3b", "name": "Comp 3b", "mark": null, "maxMark": 20 }
+      ],
+      "totals": {
+        "outOf50": 24.39,
+        "outOf100": 48.79,
+        "attendance": 0,
+        "final": 0
+      }
+    },
+    {
+      "courseCode": "PDS1MC14",
+      "courseName": "Python for data Science – Lab",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Ms. Chris Jenifer K B, Rev. Dr. Maria Wenisch SJ",
+      "marksAvailable": true,
+      "components": [
+        { "id": "cia-1", "name": "Comp 1", "mark": 30, "maxMark": 30 },
+        { "id": "cia-2", "name": "Comp 2", "mark": null, "maxMark": 30 },
+        { "id": "3a", "name": "Comp 3a", "mark": null, "maxMark": 20 },
+        { "id": "3b", "name": "Comp 3b", "mark": null, "maxMark": 20 }
+      ],
+      "totals": { "outOf50": 15, "outOf100": 30, "attendance": 0, "final": 0 }
+    },
+    {
+      "courseCode": "PDS1MC15",
+      "courseName": "Machine Learning",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Dr. Maria Jesu Raja S, Rev. Dr. Maria Wenisch SJ",
+      "marksAvailable": true,
+      "components": [
+        { "id": "cia-1", "name": "Comp 1", "mark": 23.4, "maxMark": 30 },
+        { "id": "cia-2", "name": "Comp 2", "mark": null, "maxMark": 30 },
+        { "id": "3a", "name": "Comp 3a", "mark": 18, "maxMark": 20 },
+        { "id": "3b", "name": "Comp 3b", "mark": null, "maxMark": 20 }
+      ],
+      "totals": {
+        "outOf50": 20.7,
+        "outOf100": 41.4,
+        "attendance": 0,
+        "final": 0
+      }
+    },
+    {
+      "courseCode": "PDS1MC16",
+      "courseName": "Machine Learning – Lab",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Dr. Muthu. C, Ms. Adlin Nithisha T",
+      "marksAvailable": true,
+      "components": [
+        { "id": "cia-1", "name": "Comp 1", "mark": 30, "maxMark": 30 },
+        { "id": "cia-2", "name": "Comp 2", "mark": null, "maxMark": 30 },
+        { "id": "3a", "name": "Comp 3a", "mark": null, "maxMark": 20 },
+        { "id": "3b", "name": "Comp 3b", "mark": null, "maxMark": 20 }
+      ],
+      "totals": { "outOf50": 15, "outOf100": 30, "attendance": 0, "final": 0 }
+    },
+    {
+      "courseCode": "PDS1MC17",
+      "courseName": "Structured and Unstructured Database Lab",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Ms. Adlin Nithisha T, Ms. Chris Jenifer K B",
+      "marksAvailable": true,
+      "components": [
+        { "id": "cia-1", "name": "Comp 1", "mark": 23.4, "maxMark": 30 },
+        { "id": "cia-2", "name": "Comp 2", "mark": null, "maxMark": 30 },
+        { "id": "3a", "name": "Comp 3a", "mark": null, "maxMark": 20 },
+        { "id": "3b", "name": "Comp 3b", "mark": null, "maxMark": 20 }
+      ],
+      "totals": {
+        "outOf50": 11.7,
+        "outOf100": 23.4,
+        "attendance": 0,
+        "final": 0
+      }
+    },
+    {
+      "courseCode": "PHE1LS11",
+      "courseName": "Life Skills",
+      "semester": 1,
+      "credits": 1,
+      "faculty": "",
+      "marksAvailable": false,
+      "components": [],
+      "totals": null
+    }
+  ]
+}

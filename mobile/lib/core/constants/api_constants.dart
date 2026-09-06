@@ -9,4 +9,5 @@ class ApiConstants {
   static const String logout = '/auth/logout';
 
   static const String dashboard = '/dashboard';
+  static const String marks = '/marks/internal';
 }

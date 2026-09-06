@@ -1,0 +1,61 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "course_code": "PDS1MC11",
+      "course_title": "Fundamentals of Mathematics",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Dr. Maria Jesu Raja S"
+    },
+    {
+      "course_code": "PDS1MC12",
+      "course_title": "Statistics and Probability",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Dr. Muthu. C"
+    },
+    {
+      "course_code": "PDS1MC13",
+      "course_title": "Python for data Science",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Rev. Dr. Maria Wenisch SJ"
+    },
+    {
+      "course_code": "PDS1MC14",
+      "course_title": "Python for data Science – Lab",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Ms. Chris Jenifer K B, Rev. Dr. Maria Wenisch SJ"
+    },
+    {
+      "course_code": "PDS1MC15",
+      "course_title": "Machine Learning",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Dr. Maria Jesu Raja S, Rev. Dr. Maria Wenisch SJ"
+    },
+    {
+      "course_code": "PDS1MC16",
+      "course_title": "Machine Learning – Lab",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Dr. Muthu. C, Ms. Adlin Nithisha T"
+    },
+    {
+      "course_code": "PDS1MC17",
+      "course_title": "Structured and Unstructured Database Lab",
+      "semester": 1,
+      "credits": 4,
+      "faculty": "Ms. Adlin Nithisha T, Ms. Chris Jenifer K B"
+    },
+    {
+      "course_code": "PHE1LS11",
+      "course_title": "Life Skills",
+      "semester": 1,
+      "credits": 1,
+      "faculty": ""
+    }
+  ]
+}

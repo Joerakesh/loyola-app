@@ -1,6 +1,6 @@
-import '../../../core/constants/api_constants.dart';
 import '../../../core/network/api_client.dart';
 import '../models/attendance_model.dart';
+import 'package:flutter/foundation.dart';
 
 class AttendanceService {
   AttendanceService(this._apiClient);
@@ -8,26 +8,33 @@ class AttendanceService {
   final ApiClient _apiClient;
 
   Future<List<AttendanceRecord>> getHourlyAttendance() async {
-    final response = await _apiClient.dio.get(
-      '/attendance/hourly',
-    );
+    final response = await _apiClient.dio.get('/attendance/hourly');
 
     final data = response.data;
 
     if (data['status'] != 'success') {
-      throw Exception(
-        data['message'] ?? 'Unable to load attendance',
-      );
+      throw Exception(data['message'] ?? 'Unable to load attendance');
     }
 
     final records = data['data'] as List<dynamic>? ?? [];
 
     return records
-        .map(
-          (item) => AttendanceRecord.fromJson(
-            item as Map<String, dynamic>,
-          ),
-        )
+        .map((item) => AttendanceRecord.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<dynamic> getAttendanceSummary() async {
+    final response = await _apiClient.dio.get('/attendance/summary');
+
+    final data = response.data;
+    debugPrint('========== ATTENDANCE SUMMARY API ==========');
+    debugPrint('Status: ${response.statusCode}');
+    debugPrint('Response: ${response.data}');
+    debugPrint('=============================================');
+    if (data['status'] != 'success') {
+      throw Exception(data['message'] ?? 'Unable to load attendance summary');
+    }
+
+    return data['data'];
   }
 }
