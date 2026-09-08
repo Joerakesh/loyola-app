@@ -26,3 +26,5 @@ dummy.txt
 
 # Firebase service account
 backend/firebase-service-account.json
+
+google-services.json
