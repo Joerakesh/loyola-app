@@ -64,53 +64,114 @@ class _MarksScreenState extends State<MarksScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: GlassBackground(
-        glows: const [
-          GlassGlow(
-            top: -100,
-            right: -50,
-            size: 300,
-            color: Color(0x33FF9500),
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          color: AppColors.white,
+          backgroundColor: Colors.black45,
+          // We move the AnimatedSwitcher to the root of the scroll view
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            child: _buildMainContent(),
           ),
-          GlassGlow(
-            bottom: 0,
-            left: -100,
-            size: 250,
-            color: Color(0x338B0000),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    if (_isLoading) {
+      return _buildStateLayout(
+        key: const ValueKey('loading'),
+        child: const LoadingView(),
+      );
+    }
+
+    if (_error != null) {
+      return _buildStateLayout(
+        key: const ValueKey('error'),
+        child: ErrorView(message: _error!, onRetry: _refreshData),
+      );
+    }
+
+    if (_marks.isEmpty) {
+      return _buildStateLayout(
+        key: const ValueKey('empty'),
+        child: _buildEmptyState(),
+      );
+    }
+
+    // This is the populated, fully scrollable list state
+    return CustomScrollView(
+      key: const ValueKey('list'),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      slivers: [
+        const SliverToBoxAdapter(
+          child: GlassAppBar(
+            title: 'CIA Marks',
+            showBackButton: false,
+            bottomPadding: true,
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
+          sliver: SliverList.separated(
+            itemCount: _marks.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 16),
+            itemBuilder: (context, index) => _buildCourseCard(_marks[index]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper method for Loading, Error, and Empty states to keep the AppBar
+  // at the top and allow pull-to-refresh even when there's no data.
+  Widget _buildStateLayout({required Key key, required Widget child}) {
+    return CustomScrollView(
+      key: key,
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      slivers: [
+        const SliverToBoxAdapter(
+          child: GlassAppBar(
+            title: 'CIA Marks',
+            showBackButton: false,
+            bottomPadding: true,
+          ),
+        ),
+        SliverFillRemaining(
+          hasScrollBody:
+              false, // False allows the content to center itself properly
+          child: child,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.leaderboard_rounded,
+            size: 48,
+            color: AppColors.white.withValues(alpha: 0.2),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No marks available yet',
+            style: TextStyle(
+              color: AppColors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
           ),
         ],
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          slivers: [
-            SliverToBoxAdapter(
-              child: GlassAppBar(
-                title: 'CIA Marks',
-                showBackButton: true,
-                bottomPadding: true,
-              ),
-            ),
-            if (_isLoading)
-              const SliverFillRemaining(child: LoadingView())
-            else if (_error != null)
-              SliverFillRemaining(
-                child: ErrorView(
-                  message: _error!,
-                  onRetry: _refreshData,
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-                sliver: SliverList.separated(
-                  itemCount: _marks.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) =>
-                      _buildCourseCard(_marks[index]),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }
@@ -120,6 +181,7 @@ class _MarksScreenState extends State<MarksScreen> {
   // ---------------------------------------------------------------------------
   Widget _buildCourseCard(CourseMarks course) {
     return GlassContainer(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -128,12 +190,11 @@ class _MarksScreenState extends State<MarksScreen> {
             style: const TextStyle(
               color: AppColors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
-              letterSpacing: 0.2,
+              fontSize: 15,
+              letterSpacing: 0.3,
             ),
           ),
-
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
 
           if (!course.marksAvailable)
             Container(
@@ -149,10 +210,13 @@ class _MarksScreenState extends State<MarksScreen> {
                     color: AppColors.white54,
                     size: 20,
                   ),
-                  SizedBox(width: 8),
+                  SizedBox(width: 12),
                   Text(
-                    'Marks not available yet',
-                    style: TextStyle(color: AppColors.white54),
+                    'Marks pending',
+                    style: TextStyle(
+                      color: AppColors.white54,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -163,7 +227,7 @@ class _MarksScreenState extends State<MarksScreen> {
                   .map(
                     (c) => Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: _buildComponentBox(c),
                       ),
                     ),
@@ -172,27 +236,41 @@ class _MarksScreenState extends State<MarksScreen> {
             ),
 
             const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Divider(color: Colors.white24, height: 1),
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Divider(color: Colors.white12, height: 1),
             ),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Total',
+                  'Total Score',
                   style: TextStyle(
-                    color: AppColors.white70,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
+                    color: AppColors.white54,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
                 ),
-                Text(
-                  '${course.totals?.outOf100.toStringAsFixed(1) ?? '--'} / 100',
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF9D84FF).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF9D84FF).withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    '${course.totals?.outOf100.toStringAsFixed(1) ?? '--'} / 100',
+                    style: const TextStyle(
+                      color: Color(0xFF9D84FF),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
               ],
@@ -210,11 +288,14 @@ class _MarksScreenState extends State<MarksScreen> {
     final hasMark = component.mark != null;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.08),
+        color: AppColors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.15), width: 1),
+        border: Border.all(
+          color: AppColors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -224,24 +305,28 @@ class _MarksScreenState extends State<MarksScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: AppColors.white70,
+              color: AppColors.white54,
               fontSize: 11,
               fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             hasMark ? '${component.mark}' : '--',
             style: TextStyle(
               color: hasMark ? AppColors.white : AppColors.white38,
-              fontWeight: FontWeight.w900,
-              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
-            '/${component.maxMark.toInt()}',
-            style: const TextStyle(color: AppColors.white54, fontSize: 10),
+            '/ ${component.maxMark.toInt()}',
+            style: TextStyle(
+              color: AppColors.white.withValues(alpha: 0.3),
+              fontSize: 10,
+            ),
           ),
         ],
       ),

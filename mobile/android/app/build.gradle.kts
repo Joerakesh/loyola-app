@@ -4,6 +4,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Firebase google-services plugin is applied only when the config file is
+// present (download it from Firebase Console → Project → Add Android app:
+// com.joerakesh.loyolaerp, then drop google-services.json into android/app/).
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.joerakesh.loyolaerp"
     compileSdk = 37

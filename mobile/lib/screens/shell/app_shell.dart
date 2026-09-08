@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -30,10 +31,16 @@ class AppShell extends StatelessWidget {
         selectedIcon: Icons.calendar_month_rounded,
         label: 'Attendance',
       ),
+
       (
         icon: Icons.menu_book_outlined,
         selectedIcon: Icons.menu_book_rounded,
         label: 'Subjects',
+      ),
+      (
+        icon: Icons.leaderboard_outlined,
+        selectedIcon: Icons.leaderboard_rounded,
+        label: 'Marks',
       ),
       (
         icon: Icons.person_outline_rounded,
@@ -43,11 +50,11 @@ class AppShell extends StatelessWidget {
     ];
 
     return SafeArea(
-      minimum: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+      minimum: const EdgeInsets.fromLTRB(20, 0, 20, 40),
       child: GlassContainer(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         borderRadius: BorderRadius.circular(36),
-        blur: 24,
+        blur: 30, // Slightly increased blur for a deeper glass effect
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -71,14 +78,20 @@ class AppShell extends StatelessWidget {
     required String label,
   }) {
     final isSelected = navigationShell.currentIndex == index;
+    const animDuration = Duration(milliseconds: 350);
+    const animCurve =
+        Curves.easeOutCubic; // Gives that liquid, smooth deceleration
 
     return GestureDetector(
-      onTap: () => _onNavigate(index),
+      onTap: () {
+        HapticFeedback.lightImpact(); // Adds a premium tactile feel
+        _onNavigate(index);
+      },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        duration: animDuration,
+        curve: animCurve,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.white.withValues(alpha: 0.15)
@@ -88,22 +101,48 @@ class AppShell extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? selectedIcon : icon,
-              color: isSelected ? AppColors.white : AppColors.white38,
-              size: 22,
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
+            // 1. Icon Swap Animation
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: Icon(
+                isSelected ? selectedIcon : icon,
+                key: ValueKey<bool>(
+                  isSelected,
+                ), // Triggers the switcher animation
+                color: isSelected ? AppColors.white : AppColors.white38,
+                size: 22,
               ),
-            ],
+            ),
+
+            // 2. Fluid Width Expansion for Text
+            ClipRRect(
+              child: AnimatedSize(
+                duration: animDuration,
+                curve: animCurve,
+                child: isSelected
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(width: 8),
+                          Text(
+                            label,
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              letterSpacing: 0.3,
+                            ),
+                            maxLines: 1,
+                          ),
+                        ],
+                      )
+                    // The empty box keeps the height consistent when collapsed
+                    : const SizedBox(width: 0, height: 20),
+              ),
+            ),
           ],
         ),
       ),

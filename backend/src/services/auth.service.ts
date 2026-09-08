@@ -1,65 +1,39 @@
-import crypto from "node:crypto";
-import { LRMSClient } from "../upstream/lrms.client.js";
-import { lrmsSessionService } from "./lrms-session.service.js";
-
-interface LoginResult {
-  token: string;
-  expiresAt: number;
-  profile: unknown;
-}
+import { userRepository } from "../repositories/user.repository.js";
+import { PublicUser } from "../models/user.model.js";
+import { googleAuthService } from "./google-auth.service.js";
 
 export class AuthService {
-  async login(
-    registrationNumber: string,
-    password: string,
-  ): Promise<LoginResult> {
-    return this.authenticate(registrationNumber, password);
-  }
+  async loginWithGoogle(idToken: string): Promise<PublicUser> {
+    const profile = await googleAuthService.verifyIdToken(idToken);
 
-  async refresh(
-    registrationNumber: string,
-    password: string,
-  ): Promise<LoginResult> {
-    return this.authenticate(registrationNumber, password);
-  }
+    const byGoogleId = await userRepository.findByGoogleId(profile.googleId);
 
-  private async authenticate(
-    registrationNumber: string,
-    password: string,
-  ): Promise<LoginResult> {
-    const client = new LRMSClient();
-
-    // Get a fresh CAPTCHA
-    const loginPage = await client.getLoginPage();
-
-    // Login to LRMS
-    const result = await client.login(
-      registrationNumber,
-      password,
-      loginPage.captcha,
-    );
-
-    if (!result || result.status !== "success") {
-      throw new Error(result?.message ?? "LRMS login failed");
+    if (byGoogleId) {
+      return userRepository.toPublicUser(byGoogleId);
     }
 
-    // Generate our application's token
-    const token = crypto.randomUUID();
+    const byEmail = profile.email
+      ? await userRepository.findByEmail(profile.email)
+      : null;
 
-    // Export the fresh LRMS session
-    const session = await client.exportSession(registrationNumber);
+    if (byEmail) {
+      await userRepository.linkGoogleId(byEmail._id, profile.googleId);
 
-    // Store the session in Redis
-    await lrmsSessionService.createSession(token, session);
+      const linked = await userRepository.findByGoogleId(profile.googleId);
 
-    // Our application token expires after 24 hours
-    const expiresAt = Date.now() + 60 * 60 * 24 * 1000;
+      if (linked) {
+        return userRepository.toPublicUser(linked);
+      }
+    }
 
-    return {
-      token,
-      expiresAt,
-      profile: null,
-    };
+    const user = await userRepository.create({
+      googleId: profile.googleId,
+      email: profile.email,
+      name: profile.name,
+      avatarUrl: profile.avatarUrl,
+    });
+
+    return userRepository.toPublicUser(user);
   }
 }
 

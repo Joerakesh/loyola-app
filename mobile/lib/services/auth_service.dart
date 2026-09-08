@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/constants/api_constants.dart';
 import '../core/network/api_client.dart';
 import '../core/storage/secure_storage.dart';
-import 'package:flutter/foundation.dart';
+import '../models/auth_user.dart';
 
 class AuthService {
   AuthService(this._apiClient, this._storage);
@@ -11,15 +12,12 @@ class AuthService {
   final ApiClient _apiClient;
   final SecureStorage _storage;
 
-  Future<void> login({
-    required String registrationNumber,
-    required String password,
-    required bool rememberMe,
-  }) async {
+  /// Exchanges a Firebase Google ID token for a backend session (JWT).
+  Future<AuthUser> loginWithGoogle({required String idToken}) async {
     try {
       final response = await _apiClient.dio.post(
-        ApiConstants.login,
-        data: {'registrationNumber': registrationNumber, 'password': password},
+        ApiConstants.googleLogin,
+        data: {'idToken': idToken},
       );
 
       final data = response.data;
@@ -40,10 +38,7 @@ class AuthService {
         throw Exception('Token missing from response');
       }
 
-      // A session token is kept in memory for the current run. It is only
-      // persisted when "remember me" is on, so the login can be restored
-      // automatically on the next launch.
-      await _storage.saveToken(token, persist: rememberMe);
+      await _storage.saveToken(token);
 
       final expiresAt = authentication['expiresAt'];
 
@@ -51,15 +46,10 @@ class AuthService {
         await _storage.saveExpiresAt(expiresAt);
       }
 
-      if (rememberMe) {
-        await _storage.saveCredentials(
-          registrationNumber: registrationNumber,
-          password: password,
-        );
-        await _storage.saveRememberMe(true);
-      } else {
-        await _storage.clearCredentials();
-      }
+      final user = AuthUser.fromJson(data['user'] as Map<String, dynamic>);
+      await _storage.saveUser(user);
+
+      return user;
     } on DioException catch (error) {
       debugPrint('HTTP STATUS: ${error.response?.statusCode}');
       debugPrint('HTTP RESPONSE: ${error.response?.data}');
@@ -71,23 +61,19 @@ class AuthService {
         throw Exception(responseData['message']);
       }
 
-      throw Exception('Unable to connect to the Loyola ERP server');
+      throw Exception('Unable to connect to Loyola servers');
     }
   }
 
-  Future<void> refresh() async {
-    final registrationNumber = await _storage.getRegistrationNumber();
+  /// Re-issues the session JWT using the existing (still valid) token.
+  Future<AuthUser?> refresh() async {
+    final token = await _storage.getToken();
 
-    final password = await _storage.getPassword();
-
-    if (registrationNumber == null || password == null) {
-      throw Exception('No saved credentials');
+    if (token == null || token.isEmpty) {
+      throw Exception('No session to refresh');
     }
 
-    final response = await _apiClient.dio.post(
-      ApiConstants.refresh,
-      data: {'registrationNumber': registrationNumber, 'password': password},
-    );
+    final response = await _apiClient.dio.post(ApiConstants.refresh);
 
     final data = response.data;
 
@@ -96,21 +82,25 @@ class AuthService {
     }
 
     final authentication = data['authentication'];
+    final newToken = authentication['token'];
 
-    final token = authentication['token'];
-
-    if (token == null) {
+    if (newToken == null) {
       throw Exception('Token missing from refresh response');
     }
 
-    await _storage.saveToken(token);
+    await _storage.saveToken(newToken);
 
     final expiresAt = authentication['expiresAt'];
 
     if (expiresAt != null) {
       await _storage.saveExpiresAt(expiresAt);
     }
+
+    final storedUser = await _storage.getUser();
+    return storedUser;
   }
+
+  Future<AuthUser?> getUser() => _storage.getUser();
 
   Future<bool> hasValidSession() async {
     final token = await _storage.getToken();
@@ -128,17 +118,11 @@ class AuthService {
     return true;
   }
 
-  /// Whether the user asked to stay logged in on the previous session.
-  Future<bool> hasRememberMe() {
-    return _storage.getRememberMe();
-  }
-
   Future<void> logout() async {
     try {
       await _apiClient.dio.post(ApiConstants.logout);
     } on DioException {
-      // Even if the server request fails,
-      // clear local authentication.
+      // Even if the server request fails, clear local state.
     } finally {
       await _storage.clear();
     }

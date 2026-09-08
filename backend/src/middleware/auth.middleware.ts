@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
-import { lrmsSessionService } from "../services/lrms-session.service.js";
+import { appSessionService } from "../services/app-session.service.js";
+import { userRepository } from "../repositories/user.repository.js";
 
 export async function requireAuth(
   req: Request,
@@ -26,9 +27,19 @@ export async function requireAuth(
       });
     }
 
-    const client = await lrmsSessionService.getSession(token);
+    const payload = await appSessionService.verifySession(token);
 
-    res.locals.lrmsClient = client;
+    const user = await userRepository.findById(payload.sub);
+
+    if (!user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid or expired session",
+      });
+    }
+
+    res.locals.user = userRepository.toPublicUser(user);
+    res.locals.userDocument = user;
 
     next();
   } catch (error) {

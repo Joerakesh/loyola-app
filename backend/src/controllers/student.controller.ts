@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { lrmsSessionService } from "../services/lrms-session.service.js";
 import { StudentService } from "../services/student.service.js";
 
 export class StudentController {

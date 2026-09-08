@@ -10,6 +10,8 @@ import subjectsRoutes from "./routes/subjects.routes.js";
 import studentRoutes from "./routes/student.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import { createPlatformRouter } from "./routes/platform.routes.js";
+import { platformControllers } from "./controllers/platform.controllers.js";
 
 const app = express();
 
@@ -38,6 +40,28 @@ app.use("/api/v1/subjects", subjectsRoutes);
 app.use("/api/v1/student", studentRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/auth", authRoutes);
+
+// platform resources (MongoDB-backed, per-user)
+app.use(
+  "/api/v1/schedules",
+  createPlatformRouter(platformControllers.schedules),
+);
+app.use(
+  "/api/v1/announcements",
+  createPlatformRouter(platformControllers.announcements),
+);
+app.use(
+  "/api/v1/assignments",
+  createPlatformRouter(platformControllers.assignments),
+);
+app.use(
+  "/api/v1/reminders",
+  createPlatformRouter(platformControllers.reminders),
+);
+app.use(
+  "/api/v1/notifications",
+  createPlatformRouter(platformControllers.notifications),
+);
 
 app.get("/api/health", (_req, res) => {
   console.log("req came from", _req.originalUrl);

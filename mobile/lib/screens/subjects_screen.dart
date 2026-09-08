@@ -70,152 +70,209 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     return Scaffold(
       body: GlassBackground(
         glows: const [
-          GlassGlow(
-            top: -100,
-            right: -50,
-            size: 300,
-            color: Color(0x33AF52DE),
-          ),
-          GlassGlow(
-            bottom: 0,
-            left: -100,
-            size: 250,
-            color: Color(0x338B0000),
-          ),
+          GlassGlow(top: -100, right: -50, size: 300, color: Color(0x33AF52DE)),
+          GlassGlow(bottom: 0, left: -100, size: 250, color: Color(0x338B0000)),
         ],
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
-          slivers: [
-            const SliverToBoxAdapter(
-              child: GlassAppBar(
-                title: 'Subjects',
-                showBackButton: false,
-                bottomPadding: true,
-              ),
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          color: AppColors.white,
+          backgroundColor: Colors.black45,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
             ),
-            if (_isLoading)
-              const SliverFillRemaining(child: LoadingView())
-            else if (_error != null)
-              SliverFillRemaining(
-                child: ErrorView(
-                  message: _error!,
-                  onRetry: _refreshData,
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _buildSummaryCard(),
-                    const SizedBox(height: 24),
-                    SectionHeader(
-                      title: 'Courses',
-                      subtitle: '${_subjects.length} subjects this semester',
-                    ),
-                    const SizedBox(height: 14),
-                    ..._subjects.map(
-                      (subject) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildSubjectCard(subject),
-                      ),
-                    ),
-                  ]),
+            slivers: [
+              const SliverToBoxAdapter(
+                child: GlassAppBar(
+                  title: 'Subjects',
+                  showBackButton: false, // Handled by AppShell
+                  bottomPadding: true,
                 ),
               ),
-          ],
+
+              // Animated Content Transition
+              SliverFillRemaining(
+                hasScrollBody: true,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  child: _buildMainContent(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSummaryCard() {
-    return Row(
-      children: [
-        Expanded(
-          child: GlassContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.menu_book_rounded,
-                  color: AppColors.white70,
-                  size: 20,
+  Widget _buildMainContent() {
+    if (_isLoading) {
+      return const LoadingView(key: ValueKey('loading'));
+    }
+
+    if (_error != null) {
+      return ErrorView(
+        key: const ValueKey('error'),
+        message: _error!,
+        onRetry: _refreshData,
+      );
+    }
+
+    if (_subjects.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return CustomScrollView(
+      key: const ValueKey('content'),
+      physics: const NeverScrollableScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              _buildSummaryCard(),
+              const SizedBox(height: 32),
+              SectionHeader(
+                title: 'Curriculum',
+                subtitle: '${_subjects.length} subjects this semester',
+              ),
+              const SizedBox(height: 16),
+              ..._subjects.map(
+                (subject) => Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: _buildSubjectCard(subject),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Total Courses',
-                  style: TextStyle(color: AppColors.white54, fontSize: 12),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${_subjects.length}',
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: GlassContainer(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.stars_rounded,
-                  color: AppColors.orange,
-                  size: 20,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Total Credits',
-                  style: TextStyle(color: AppColors.white54, fontSize: 12),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '$_totalCredits',
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ]),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSubjectCard(Subject subject) {
+  Widget _buildEmptyState() {
+    return Center(
+      key: const ValueKey('empty'),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.menu_book_rounded,
+            size: 48,
+            color: AppColors.white.withValues(alpha: 0.2),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No subjects found',
+            style: TextStyle(
+              color: AppColors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // SUMMARY CARDS
+  // ---------------------------------------------------------------------------
+  Widget _buildSummaryCard() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            title: 'Total Courses',
+            value: '${_subjects.length}',
+            icon: Icons.library_books_rounded,
+            accentColor: const Color(0xFF9D84FF), // Theme Purple
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _buildStatCard(
+            title: 'Total Credits',
+            value: '$_totalCredits',
+            icon: Icons.stars_rounded,
+            accentColor: const Color(0xFFFFCA7A), // Theme Gold
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color accentColor,
+  }) {
     return GlassContainer(
-      child: Row(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 48,
-            height: 48,
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.crimson.withValues(alpha: 0.25),
-              borderRadius: BorderRadius.circular(14),
+              color: accentColor.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: accentColor, size: 24),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppColors.white54,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // SUBJECT LIST CARD
+  // ---------------------------------------------------------------------------
+  Widget _buildSubjectCard(Subject subject) {
+    return GlassContainer(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          // Sleek, monochromatic icon container
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppColors.crimson.withValues(alpha: 0.4),
+                color: AppColors.white.withValues(alpha: 0.15),
               ),
             ),
             child: const Icon(
-              Icons.auto_stories_rounded,
+              Icons.import_contacts_rounded,
               color: AppColors.white,
               size: 22,
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
+
+          // Course Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,62 +281,78 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                   subject.title.isEmpty ? 'Untitled Course' : subject.title,
                   style: const TextStyle(
                     color: AppColors.white,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  subject.courseCode,
-                  style: const TextStyle(
-                    color: AppColors.white54,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (subject.faculty.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.person_outline_rounded,
-                        color: AppColors.white38,
-                        size: 14,
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Frosted Code Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
                       ),
-                      const SizedBox(width: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        subject.courseCode,
+                        style: const TextStyle(
+                          color: AppColors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    if (subject.faculty.isNotEmpty) ...[
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          subject.faculty,
+                          '•  ${subject.faculty}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: AppColors.white54,
                             fontSize: 12,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.white.withValues(alpha: 0.2)),
-            ),
-            child: Text(
-              '${subject.credits} CR',
-              style: const TextStyle(
-                color: AppColors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
+
+          // Credits
+          const SizedBox(width: 12),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '${subject.credits}',
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
+              const Text(
+                'CR',
+                style: TextStyle(
+                  color: AppColors.white54,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
         ],
       ),

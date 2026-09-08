@@ -19,10 +19,7 @@ import '../services/profile_service.dart';
 import '../services/subject_service.dart';
 
 class AppRouter {
-  AppRouter({
-    required this.apiClient,
-    required this.authProvider,
-  }) {
+  AppRouter({required this.apiClient, required this.authProvider}) {
     dashboardService = DashboardService(apiClient);
     attendanceService = AttendanceService(apiClient);
     marksService = MarksService(apiClient);
@@ -46,31 +43,24 @@ class AppRouter {
   late final SubjectService subjectService;
   late final ProfileService profileService;
 
-  /// Prefetches all endpoints during the splash phase so screens open fast.
   late final CacheWarmup warmup;
 
   late final GoRouter router = GoRouter(
     initialLocation: AppRoutes.splash,
     redirect: _redirect,
-    errorBuilder: (context, state) => _NotFoundScreen(
-      location: state.uri.toString(),
-    ),
+    errorBuilder: (context, state) =>
+        _NotFoundScreen(location: state.uri.toString()),
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => SplashScreen(
-          authProvider: authProvider,
-          warmup: warmup,
-        ),
+        builder: (context, state) =>
+            SplashScreen(authProvider: authProvider, warmup: warmup),
       ),
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.marks,
-        builder: (context, state) => MarksScreen(marksService: marksService),
-      ),
+      // AppShell containing the 5 main navigation tabs
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -107,6 +97,15 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: AppRoutes.marks,
+                builder: (context, state) =>
+                    MarksScreen(marksService: marksService),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: AppRoutes.profile,
                 builder: (context, state) =>
                     ProfileScreen(profileService: profileService),
@@ -122,18 +121,13 @@ class AppRouter {
     final location = state.matchedLocation;
     final isLoggedIn = authProvider.isAuthenticated;
 
-    // The splash screen decides where the user goes next.
-    if (location == AppRoutes.splash) {
-      return null;
-    }
+    if (location == AppRoutes.splash) return null;
 
     if (location == AppRoutes.login) {
       return isLoggedIn ? AppRoutes.home : null;
     }
 
-    if (!isLoggedIn) {
-      return AppRoutes.login;
-    }
+    if (!isLoggedIn) return AppRoutes.login;
 
     return null;
   }
@@ -155,7 +149,6 @@ class AppRoutes {
 
 class _NotFoundScreen extends StatelessWidget {
   const _NotFoundScreen({required this.location});
-
   final String location;
 
   @override
@@ -165,7 +158,11 @@ class _NotFoundScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.signpost_outlined, size: 48, color: Colors.white38),
+            const Icon(
+              Icons.signpost_outlined,
+              size: 48,
+              color: Colors.white38,
+            ),
             const SizedBox(height: 12),
             const Text('Route not found'),
             const SizedBox(height: 4),

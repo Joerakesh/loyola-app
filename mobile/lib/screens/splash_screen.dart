@@ -1,5 +1,8 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 import '../app/app_router.dart';
 import '../core/constants/app_colors.dart';
@@ -21,69 +24,90 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  static const Duration _minimumShowTime = Duration(milliseconds: 2600);
+    with TickerProviderStateMixin {
+  static const Duration _minimumShowTime = Duration(milliseconds: 2800);
 
-  late final AnimationController _controller;
+  // Entrance Animations
+  late final AnimationController _entranceController;
   late final Animation<double> _logoScale;
   late final Animation<double> _textFade;
+  late final Animation<Offset> _textSlide;
+
+  // Continuous Breathing Animation
+  late final AnimationController _glowController;
+  late final Animation<double> _glowAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
+    // 1. Setup Entrance Choreography
+    _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600),
+      duration: const Duration(milliseconds: 2000),
     );
 
     _logoScale = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
+      parent: _entranceController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
     );
 
     _textFade = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.2, 1.0, curve: Curves.easeOut),
+      parent: _entranceController,
+      curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
     );
 
-    _controller.forward();
+    _textSlide = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: const Interval(0.4, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
 
+    // 2. Setup Ambient Glow (Breathing Effect)
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+
+    _glowAnimation = Tween<double>(begin: 0.2, end: 0.6).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+
+    // Start entrance
+    _entranceController.forward();
     _bootstrap();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _entranceController.dispose();
+    _glowController.dispose();
     super.dispose();
   }
 
   Future<void> _bootstrap() async {
     final startedAt = DateTime.now();
 
-    // 1. Try to restore the remembered session automatically.
     final loggedIn = await widget.authProvider.autoLogin();
 
-    // 2. While the branding is on screen, prefetch every endpoint so the
-    //    rest of the app can render straight from cache. The fetch continues
-    //    in the background even if it takes longer than the splash timeout.
     if (loggedIn) {
-      await widget.warmup
-          .prefetchAll()
-          .timeout(
-            const Duration(seconds: 6),
-            onTimeout: () {},
-          );
+      try {
+        await widget.warmup.prefetchAll().timeout(const Duration(seconds: 6));
+      } on TimeoutException catch (_) {
+        debugPrint('Cache warmup timed out, proceeding to app.');
+      } catch (e) {
+        debugPrint('Warmup error: $e');
+      }
     }
 
-    // 3. Keep the splash visible for at least the minimum duration.
     final elapsed = DateTime.now().difference(startedAt);
     if (elapsed < _minimumShowTime) {
       await Future.delayed(_minimumShowTime - elapsed);
     }
 
     if (!mounted) return;
-
     context.go(loggedIn ? AppRoutes.home : AppRoutes.login);
   }
 
@@ -95,92 +119,121 @@ class _SplashScreenState extends State<SplashScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1A0A0A),
-              Color(0xFF0F0E17),
-              Color(0xFF16060A),
-            ],
+            colors: [Color(0xFF120B10), Color(0xFF0C0A14), Color(0xFF0B0F12)],
           ),
         ),
         child: Stack(
           children: [
+            // Ambient Orbs
             Positioned(
-              top: -90,
-              right: -70,
+              top: -120,
+              right: -60,
               child: Container(
-                width: 300,
-                height: 300,
+                width: 380,
+                height: 380,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0x338B0000),
+                  color: Color(0x1F8B0000),
                 ),
               ),
             ),
             Positioned(
-              bottom: -110,
-              left: -60,
+              bottom: -150,
+              left: -80,
               child: Container(
-                width: 340,
-                height: 340,
+                width: 450,
+                height: 450,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0x22007AFF),
+                  color: Color(0x10007AFF),
                 ),
               ),
             ),
+
+            // True Glassmorphism Blur Layer
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 70, sigmaY: 70),
+                child: const SizedBox(),
+              ),
+            ),
+
+            // Foreground Content
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ScaleTransition(
                     scale: _logoScale,
-                    child: _buildLogo(),
-                  ),
-                  const SizedBox(height: 40),
-                  FadeTransition(
-                    opacity: _textFade,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text(
-                          'LOYOLA COLLEGE',
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 4,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'C H E N N A I',
-                          style: TextStyle(
-                            color: Color(0xFFFFB4A2),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 8,
-                          ),
-                        ),
-                        SizedBox(height: 14),
-                        Text(
-                          'Autonomous · Affiliated to University of Madras',
-                          style: TextStyle(
-                            color: AppColors.white38,
-                            fontSize: 12,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
+                    child: AnimatedBuilder(
+                      animation: _glowAnimation,
+                      builder: (context, child) => _buildLogo(),
                     ),
                   ),
-                  const SizedBox(height: 56),
-                  const SizedBox(
-                    width: 26,
-                    height: 26,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: AppColors.crimson,
-                      backgroundColor: Color(0x1FFFFFFF),
+                  const SizedBox(height: 48),
+                  FadeTransition(
+                    opacity: _textFade,
+                    child: SlideTransition(
+                      position: _textSlide,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            'LOYOLA COLLEGE',
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 5,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'C H E N N A I',
+                            style: TextStyle(
+                              color: Color(0xFFFFB4A2),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 10,
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Autonomous · Affiliated to University of Madras',
+                            style: TextStyle(
+                              color: AppColors.white38,
+                              fontSize: 12,
+                              letterSpacing: 0.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 50),
+
+                  // Integrated Custom Lottie Animation
+                  FadeTransition(
+                    opacity: _textFade,
+                    child: SizedBox(
+                      width: 160,
+                      height: 160,
+                      child: Lottie.asset(
+                        'assets/animations/loading.json',
+                        fit: BoxFit.contain,
+                        // This dynamically colors your custom JSON to match the theme
+                        delegates: LottieDelegates(
+                          values: [
+                            ValueDelegate.color(
+                              const [
+                                '**',
+                              ], // Targets all shapes/strokes in the JSON
+                              value: AppColors.crimson,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -194,27 +247,27 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _buildLogo() {
     return Container(
-      width: 120,
-      height: 120,
+      width: 130,
+      height: 130,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.white.withValues(alpha: 0.16),
-            AppColors.white.withValues(alpha: 0.04),
+            AppColors.white.withValues(alpha: 0.15),
+            AppColors.white.withValues(alpha: 0.03),
           ],
         ),
         border: Border.all(
-          color: AppColors.white.withValues(alpha: 0.28),
-          width: 2,
+          color: AppColors.white.withValues(alpha: 0.25),
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.crimson.withValues(alpha: 0.45),
-            blurRadius: 42,
-            spreadRadius: 4,
+            color: AppColors.crimson.withValues(alpha: _glowAnimation.value),
+            blurRadius: 50,
+            spreadRadius: 2 + (_glowAnimation.value * 10),
           ),
         ],
       ),
