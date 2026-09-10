@@ -68,6 +68,7 @@ app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
     service: "college-mobile-backend",
+    version: "v2-lazy-boot",
   });
 });
 
