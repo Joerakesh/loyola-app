@@ -3,8 +3,7 @@ import fs from "node:fs";
 import { createPrivateKey } from "node:crypto";
 
 import { SignJWT } from "jose";
-import { firebaseApp } from "../src/config/firebase.js";
-import { getAuth } from "firebase-admin/auth";
+import { getFirebaseAuth } from "../src/config/firebase.js";
 import { connectMongo } from "../src/config/mongo.js";
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:5000";
@@ -74,8 +73,8 @@ try {
 
   await exchangeForIdToken();
 
-  await getAuth(firebaseApp).setCustomUserClaims(testUid, { isE2ETest: true });
-  await getAuth(firebaseApp).updateUser(testUid, {
+  await getFirebaseAuth().setCustomUserClaims(testUid, { isE2ETest: true });
+  await getFirebaseAuth().updateUser(testUid, {
     email: testEmail,
     displayName: testName,
   });
@@ -127,11 +126,11 @@ try {
     process.exit(1);
   }
 
-  await getAuth(firebaseApp).deleteUser(testUid).catch(() => {});
+  await getFirebaseAuth().deleteUser(testUid).catch(() => {});
 
   console.log("\nAll login checks passed.");
 } catch (error: any) {
   console.error("\n✗ Test error:", error.message ?? error);
-  await getAuth(firebaseApp).deleteUser(testUid).catch(() => {});
+  await getFirebaseAuth().deleteUser(testUid).catch(() => {});
   process.exit(1);
 }

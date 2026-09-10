@@ -8,8 +8,11 @@ class ApiConstants {
   /// Android defaults to 127.0.0.1 with `adb reverse tcp:5000 tcp:5000`.
   static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
 
-  static const String _defaultLocal = 'http://127.0.0.1:5000/api/v1';
-  static const String _host = 'http://127.0.0.1:5000/api/v1';
+  // static const String _defaultLocal = 'http://127.0.0.1:5000/api/v1';
+  // static const String _host = 'http://127.0.0.1:5000/api/v1';
+  static const String _defaultLocal =
+      'https://loyola-app-livid.vercel.app/api/v1';
+  static const String _host = 'https://loyola-app-livid.vercel.app/api/v1';
 
   static String get baseUrl {
     if (_envBaseUrl.isNotEmpty) {

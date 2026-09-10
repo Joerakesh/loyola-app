@@ -1,200 +1,346 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Loyola — Sign in &amp; Link ERP</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --bg: #f4f6fb;
-            --card: #ffffff;
-            --text: #111827;
-            --muted: #6b7280;
-            --accent: #155e79;
-            --accent-soft: #e3eef3;
-            --border: #e5e7eb;
-            --green: #047857;
-            --red: #b91c1c;
-        }
+      :root {
+        --bg: #f4f6fb;
+        --card: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --accent: #155e79;
+        --accent-soft: #e3eef3;
+        --border: #e5e7eb;
+        --green: #047857;
+        --red: #b91c1c;
+      }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            font-family: "Inter", system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: grid;
-            place-items: center;
-            padding: 24px;
-        }
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
 
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(16, 32, 54, 0.08);
+        width: 100%;
+        max-width: 460px;
+        padding: 32px;
+      }
+
+      .logo h1 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .logo p {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 2px;
+      }
+
+      .card-divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+      }
+
+      .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 12px 16px;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      .btn:hover {
+        background: #f9fafb;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .btn svg {
+        flex-shrink: 0;
+      }
+
+      .btn-solid {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .btn-solid:hover {
+        background: #114c63;
+        box-shadow: 0 4px 12px rgba(21, 94, 121, 0.25);
+      }
+
+      .field {
+        margin-top: 14px;
+      }
+      .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #374151;
+      }
+      .field input {
+        width: 100%;
+        padding: 11px 12px;
+        font-family: inherit;
+        font-size: 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--text);
+      }
+      .field input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: var(--accent-soft);
+        border-radius: 12px;
+      }
+      .profile img {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #fff;
+      }
+      .profile .meta {
+        min-width: 0;
+      }
+      .profile .meta strong {
+        display: block;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .profile .meta span {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+      .badge.ok {
+        background: #ecfdf5;
+        color: var(--green);
+        border: 1px solid #a7f3d0;
+      }
+      .badge.no {
+        background: #fef2f2;
+        color: var(--red);
+        border: 1px solid #fecaca;
+      }
+
+      .details {
+        margin-top: 14px;
+        font-size: 13px;
+      }
+      .details .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border);
+      }
+      .details .row dt {
+        color: var(--muted);
+      }
+      .details .row dd {
+        font-weight: 600;
+        word-break: break-all;
+        text-align: right;
+      }
+
+      .status {
+        margin-top: 14px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        display: none;
+      }
+      .status.ok {
+        display: block;
+        background: #ecfdf5;
+        color: var(--green);
+        border: 1px solid #a7f3d0;
+      }
+      .status.err {
+        display: block;
+        background: #fef2f2;
+        color: var(--red);
+        border: 1px solid #fecaca;
+      }
+
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .tiny {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 16px;
+        text-align: center;
+        word-break: break-all;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      @media (max-width: 480px) {
         .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(16, 32, 54, 0.08);
-            width: 100%;
-            max-width: 460px;
-            padding: 32px;
+          padding: 24px;
         }
-
-        .logo h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
-        .logo p { color: var(--muted); font-size: 13px; margin-top: 2px; }
-
-        .card-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 12px 16px;
-            font-family: inherit;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: #fff;
-            color: var(--text);
-            cursor: pointer;
-            transition: background 0.15s ease, box-shadow 0.15s ease;
-        }
-        .btn:hover { background: #f9fafb; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn svg { flex-shrink: 0; }
-
-        .btn-solid { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .btn-solid:hover { background: #114c63; box-shadow: 0 4px 12px rgba(21,94,121,0.25); }
-
-        .field { margin-top: 14px; }
-        .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #374151; }
-        .field input {
-            width: 100%;
-            padding: 11px 12px;
-            font-family: inherit;
-            font-size: 14px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            background: #fff;
-            color: var(--text);
-        }
-        .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--accent-soft);
-            border-radius: 12px;
-        }
-        .profile img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #fff; }
-        .profile .meta { min-width: 0; }
-        .profile .meta strong { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .profile .meta span { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 999px;
-        }
-        .badge.ok { background: #ecfdf5; color: var(--green); border: 1px solid #a7f3d0; }
-        .badge.no { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
-
-        .details { margin-top: 14px; font-size: 13px; }
-        .details .row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
-        .details .row dt { color: var(--muted);}
-        .details .row dd { font-weight: 600; word-break: break-all; text-align: right; }
-
-        .status {
-            margin-top: 14px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            display: none;
-        }
-        .status.ok { display: block; background: #ecfdf5; color: var(--green); border: 1px solid #a7f3d0; }
-        .status.err { display: block; background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
-
-        .hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
-        .tiny { font-size: 11px; color: var(--muted); margin-top: 16px; text-align: center; word-break: break-all; }
-        .hidden { display: none !important; }
-
-        @media (max-width: 480px) { .card { padding: 24px; } }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <main class="card">
-        <div class="logo">
-            <h1>🎓 Loyola College</h1>
-            <p>Sign in with Google, then link your ERP + email</p>
+      <div class="logo">
+        <h1>🎓 Loyola College</h1>
+        <p>Sign in with Google, then link your ERP + email</p>
+      </div>
+
+      <hr class="card-divider" />
+
+      <!-- Signed-out state -->
+      <div id="signed-out">
+        <button id="google-btn" class="btn">
+          <svg width="18" height="18" viewBox="0 0 48 48">
+            <path
+              fill="#FFC107"
+              d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+            />
+            <path
+              fill="#FF3D00"
+              d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
+            />
+            <path
+              fill="#4CAF50"
+              d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+            />
+            <path
+              fill="#1976D2"
+              d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
+            />
+          </svg>
+          Sign in with Google
+        </button>
+      </div>
+
+      <!-- Signed-in state -->
+      <div id="signed-in" class="hidden">
+        <div class="profile">
+          <img id="avatar" alt="" />
+          <div class="meta">
+            <strong id="display-name"></strong>
+            <span id="primary-email"></span>
+          </div>
         </div>
 
-        <hr class="card-divider">
+        <dl class="details" id="details"></dl>
 
-        <!-- Signed-out state -->
-        <div id="signed-out">
-            <button id="google-btn" class="btn">
-                <svg width="18" height="18" viewBox="0 0 48 48">
-                    <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
-                    <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
-                    <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
-                    <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
-                </svg>
-                Sign in with Google
-            </button>
+        <hr class="card-divider" />
+
+        <div id="bind-block">
+          <h2 style="font-size: 15px; font-weight: 700; margin-bottom: 4px">
+            Link ERP + college email
+          </h2>
+          <p class="hint" style="margin-top: 0">
+            Credentials are validated against the ERP and stored encrypted.
+          </p>
+
+          <div class="field">
+            <label for="reg-input">ERP registration number</label>
+            <input id="reg-input" placeholder="26-PDS-002" autocomplete="off" />
+          </div>
+
+          <div class="field">
+            <label for="pass-input">ERP password</label>
+            <input
+              id="pass-input"
+              type="password"
+              placeholder="••••••••"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="field">
+            <label for="email-input">College email</label>
+            <input
+              id="email-input"
+              type="email"
+              placeholder="26pds002@loyolacollege.edu"
+            />
+          </div>
+
+          <button id="bind-btn" class="btn btn-solid" style="margin-top: 16px">
+            Link ERP &amp; email
+          </button>
         </div>
 
-        <!-- Signed-in state -->
-        <div id="signed-in" class="hidden">
-            <div class="profile">
-                <img id="avatar" alt="">
-                <div class="meta">
-                    <strong id="display-name"></strong>
-                    <span id="primary-email"></span>
-                </div>
-            </div>
+        <button id="signout-btn" class="btn" style="margin-top: 16px">
+          Sign out
+        </button>
+      </div>
 
-            <dl class="details" id="details"></dl>
-
-            <hr class="card-divider">
-
-            <div id="bind-block">
-                <h2 style="font-size:15px;font-weight:700;margin-bottom:4px">Link ERP + college email</h2>
-                <p class="hint" style="margin-top:0">Credentials are validated against the ERP and stored encrypted.</p>
-
-                <div class="field">
-                    <label for="reg-input">ERP registration number</label>
-                    <input id="reg-input" placeholder="26-PDS-002" autocomplete="off">
-                </div>
-
-                <div class="field">
-                    <label for="pass-input">ERP password</label>
-                    <input id="pass-input" type="password" placeholder="••••••••" autocomplete="off">
-                </div>
-
-                <div class="field">
-                    <label for="email-input">College email</label>
-                    <input id="email-input" type="email" placeholder="26pds002@loyolacollege.edu">
-                </div>
-
-                <button id="bind-btn" class="btn btn-solid" style="margin-top:16px">Link ERP &amp; email</button>
-            </div>
-
-            <button id="signout-btn" class="btn" style="margin-top:16px">Sign out</button>
-        </div>
-
-        <div id="status" class="status" role="status"></div>
-        <p class="tiny" id="token-preview"></p>
+      <div id="status" class="status" role="status"></div>
+      <p class="tiny" id="token-preview"></p>
     </main>
 
     <!-- Firebase SDK (browser) -->
@@ -202,185 +348,345 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDBi2gZ9bB8mALpUBgAAFJcYrJYe8ZYLqo",
-            authDomain: "loyola-app-803a6.firebaseapp.com",
-            projectId: "loyola-app-803a6",
-            storageBucket: "loyola-app-803a6.firebasestorage.app",
-            messagingSenderId: "816257307604",
-            appId: "1:816257307604:web:405474e31f3d5eaae2bc41",
-            measurementId: "G-BCFWM37PYC"
-        };
+      const firebaseConfig = {
+        apiKey: "AIzaSyDBi2gZ9bB8mALpUBgAAFJcYrJYe8ZYLqo",
+        authDomain: "loyola-app-803a6.firebaseapp.com",
+        projectId: "loyola-app-803a6",
+        storageBucket: "loyola-app-803a6.firebasestorage.app",
+        messagingSenderId: "816257307604",
+        appId: "1:816257307604:web:405474e31f3d5eaae2bc41",
+        measurementId: "G-BCFWM37PYC",
+      };
 
-        // Your backend base URL. Update if the API runs elsewhere.
-        const API_BASE = "http://localhost:5000/api/v1";
+      // Your backend base URL. Update if the API runs elsewhere.
+      const API_BASE = "http://localhost:5000/api/v1";
+      console.log("[Loyola] Firebase configuration:", {
+        projectId: firebaseConfig.projectId,
+        authDomain: firebaseConfig.authDomain,
+        appId: firebaseConfig.appId,
+      });
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+      console.log("[Loyola] Backend API:", API_BASE);
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const DEBUG = true;
 
-        const $ = (id) => document.getElementById(id);
-        const statusEl = $("status");
+      function log(...args) {
+        if (DEBUG) {
+          console.log("[Loyola]", ...args);
+        }
+      }
 
-        async function exchangeToken(idToken) {
-            const res = await fetch(`${API_BASE}/auth/google`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ idToken }),
-            });
+      function logError(...args) {
+        if (DEBUG) {
+          console.error("[Loyola]", ...args);
+        }
+      }
 
-            const body = await res.json();
-            if (!res.ok) throw new Error(body.message || "Login failed");
+      function logResponse(label, response, body) {
+        if (DEBUG) {
+          console.log(`[Loyola] ${label}`, {
+            status: response.status,
+            ok: response.ok,
+            body,
+          });
+        }
+      }
+      const $ = (id) => document.getElementById(id);
+      const statusEl = $("status");
 
-            localStorage.setItem("loyola.token", body.authentication.token);
-            return body.user;
+      async function exchangeToken(idToken) {
+        log("Sending Firebase ID token to backend...");
+
+        const res = await fetch(`${API_BASE}/auth/google`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idToken }),
+        });
+
+        const body = await res.json();
+
+        logResponse("Google authentication response", res, body);
+
+        if (!res.ok) {
+          throw new Error(body.message || "Login failed");
         }
 
-        function render(user) {
-            $("signed-out").classList.add("hidden");
-            $("signed-in").classList.remove("hidden");
-            $("avatar").src = user.avatarUrl || "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg";
-            $("display-name").textContent = user.name || "User";
-            $("primary-email").textContent = user.email || "(no primary email)";
+        localStorage.setItem("loyola.token", body.authentication.token);
 
-            const erpBadge = user.erpLinked
-                ? '<span class="badge ok">ERP linked</span>'
-                : '<span class="badge no">ERP not linked</span>';
+        log("Backend application token received");
 
-            const emails = [user.email, ...(user.linkedEmails || [])].filter(Boolean);
-            const links = emails.length
-                ? emails.map((e) => `<div class="row"><dt>email</dt><dd>${e}</dd></div>`).join("")
-                : '<div class="row"><dt>email</dt><dd>—</dd></div>';
+        return body.user;
+      }
+      function render(user) {
+        $("signed-out").classList.add("hidden");
+        $("signed-in").classList.remove("hidden");
+        $("avatar").src =
+          user.avatarUrl ||
+          "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg";
+        $("display-name").textContent = user.name || "User";
+        $("primary-email").textContent = user.email || "(no primary email)";
 
-            $("details").innerHTML = `
+        const erpBadge = user.erpLinked
+          ? '<span class="badge ok">ERP linked</span>'
+          : '<span class="badge no">ERP not linked</span>';
+
+        const emails = [user.email, ...(user.linkedEmails || [])].filter(
+          Boolean,
+        );
+        const links = emails.length
+          ? emails
+              .map((e) => `<div class="row"><dt>email</dt><dd>${e}</dd></div>`)
+              .join("")
+          : '<div class="row"><dt>email</dt><dd>—</dd></div>';
+
+        $("details").innerHTML = `
                 ${erpBadge}
                 ${links}
             `;
 
-            $("bind-block").style.display = user.erpLinked ? "none" : "block";
+        $("bind-block").style.display = user.erpLinked ? "none" : "block";
 
-            $("token-preview").textContent =
-                "Session JWT: " + (localStorage.getItem("loyola.token") || "").slice(0, 24) + "…";
+        $("token-preview").textContent =
+          "Session JWT: " +
+          (localStorage.getItem("loyola.token") || "").slice(0, 24) +
+          "…";
+      }
+
+      function showStatus(msg, kind) {
+        statusEl.textContent = msg;
+        statusEl.className = "status " + kind;
+        setTimeout(() => {
+          statusEl.className = "status";
+        }, 6000);
+      }
+
+      const EMAIL_SUFFIX = "@loyolacollege.edu";
+
+      function deriveCollegeEmail(reg) {
+        const normalized = reg
+          .replace(/\s+/g, "")
+          .replace(/-/g, "")
+          .toLowerCase();
+        return normalized ? normalized + EMAIL_SUFFIX : "";
+      }
+
+      $("reg-input").addEventListener("input", () => {
+        const collegeEmail = deriveCollegeEmail($("reg-input").value);
+        if (collegeEmail && $("email-input").value.trim() === "") {
+          $("email-input").value = collegeEmail;
+        }
+      });
+
+      $("google-btn").addEventListener("click", async () => {
+        $("google-btn").disabled = true;
+
+        log("Google sign-in started");
+
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+
+          log("GoogleAuthProvider created");
+
+          const result = await auth.signInWithPopup(provider);
+
+          log("Firebase Google sign-in successful", {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+          });
+
+          log("Requesting Firebase ID token...");
+
+          const idToken = await result.user.getIdToken();
+
+          log("Firebase ID token received");
+
+          const user = await exchangeToken(idToken);
+
+          log("Backend authentication successful", {
+            user,
+          });
+
+          render(user);
+
+          showStatus("Signed in — " + user.email, "ok");
+        } catch (err) {
+          logError("Google sign-in failed", {
+            code: err.code,
+            message: err.message,
+            error: err,
+          });
+
+          if (err.code !== "auth/popup-closed-by-user") {
+            showStatus("Sign-in failed: " + err.message, "err");
+          }
+        } finally {
+          $("google-btn").disabled = false;
+          log("Google sign-in finished");
+        }
+      });
+      $("signout-btn").addEventListener("click", async () => {
+        try {
+          const token = localStorage.getItem("loyola.token");
+          await fetch(`${API_BASE}/auth/logout`, {
+            method: "POST",
+            headers: { Authorization: "Bearer " + token },
+          });
+        } catch (_) {
+          /* ignore */
         }
 
-        function showStatus(msg, kind) {
-            statusEl.textContent = msg;
-            statusEl.className = "status " + kind;
-            setTimeout(() => { statusEl.className = "status"; }, 6000);
+        localStorage.removeItem("loyola.token");
+        await auth.signOut();
+        $("signed-out").classList.remove("hidden");
+        $("signed-in").classList.add("hidden");
+        $("token-preview").textContent = "";
+        $("details").innerHTML = "";
+      });
+
+      $("bind-btn").addEventListener("click", async () => {
+        const token = localStorage.getItem("loyola.token");
+
+        const registrationNumber = $("reg-input").value.trim();
+
+        const password = $("pass-input").value;
+
+        const email = $("email-input").value.trim();
+
+        log("ERP linking started", {
+          registrationNumber,
+          email,
+          hasPassword: Boolean(password),
+          hasAppToken: Boolean(token),
+        });
+
+        if (!token) {
+          logError("ERP linking failed: no application token");
+          return showStatus("Not signed in", "err");
         }
 
-        const EMAIL_SUFFIX = "@loyolacollege.edu";
-
-        function deriveCollegeEmail(reg) {
-            const normalized = reg.replace(/\s+/g, "").replace(/-/g, "").toLowerCase();
-            return normalized ? normalized + EMAIL_SUFFIX : "";
+        if (!registrationNumber || !password) {
+          logError("ERP linking failed: missing ERP credentials");
+          return showStatus("Enter ERP credentials", "err");
         }
 
-        $("reg-input").addEventListener("input", () => {
-            const collegeEmail = deriveCollegeEmail($("reg-input").value);
-            if (collegeEmail && $("email-input").value.trim() === "") {
-                $("email-input").value = collegeEmail;
-            }
-        });
+        $("bind-btn").disabled = true;
 
-        $("google-btn").addEventListener("click", async () => {
-            $("google-btn").disabled = true;
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await auth.signInWithPopup(provider);
-                const idToken = await result.user.getIdToken();
-                const user = await exchangeToken(idToken);
-                render(user);
-                showStatus("Signed in — " + user.email, "ok");
-            } catch (err) {
-                if (err.code !== "auth/popup-closed-by-user") {
-                    showStatus("Sign-in failed: " + err.message, "err");
-                }
-            } finally {
-                $("google-btn").disabled = false;
-            }
-        });
+        try {
+          const res = await fetch(`${API_BASE}/auth/bind-erp`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify({
+              registrationNumber,
+              password,
+              email,
+            }),
+          });
 
-        $("signout-btn").addEventListener("click", async () => {
-            try {
-                const token = localStorage.getItem("loyola.token");
-                await fetch(`${API_BASE}/auth/logout`, {
-                    method: "POST",
-                    headers: { Authorization: "Bearer " + token },
-                });
-            } catch (_) { /* ignore */ }
+          const body = await res.json();
 
-            localStorage.removeItem("loyola.token");
-            await auth.signOut();
-            $("signed-out").classList.remove("hidden");
-            $("signed-in").classList.add("hidden");
-            $("token-preview").textContent = "";
-            $("details").innerHTML = "";
-        });
+          logResponse("ERP linking response", res, body);
 
-        $("bind-btn").addEventListener("click", async () => {
-            const token = localStorage.getItem("loyola.token");
-            const registrationNumber = $("reg-input").value.trim();
-            const password = $("pass-input").value;
-            const email = $("email-input").value.trim();
+          if (!res.ok) {
+            throw new Error(body.message || "Unable to link ERP");
+          }
 
-            if (!token) return showStatus("Not signed in", "err");
-            if (!registrationNumber || !password) return showStatus("Enter ERP credentials", "err");
+          log("ERP successfully linked", {
+            user: body.user,
+          });
 
-            $("bind-btn").disabled = true;
+          render(body.user);
 
-            try {
-                const res = await fetch(`${API_BASE}/auth/bind-erp`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + token,
-                    },
-                    body: JSON.stringify({ registrationNumber, password, email }),
-                });
+          $("reg-input").value = "";
+          $("pass-input").value = "";
+          $("email-input").value = "";
 
-                const body = await res.json();
+          showStatus(
+            "ERP linked" + (email ? " with email " + email : ""),
+            "ok",
+          );
+        } catch (err) {
+          logError("ERP linking failed", {
+            message: err.message,
+            error: err,
+          });
 
-                if (!res.ok) throw new Error(body.message || "Unable to link ERP");
+          showStatus("Link failed: " + err.message, "err");
+        } finally {
+          $("bind-btn").disabled = false;
 
-                render(body.user);
-                $("reg-input").value = "";
-                $("pass-input").value = "";
-                $("email-input").value = "";
-                showStatus("ERP linked" + (email ? " with email " + email : ""), "ok");
-            } catch (err) {
-                showStatus("Link failed: " + err.message, "err");
-            } finally {
-                $("bind-btn").disabled = false;
-            }
-        });
+          log("ERP linking finished");
+        }
+      });
+      // Restore session from a valid stored token.
+      (async function restore() {
+        log("Checking for existing application session...");
 
-        // Restore session from a valid stored token.
-        (async function restore() {
-            const token = localStorage.getItem("loyola.token");
-            if (!token) return;
+        const token = localStorage.getItem("loyola.token");
 
-            try {
-                const res = await fetch(`${API_BASE}/auth/refresh`, {
-                    method: "POST",
-                    headers: { Authorization: "Bearer " + token },
-                });
+        if (!token) {
+          log("No stored application session");
+          return;
+        }
 
-                const body = await res.json();
-                if (!res.ok) throw new Error();
-                localStorage.setItem("loyola.token", body.authentication.token);
+        log("Stored application session found");
 
-                const meRes = await fetch(`${API_BASE}/auth/google/me`, {
-                    headers: { Authorization: "Bearer " + body.authentication.token },
-                });
-                if (meRes.ok) {
-                    const me = await meRes.json();
-                    render(me.user);
-                }
-            } catch (_) {
-                localStorage.removeItem("loyola.token");
-            }
-        })();
+        try {
+          log("Refreshing application session...");
+
+          const res = await fetch(`${API_BASE}/auth/refresh`, {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          });
+
+          const body = await res.json();
+
+          logResponse("Application session refresh response", res, body);
+
+          if (!res.ok) {
+            throw new Error(body.message || "Session refresh failed");
+          }
+
+          localStorage.setItem("loyola.token", body.authentication.token);
+
+          log("Application session refreshed");
+
+          const meRes = await fetch(`${API_BASE}/auth/google/me`, {
+            headers: {
+              Authorization: "Bearer " + body.authentication.token,
+            },
+          });
+
+          const me = await meRes.json();
+
+          logResponse("Current user response", meRes, me);
+
+          if (meRes.ok) {
+            render(me.user);
+
+            log("Existing session restored", {
+              user: me.user,
+            });
+          }
+        } catch (err) {
+          logError("Session restoration failed", {
+            message: err.message,
+            error: err,
+          });
+
+          localStorage.removeItem("loyola.token");
+
+          log("Invalid application session removed");
+        }
+      })();
     </script>
-
-</body>
+  </body>
 </html>

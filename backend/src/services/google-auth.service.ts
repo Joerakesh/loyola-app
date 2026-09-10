@@ -1,4 +1,4 @@
-import { firebaseAuth } from "../config/firebase.js";
+import { getFirebaseAuth } from "../config/firebase.js";
 
 export interface GoogleProfile {
   googleId: string;
@@ -9,6 +9,7 @@ export interface GoogleProfile {
 
 export class GoogleAuthService {
   async verifyIdToken(idToken: string): Promise<GoogleProfile> {
+    const firebaseAuth = await getFirebaseAuth();
     const decoded = await firebaseAuth.verifyIdToken(idToken);
 
     return {

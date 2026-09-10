@@ -1,23 +1,25 @@
 import { MongoClient, Db } from "mongodb";
 
-const mongoUri = process.env.MONGODB_URI;
-
-if (!mongoUri) {
-  throw new Error("MONGODB_URI environment variable is not configured");
-}
-
-const mongoClient = new MongoClient(mongoUri, {
-  serverSelectionTimeoutMS: 5000,
-});
-
-mongoClient.on("error", (error) => {
-  console.error("MongoDB error:", error);
-});
-
 let connectionPromise: Promise<MongoClient> | null = null;
 
 export function connectMongo(): Promise<MongoClient> {
+  const mongoUri = process.env.MONGODB_URI;
+
+  if (!mongoUri) {
+    return Promise.reject(
+      new Error("MONGODB_URI environment variable is not configured"),
+    );
+  }
+
   if (!connectionPromise) {
+    const mongoClient = new MongoClient(mongoUri, {
+      serverSelectionTimeoutMS: 5000,
+    });
+
+    mongoClient.on("error", (error) => {
+      console.error("MongoDB error:", error);
+    });
+
     connectionPromise = mongoClient.connect();
   }
 
