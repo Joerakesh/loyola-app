@@ -3,17 +3,17 @@ import app from "./app.js";
 
 export default app;
 
-const PORT = Number(process.env.PORT ?? 3000);
+// const PORT = Number(process.env.PORT ?? 3000);
 
-async function start() {
-  app.listen(PORT, () => {
-    console.log(`Backend running on http://localhost:${PORT}`);
-  });
-}
+// async function start() {
+//   app.listen(PORT, () => {
+//     console.log(`Backend running on http://localhost:${PORT}`);
+//   });
+// }
 
-if (process.env.NODE_ENV !== "production") {
-  start().catch((error) => {
-    console.error("Failed to start backend:", error);
-    process.exit(1);
-  });
-}
+// if (process.env.NODE_ENV !== "production") {
+//   start().catch((error) => {
+//     console.error("Failed to start backend:", error);
+//     process.exit(1);
+//   });
+// }
