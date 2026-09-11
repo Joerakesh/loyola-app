@@ -4,14 +4,14 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
 // routes import
-import attendanceRoutes from "./routes/attendance.routes.js";
-import marksRoutes from "./routes/marks.routes.js";
-import subjectsRoutes from "./routes/subjects.routes.js";
-import studentRoutes from "./routes/student.routes.js";
-import dashboardRoutes from "./routes/dashboard.routes.js";
-import authRoutes from "./routes/auth.routes.js";
-import { createPlatformRouter } from "./routes/platform.routes.js";
-import { platformControllers } from "./controllers/platform.controllers.js";
+import attendanceRoutes from "../routes/attendance.routes.js";
+import marksRoutes from "../routes/marks.routes.js";
+import subjectsRoutes from "../routes/subjects.routes.js";
+import studentRoutes from "../routes/student.routes.js";
+import dashboardRoutes from "../routes/dashboard.routes.js";
+import authRoutes from "../routes/auth.routes.js";
+import { createPlatformRouter } from "../routes/platform.routes.js";
+import { platformControllers } from "../controllers/platform.controllers.js";
 
 const app = express();
 
