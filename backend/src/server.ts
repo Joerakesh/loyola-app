@@ -1,6 +1,14 @@
 import "dotenv/config";
 import app from "./app.js";
 
+// only for testing
+app.get("/api/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    version: "test",
+  });
+});
+
 export default app;
 
 // const PORT = Number(process.env.PORT ?? 3000);
