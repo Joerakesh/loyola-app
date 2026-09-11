@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_colors.dart';
+import '../core/theme/responsive.dart';
 import '../models/subject_model.dart';
 import '../services/subject_service.dart';
 import '../widgets/app_state_views.dart';
@@ -129,7 +130,12 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
       physics: const NeverScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
+          padding: EdgeInsets.fromLTRB(
+            Responsive.dp(context, 20),
+            8,
+            Responsive.dp(context, 20),
+            Responsive.dp(context, 130),
+          ),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               _buildSummaryCard(),
@@ -249,14 +255,16 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   // SUBJECT LIST CARD
   // ---------------------------------------------------------------------------
   Widget _buildSubjectCard(Subject subject) {
+    final compact = Responsive.isCompact(context);
+    final iconBox = Responsive.dp(context, compact ? 46 : 52);
+
     return GlassContainer(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(Responsive.dp(context, 16)),
       child: Row(
         children: [
-          // Sleek, monochromatic icon container
           Container(
-            width: 52,
-            height: 52,
+            width: iconBox,
+            height: iconBox,
             decoration: BoxDecoration(
               color: AppColors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
@@ -264,24 +272,25 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                 color: AppColors.white.withValues(alpha: 0.15),
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.import_contacts_rounded,
               color: AppColors.white,
-              size: 22,
+              size: Responsive.dp(context, 22),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: Responsive.dp(context, 16)),
 
-          // Course Details
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   subject.title.isEmpty ? 'Untitled Course' : subject.title,
-                  style: const TextStyle(
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
                     color: AppColors.white,
-                    fontSize: 16,
+                    fontSize: Responsive.sp(context, 16),
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.2,
                   ),
@@ -289,7 +298,6 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    // Frosted Code Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -330,16 +338,15 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
             ),
           ),
 
-          // Credits
-          const SizedBox(width: 12),
+          SizedBox(width: Responsive.dp(context, 12)),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 '${subject.credits}',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.white,
-                  fontSize: 22,
+                  fontSize: Responsive.sp(context, 22),
                   fontWeight: FontWeight.w800,
                 ),
               ),

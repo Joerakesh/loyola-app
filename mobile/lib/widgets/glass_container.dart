@@ -9,7 +9,7 @@ class GlassContainer extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(20),
     this.borderRadius,
-    this.blur = 15,
+    this.blur = 12,
     this.color,
     this.borderColor,
     this.onTap,

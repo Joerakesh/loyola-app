@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_colors.dart';
+import '../core/theme/responsive.dart';
 import '../models/marks_model.dart';
 import '../services/marks_service.dart';
 import '../widgets/app_state_views.dart';
@@ -117,7 +118,12 @@ class _MarksScreenState extends State<MarksScreen> {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 130),
+          padding: EdgeInsets.fromLTRB(
+            Responsive.dp(context, 20),
+            8,
+            Responsive.dp(context, 20),
+            Responsive.dp(context, 130),
+          ),
           sliver: SliverList.separated(
             itemCount: _marks.length,
             separatorBuilder: (_, _) => const SizedBox(height: 16),
@@ -181,16 +187,16 @@ class _MarksScreenState extends State<MarksScreen> {
   // ---------------------------------------------------------------------------
   Widget _buildCourseCard(CourseMarks course) {
     return GlassContainer(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(Responsive.dp(context, 18)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             '${course.courseCode} - ${course.courseName}',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 15,
+              fontSize: Responsive.sp(context, 15),
               letterSpacing: 0.3,
             ),
           ),

@@ -17,7 +17,10 @@ class MarksService {
     final data = await _cache.load(CacheKeys.marks);
     if (data is List) {
       return data
-          .map((item) => CourseMarks.fromJson(item as Map<String, dynamic>))
+          .whereType<Map>()
+          .map(
+            (item) => CourseMarks.fromJson(item.cast<String, dynamic>()),
+          )
           .toList();
     }
     return null;
@@ -28,14 +31,19 @@ class MarksService {
       final response = await _apiClient.dio.get(ApiConstants.marks);
       final data = response.data;
 
-      if (data['status'] != 'success') {
-        throw Exception(data['message'] ?? 'Unable to load marks');
+      if (data is! Map<String, dynamic> || data['status'] != 'success') {
+        throw Exception(
+          (data is Map && data['message']?.toString().isNotEmpty == true)
+              ? data['message'].toString()
+              : 'Unable to load marks',
+        );
       }
 
       final payload = data['data'] as List<dynamic>? ?? [];
 
       final records = payload
-          .map((item) => CourseMarks.fromJson(item as Map<String, dynamic>))
+          .whereType<Map>()
+          .map((item) => CourseMarks.fromJson(item.cast<String, dynamic>()))
           .toList();
 
       final changed = await _cache.isChanged(CacheKeys.marks, payload);

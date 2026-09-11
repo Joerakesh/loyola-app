@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
+import '../core/theme/responsive.dart';
 import '../models/profile_model.dart';
 import '../services/auth_provider.dart';
 import '../services/profile_service.dart';
@@ -129,8 +130,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         SliverPadding(
-          // Reduced outer paddings
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 110),
+          padding: EdgeInsets.fromLTRB(
+            Responsive.dp(context, 16),
+            4,
+            Responsive.dp(context, 16),
+            Responsive.dp(context, 110),
+          ),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               _buildHeader(_profile!),

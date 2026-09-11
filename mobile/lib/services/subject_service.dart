@@ -17,7 +17,10 @@ class SubjectService {
     final data = await _cache.load(CacheKeys.subjects);
     if (data is List) {
       return data
-          .map((item) => Subject.fromJson(item as Map<String, dynamic>))
+          .whereType<Map>()
+          .map(
+            (item) => Subject.fromJson(item.cast<String, dynamic>()),
+          )
           .toList();
     }
     return null;
@@ -28,14 +31,19 @@ class SubjectService {
       final response = await _apiClient.dio.get(ApiConstants.subjects);
       final data = response.data;
 
-      if (data['status'] != 'success') {
-        throw Exception(data['message'] ?? 'Unable to load subjects');
+      if (data is! Map<String, dynamic> || data['status'] != 'success') {
+        throw Exception(
+          (data is Map && data['message']?.toString().isNotEmpty == true)
+              ? data['message'].toString()
+              : 'Unable to load subjects',
+        );
       }
 
       final payload = data['data'] as List<dynamic>? ?? [];
 
       final records = payload
-          .map((item) => Subject.fromJson(item as Map<String, dynamic>))
+          .whereType<Map>()
+          .map((item) => Subject.fromJson(item.cast<String, dynamic>()))
           .toList();
 
       final changed = await _cache.isChanged(CacheKeys.subjects, payload);

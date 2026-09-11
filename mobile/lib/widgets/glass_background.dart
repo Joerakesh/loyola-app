@@ -39,7 +39,7 @@ class GlassBackground extends StatelessWidget {
         color: Color(0x44007AFF),
       ),
     ],
-    this.blur = 90,
+    this.blur = 40,
   });
 
   final Widget child;

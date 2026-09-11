@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
+import '../core/theme/responsive.dart';
 import '../services/auth_provider.dart';
 import '../widgets/glass_background.dart';
 import '../widgets/glass_container.dart';
@@ -30,7 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
 
-    // The router redirect will move the user into the app automatically.
     if (provider.isAuthenticated) {
       return;
     }
@@ -52,73 +52,90 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AuthProvider>();
+    final compact = Responsive.isCompact(context);
+    final avatarSize = Responsive.dp(context, compact ? 56 : 72);
 
     return Scaffold(
       body: GlassBackground(
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: GlassContainer(
-                padding: const EdgeInsets.all(28),
-                blur: 20,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.white.withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: AppColors.white.withValues(alpha: 0.2),
-                            width: 1.5,
+              padding: EdgeInsets.symmetric(
+                horizontal: Responsive.dp(context, 24),
+                vertical: 16,
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: GlassContainer(
+                  padding: EdgeInsets.all(Responsive.dp(context, 26)),
+                  blur: 18,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Center(
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/loyola_logo.png',
+                            width: avatarSize,
+                            height: avatarSize,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                              width: avatarSize,
+                              height: avatarSize,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.white.withValues(alpha: 0.1),
+                                border: Border.all(
+                                  color:
+                                      AppColors.white.withValues(alpha: 0.2),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.school_rounded,
+                                color: AppColors.white,
+                              ),
+                            ),
                           ),
                         ),
-                        child: const Icon(
-                          Icons.school_rounded,
-                          size: 36,
+                      ),
+                      SizedBox(height: Responsive.dp(context, 20)),
+                      Text(
+                        'Loyola ERP',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
                           color: AppColors.white,
+                          fontSize: Responsive.sp(context, 26),
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Loyola ERP',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Student Portal',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.white54,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Student Portal',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.white54,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                      SizedBox(height: Responsive.dp(context, 32)),
+                      _buildGoogleButton(provider),
+                      SizedBox(height: Responsive.dp(context, 20)),
+                      const Text(
+                        'Sign in with your Loyola Google account to\naccess attendance, marks and more.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.white54,
+                          fontSize: 13,
+                          height: 1.5,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildGoogleButton(provider),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Sign in with your Loyola Google account to\naccess attendance, marks and more.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: AppColors.white54,
-                        fontSize: 13,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -130,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildGoogleButton(AuthProvider provider) {
     return SizedBox(
-      height: 52,
+      height: Responsive.dp(context, 52),
       child: provider.isLoading
           ? const Center(
               child: CircularProgressIndicator(
@@ -149,10 +166,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               icon: const _GoogleIcon(),
-              label: const Text(
+              label: Text(
                 'Continue with Google',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: Responsive.sp(context, 16),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -166,8 +183,6 @@ class _GoogleIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Material "G" glyph instead of a network-downloaded SVG so it renders
-    // reliably on every platform.
     return const Icon(
       Icons.g_mobiledata_rounded,
       size: 28,

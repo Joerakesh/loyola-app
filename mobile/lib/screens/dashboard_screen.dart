@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/cache/data_cache.dart';
 import '../core/constants/app_colors.dart';
+import '../core/theme/responsive.dart';
 import '../models/attendance_model.dart';
 import '../models/dashboard_model.dart';
 import '../services/attendance_service.dart';
@@ -136,6 +137,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildContent() {
     final dashboard = _dashboard!;
     final todayRecord = _getTodayAttendance();
+    final sidePad = Responsive.dp(context, 20);
 
     return SafeArea(
       bottom: false,
@@ -150,12 +152,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
           slivers: [
             SliverToBoxAdapter(child: _buildHeader(dashboard)),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 130),
+              padding: EdgeInsets.fromLTRB(
+                sidePad,
+                10,
+                sidePad,
+                Responsive.dp(context, 130),
+              ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildHeroCard(todayRecord),
                   const SizedBox(height: 28),
-                  _buildRecentLogsSection(), // Replaced Quick Actions with Recent Logs
+                  _buildRecentLogsSection(),
                 ]),
               ),
             ),
@@ -172,7 +179,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         : 'Student';
 
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(Responsive.dp(context, 20)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -183,9 +190,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text(
                   '${_formatTodayDate()} • $firstName'.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.white54,
-                    fontSize: 11,
+                    fontSize: Responsive.sp(context, 11),
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
                   ),
@@ -195,9 +202,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   '${_greeting()}!',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.white,
-                    fontSize: 28,
+                    fontSize: Responsive.sp(context, 28),
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
                   ),
@@ -218,9 +225,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final progressColor = percentage >= 75
         ? const Color(0xFF9D84FF)
         : const Color(0xFFFF8484);
+    final compact = Responsive.isCompact(context);
+    final ringSize = Responsive.dp(context, compact ? 70 : 85);
 
     return GlassContainer(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(Responsive.dp(context, 24)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -243,9 +252,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(height: 8),
                     Text(
                       dayOrder > 0 ? 'Day Order $dayOrder' : 'No Schedule',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.white,
-                        fontSize: 24,
+                        fontSize: Responsive.sp(context, 24),
                         fontWeight: FontWeight.bold,
                         letterSpacing: -0.5,
                       ),
@@ -255,17 +264,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       hours.isNotEmpty
                           ? 'Keep up the good work! 🚀'
                           : 'Enjoy your day off ✨',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.white54,
-                        fontSize: 13,
+                        fontSize: Responsive.sp(context, 13),
                       ),
                     ),
                   ],
                 ),
               ),
               SizedBox(
-                height: 85,
-                width: 85,
+                height: ringSize,
+                width: ringSize,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -273,15 +282,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       value: (percentage / 100).clamp(0.0, 1.0),
                       strokeWidth: 8,
                       strokeCap: StrokeCap.round,
-                      backgroundColor: AppColors.white.withValues(alpha: 0.05),
-                      valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                      backgroundColor:
+                          AppColors.white.withValues(alpha: 0.05),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(progressColor),
                     ),
                     Center(
                       child: Text(
                         '${percentage.toDouble()}%',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.white,
-                          fontSize: 20,
+                          fontSize: Responsive.sp(context, 20),
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -294,10 +305,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           if (hours.isNotEmpty) ...[
             const SizedBox(height: 28),
-            Container(height: 1, color: AppColors.white.withValues(alpha: 0.1)),
+            Container(
+              height: 1,
+              color: AppColors.white.withValues(alpha: 0.1),
+            ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              spacing: 18,
+              runSpacing: 10,
               children: hours.map((h) => _buildHourStatusPill(h)).toList(),
             ),
           ],
@@ -355,7 +370,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SectionHeader(title: 'Recent Logs'),
         const SizedBox(height: 14),
         GlassContainer(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: EdgeInsets.symmetric(
+            horizontal: Responsive.dp(context, 20),
+            vertical: 12,
+          ),
           child: Column(
             children: recentRecords.asMap().entries.map((entry) {
               final index = entry.key;
@@ -384,54 +402,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              formattedDate,
-              style: const TextStyle(
-                color: AppColors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                formattedDate,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              (record.dayOrder ?? 0) > 0
-                  ? 'Day Order ${record.dayOrder}'
-                  : 'No Schedule',
-              style: const TextStyle(
-                color: AppColors.white54,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 4),
+              Text(
+                (record.dayOrder ?? 0) > 0
+                    ? 'Day Order ${record.dayOrder}'
+                    : 'No Schedule',
+                style: const TextStyle(
+                  color: AppColors.white54,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (hours.isNotEmpty)
-          Row(
-            children: hours.map((h) {
-              Color color;
-              IconData icon;
-              switch (h.status) {
-                case AttendanceStatus.present:
-                  color = const Color(0xFF5ED5A8);
-                  icon = Icons.task_alt_rounded;
-                  break;
-                case AttendanceStatus.absent:
-                  color = const Color(0xFFFF7A7A);
-                  icon = Icons.highlight_off_rounded;
-                  break;
-                case AttendanceStatus.notScheduled:
-                  color = AppColors.white30;
-                  icon = Icons.more_horiz_rounded;
-                  break;
-              }
-              return Padding(
-                padding: const EdgeInsets.only(left: 6),
-                child: Icon(icon, color: color, size: 16),
-              );
-            }).toList(),
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: hours.map((h) {
+                Color color;
+                IconData icon;
+                switch (h.status) {
+                  case AttendanceStatus.present:
+                    color = const Color(0xFF5ED5A8);
+                    icon = Icons.task_alt_rounded;
+                    break;
+                  case AttendanceStatus.absent:
+                    color = const Color(0xFFFF7A7A);
+                    icon = Icons.highlight_off_rounded;
+                    break;
+                  case AttendanceStatus.notScheduled:
+                    color = AppColors.white30;
+                    icon = Icons.more_horiz_rounded;
+                    break;
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Icon(icon, color: color, size: 15),
+                );
+              }).toList(),
+            ),
           )
         else
           const Text(
@@ -453,7 +478,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final year = int.tryParse(parts[2]);
         if (day == now.day &&
             month == now.month &&
-            (year == now.year || (year! < 100 && year + 2000 == now.year))) {
+            ((year != null && year == now.year) ||
+                (year != null &&
+                    year < 100 &&
+                    year + 2000 == now.year))) {
           return record;
         }
       }
@@ -536,10 +564,11 @@ class GlassAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initial = name.isNotEmpty ? name[0].toUpperCase() : 'S';
+    final size = Responsive.dp(context, 48);
 
     return Container(
-      width: 48,
-      height: 48,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: const Color(0xFF9D84FF),
@@ -558,9 +587,9 @@ class GlassAvatar extends StatelessWidget {
       child: Center(
         child: Text(
           initial,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.white,
-            fontSize: 20,
+            fontSize: Responsive.sp(context, 20),
             fontWeight: FontWeight.bold,
           ),
         ),

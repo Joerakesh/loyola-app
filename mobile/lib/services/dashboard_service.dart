@@ -25,13 +25,16 @@ class DashboardService {
 
     final data = response.data;
 
-    if (data['status'] != 'success') {
+    if (data is! Map<String, dynamic> || data['status'] != 'success') {
       throw Exception(
-        data['message'] ?? 'Unable to load dashboard',
+        (data is Map && data['message']?.toString().isNotEmpty == true)
+            ? data['message'].toString()
+            : 'Unable to load dashboard',
       );
     }
 
-    final payload = data['data'] as Map<String, dynamic>;
+    final payload = data['data'] as Map<String, dynamic>? ??
+        <String, dynamic>{};
 
     final changed = await _cache.isChanged(CacheKeys.dashboard, payload);
     await _cache.save(CacheKeys.dashboard, payload);

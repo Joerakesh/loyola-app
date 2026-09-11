@@ -15,8 +15,8 @@ class ProfileService {
 
   Future<StudentProfile?> getCachedProfile() async {
     final data = await _cache.load(CacheKeys.profile);
-    if (data is Map<String, dynamic>) {
-      return StudentProfile.fromJson(data);
+    if (data is Map) {
+      return StudentProfile.fromJson(data.cast<String, dynamic>());
     }
     return null;
   }
@@ -26,11 +26,16 @@ class ProfileService {
       final response = await _apiClient.dio.get(ApiConstants.profile);
       final data = response.data;
 
-      if (data['status'] != 'success') {
-        throw Exception(data['message'] ?? 'Unable to load profile');
+      if (data is! Map<String, dynamic> || data['status'] != 'success') {
+        throw Exception(
+          (data is Map && data['message']?.toString().isNotEmpty == true)
+              ? data['message'].toString()
+              : 'Unable to load profile',
+        );
       }
 
-      final payload = data['data'] as Map<String, dynamic>;
+      final payload = data['data'] as Map<String, dynamic>? ??
+          <String, dynamic>{};
 
       final changed = await _cache.isChanged(CacheKeys.profile, payload);
       await _cache.save(CacheKeys.profile, payload);

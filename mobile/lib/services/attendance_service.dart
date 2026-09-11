@@ -2,7 +2,6 @@ import '../core/cache/data_cache.dart';
 import '../core/constants/api_constants.dart';
 import '../core/network/api_client.dart';
 import '../models/attendance_model.dart';
-import 'package:flutter/foundation.dart';
 
 class AttendanceService {
   AttendanceService(this._apiClient, {DataCache? cache})
@@ -15,7 +14,10 @@ class AttendanceService {
     final data = await _cache.load(CacheKeys.attendanceHourly);
     if (data is List) {
       return data
-          .map((item) => AttendanceRecord.fromJson(item as Map<String, dynamic>))
+          .whereType<Map>()
+          .map(
+            (item) => AttendanceRecord.fromJson(item.cast<String, dynamic>()),
+          )
           .toList();
     }
     return null;
@@ -30,14 +32,19 @@ class AttendanceService {
 
     final data = response.data;
 
-    if (data['status'] != 'success') {
-      throw Exception(data['message'] ?? 'Unable to load attendance');
+    if (data is! Map<String, dynamic> || data['status'] != 'success') {
+      throw Exception(
+        (data is Map && data['message']?.toString().isNotEmpty == true)
+            ? data['message'].toString()
+            : 'Unable to load attendance',
+      );
     }
 
     final payload = data['data'] as List<dynamic>? ?? [];
 
     final records = payload
-        .map((item) => AttendanceRecord.fromJson(item as Map<String, dynamic>))
+        .whereType<Map>()
+        .map((item) => AttendanceRecord.fromJson(item.cast<String, dynamic>()))
         .toList();
 
     final changed = await _cache.isChanged(
@@ -53,12 +60,13 @@ class AttendanceService {
     final response = await _apiClient.dio.get(ApiConstants.attendanceSummary);
 
     final data = response.data;
-    debugPrint('========== ATTENDANCE SUMMARY API ==========');
-    debugPrint('Status: ${response.statusCode}');
-    debugPrint('Response: ${response.data}');
-    debugPrint('=============================================');
-    if (data['status'] != 'success') {
-      throw Exception(data['message'] ?? 'Unable to load attendance summary');
+
+    if (data is! Map<String, dynamic> || data['status'] != 'success') {
+      throw Exception(
+        (data is Map && data['message']?.toString().isNotEmpty == true)
+            ? data['message'].toString()
+            : 'Unable to load attendance summary',
+      );
     }
 
     final payload = data['data'];

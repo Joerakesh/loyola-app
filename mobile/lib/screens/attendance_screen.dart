@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_colors.dart';
+import '../core/theme/responsive.dart';
 import '../models/attendance_model.dart';
 import '../services/attendance_service.dart';
 import '../widgets/app_state_views.dart';
@@ -231,7 +232,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 _buildEmptyState('No records for this period.')
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 130),
+                  padding: EdgeInsets.fromLTRB(
+                    Responsive.dp(context, 20),
+                    0,
+                    Responsive.dp(context, 20),
+                    Responsive.dp(context, 130),
+                  ),
                   sliver: SliverList.separated(
                     itemCount: displayRecords.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 14),
@@ -313,30 +319,34 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Widget _buildAttendanceRowCard(AttendanceRecord record) {
     final hours = record.hours.take(5).toList();
+    final compact = Responsive.isCompact(context);
+    final dateWidth = compact ? 78.0 : 100.0;
 
     return GlassContainer(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(Responsive.dp(context, 16)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 100,
+            width: dateWidth,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   _formatDateForDisplay(record.date),
-                  style: const TextStyle(
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
                     color: AppColors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 14),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   (record.dayOrder ?? 0) > 0
-                      ? 'Day Order ${record.dayOrder}'
+                      ? 'Day ${record.dayOrder}'
                       : 'No Schedule',
                   style: const TextStyle(
                     color: AppColors.white54,
@@ -367,6 +377,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget _buildHourBadge(AttendanceHour hour) {
     Color color;
     IconData icon;
+    final compact = Responsive.isCompact(context);
+    final badgeSize = compact ? 26.0 : 32.0;
+    final iconSize = compact ? 15.0 : 18.0;
 
     switch (hour.status) {
       case AttendanceStatus.present:
@@ -388,21 +401,21 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       children: [
         Text(
           'H${hour.hour}',
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.white54,
-            fontSize: 11,
+            fontSize: Responsive.sp(context, 11),
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
         Container(
-          width: 32,
-          height: 32,
+          width: badgeSize,
+          height: badgeSize,
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
-          child: Center(child: Icon(icon, color: color, size: 18)),
+          child: Center(child: Icon(icon, color: color, size: iconSize)),
         ),
       ],
     );
