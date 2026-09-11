@@ -1,5 +1,8 @@
-import "dotenv/config";
-import app from "./app.js";
+// import "dotenv/config";
+// import app from "./app.js";
+import express from "express";
+
+const app = express();
 
 // only for testing
 app.get("/api/health", (_req, res) => {
