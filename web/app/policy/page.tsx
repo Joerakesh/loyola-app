@@ -54,25 +54,37 @@ const POLICIES = [
         id: "privacy",
         title: "Privacy Policy",
         icon: <ShieldCheck size={18} />,
-        lastUpdated: "September 1, 2026",
+        lastUpdated: "September 15, 2026",
         content: (
             <div className="space-y-6 text-slate-600">
                 <section>
-                    <h3 className="text-lg font-bold text-slate-900">Data Collection</h3>
+                    <h3 className="text-lg font-bold text-slate-900">Information We Collect</h3>
                     <p className="mt-2 text-sm leading-relaxed">
-                        The institution collects personal data including but not limited to academic records, attendance, biometric data (where applicable), and contact information solely for educational and administrative purposes.
+                        When you log in using Google OAuth, we collect your primary Google email address and basic profile information (such as your name). We also collect and store academic data, including attendance records, internal marks, and fee payment status, strictly for educational administration.
                     </p>
                 </section>
 
                 <section>
-                    <h3 className="text-lg font-bold text-slate-900">Data Usage & Protection</h3>
+                    <h3 className="text-lg font-bold text-slate-900">How We Use Your Data</h3>
                     <p className="mt-2 text-sm leading-relaxed">
-                        Your data is encrypted and securely stored in our ERP systems. We do not share personal information with third-party organizations without explicit consent, except when required by law or accreditation bodies.
+                        The data collected is used exclusively to:
+                    </p>
+                    <ul className="mt-2 list-inside list-disc space-y-2 text-sm">
+                        <li>Authenticate your identity and secure your account access.</li>
+                        <li>Display personalized academic dashboards, attendance logs, and examination results.</li>
+                        <li>Process institutional requests, such as hostel leave approvals.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 className="text-lg font-bold text-slate-900">Information Sharing & Storage</h3>
+                    <p className="mt-2 text-sm leading-relaxed">
+                        We do not sell, rent, or share your personal data or Google user data with any third parties. All data is encrypted and securely stored in our ERP systems. Your data is retained only for the duration of your enrollment and institutional requirements.
                     </p>
                     <div className="mt-4 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                         <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
                         <p className="text-sm text-emerald-800">
-                            Your profile data, passwords, and local storage (such as document lockers) are secured using industry-standard encryption protocols.
+                            Your profile data, passwords, and local storage are secured using industry-standard encryption protocols.
                         </p>
                     </div>
                 </section>
@@ -174,8 +186,8 @@ export default function PolicyPage() {
                                     key={policy.id}
                                     onClick={() => setActiveTab(policy.id)}
                                     className={`flex items-center justify-between rounded-xl px-4 py-3 text-left transition-all ${isActive
-                                            ? "bg-red-50 text-[#8b0000] ring-1 ring-[#8b0000]/20"
-                                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                        ? "bg-red-50 text-[#8b0000] ring-1 ring-[#8b0000]/20"
+                                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">

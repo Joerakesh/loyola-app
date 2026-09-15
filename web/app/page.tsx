@@ -9,8 +9,8 @@ export default function HomePage() {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
           <div className="flex items-center gap-2 text-[#8b0000]">
             <BookOpen size={24} />
-            <span className="text-lg font-bold tracking-tight text-slate-900">
-              Campus<span className="text-[#8b0000]">ERP</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">
+              Loyola College - ERP
             </span>
           </div>
 
@@ -36,11 +36,10 @@ export default function HomePage() {
         <section className="relative overflow-hidden bg-white px-6 py-24 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
-              Your Academic Life, <br />
-              <span className="text-[#8b0000]">Simplified.</span>
+              Loyola College - ERP
             </h1>
-            <p className="mt-6 text-lg leading-8 text-slate-600">
-              Welcome to the official Student Portal. This application is designed to help students and faculty seamlessly manage their daily academic activities. Track your attendance, monitor internal marks, request hostel leaves, and view fee structures all in one secure platform.
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+              Manage your academic journey, track daily attendance, view results, and monitor fee payments securely.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
