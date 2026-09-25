@@ -4,11 +4,13 @@ import {
   BarChart3,
   BookOpen,
   CalendarDays,
+  CalendarRange,
   CircleUserRound,
   CreditCard,
   GraduationCap,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   Menu,
   X,
 } from "lucide-react";
@@ -23,6 +25,16 @@ const navigation = [
     label: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    label: "Announcements",
+    href: "/announcements",
+    icon: Megaphone,
+  },
+  {
+    label: "Calendar",
+    href: "/calendar",
+    icon: CalendarRange,
   },
   {
     label: "Attendance",

@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test:login": "tsx scripts/test-login.ts"
+    "test:login": "tsx scripts/test-login.ts",
+    "test:endpoints": "tsx scripts/test-endpoints.ts"
   },
   "keywords": [],
   "type": "module",

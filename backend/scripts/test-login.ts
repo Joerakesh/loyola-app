@@ -73,8 +73,9 @@ try {
 
   await exchangeForIdToken();
 
-  await getFirebaseAuth().setCustomUserClaims(testUid, { isE2ETest: true });
-  await getFirebaseAuth().updateUser(testUid, {
+  const auth = await getFirebaseAuth();
+  await auth.setCustomUserClaims(testUid, { isE2ETest: true });
+  await auth.updateUser(testUid, {
     email: testEmail,
     displayName: testName,
   });
@@ -126,11 +127,13 @@ try {
     process.exit(1);
   }
 
-  await getFirebaseAuth().deleteUser(testUid).catch(() => {});
+  const cleanupAuth = await getFirebaseAuth();
+  await cleanupAuth.deleteUser(testUid).catch(() => {});
 
   console.log("\nAll login checks passed.");
 } catch (error: any) {
   console.error("\n✗ Test error:", error.message ?? error);
-  await getFirebaseAuth().deleteUser(testUid).catch(() => {});
+  const cleanupAuth = await getFirebaseAuth().catch(() => undefined);
+  await cleanupAuth?.deleteUser(testUid).catch(() => {});
   process.exit(1);
 }

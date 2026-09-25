@@ -8,27 +8,34 @@ import {
     CheckCircle2,
     Clock,
     CreditCard,
+    Download,
+    FileText,
     GraduationCap,
+    Megaphone,
     TrendingUp,
     UserRound,
 } from "lucide-react";
 
 import AppShell from "../../components/layout/app-shell";
-import {
-    getAttendanceSummary,
-    getDashboard,
-} from "../../lib/api/erp";
+import { getBootstrap } from "../../lib/api/erp";
 
 import type {
-    AttendanceSummary,
-    DashboardData,
+    AttendanceDay,
+    AttendanceHour,
+    BootstrapData,
+    WebsiteAnnouncement,
 } from "../../types/api";
 
-export default function DashboardPage() {
-    const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-    const [attendance, setAttendance] =
-        useState<AttendanceSummary | null>(null);
+function formatDay(dateKey: string): string {
+    return new Date(`${dateKey}T00:00:00`).toLocaleDateString("en-IN", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+    });
+}
 
+export default function DashboardPage() {
+    const [data, setData] = useState<BootstrapData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -38,14 +45,15 @@ export default function DashboardPage() {
                 setLoading(true);
                 setError(null);
 
-                const [dashboardResponse, attendanceResponse] =
-                    await Promise.all([
-                        getDashboard(),
-                        getAttendanceSummary(),
-                    ]);
+                // Single call — LRMS session is cached server-side, so this is
+                // one login + parallel data fetches, then one round trip here.
+                const response = await getBootstrap();
 
-                setDashboard(dashboardResponse.data);
-                setAttendance(attendanceResponse.data);
+                if (response.status !== "success") {
+                    throw new Error("Unable to load dashboard");
+                }
+
+                setData(response.data);
             } catch (err) {
                 console.error(err);
 
@@ -86,7 +94,10 @@ export default function DashboardPage() {
         );
     }
 
-    const student = dashboard?.student;
+    const student = data?.student;
+    const summary = data?.attendance.summary;
+    const last6Days = data?.attendance.last6Days ?? [];
+    const announcements = data?.announcements ?? [];
 
     return (
         <AppShell>
@@ -103,7 +114,7 @@ export default function DashboardPage() {
                             </h1>
 
                             <p className="mt-2 text-slate-500">
-                                Here's your academic overview.
+                                Here&apos;s your academic overview.
                             </p>
                         </div>
 
@@ -117,25 +128,21 @@ export default function DashboardPage() {
                 <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <StatCard
                         title="Attendance"
-                        value={
-                            attendance
-                                ? `${attendance.attendancePercentage}%`
-                                : "—"
-                        }
+                        value={summary ? `${summary.attendancePercentage}%` : "—"}
                         description="Overall attendance"
                         icon={<Activity size={20} />}
                     />
 
                     <StatCard
                         title="Classes Present"
-                        value={attendance ? String(attendance.present) : "—"}
+                        value={summary ? String(summary.present) : "—"}
                         description="Recorded classes"
                         icon={<CheckCircle2 size={20} />}
                     />
 
                     <StatCard
                         title="Classes Absent"
-                        value={attendance ? String(attendance.absent) : "—"}
+                        value={summary ? String(summary.absent) : "—"}
                         description="Recorded absences"
                         icon={<Clock size={20} />}
                     />
@@ -143,8 +150,8 @@ export default function DashboardPage() {
                     <StatCard
                         title="Fees Paid"
                         value={
-                            dashboard
-                                ? `₹${dashboard.fees.totalPaid.toLocaleString("en-IN")}`
+                            data
+                                ? `₹${data.fees.totalPaid.toLocaleString("en-IN")}`
                                 : "—"
                         }
                         description="Total paid"
@@ -162,9 +169,7 @@ export default function DashboardPage() {
                                 </div>
 
                                 <div className="mt-4 text-5xl font-bold">
-                                    {attendance
-                                        ? `${attendance.attendancePercentage}%`
-                                        : "—"}
+                                    {summary ? `${summary.attendancePercentage}%` : "—"}
                                 </div>
 
                                 <p className="mt-2 text-sm text-white/70">
@@ -183,7 +188,7 @@ export default function DashboardPage() {
                                     className="h-full rounded-full bg-white transition-all"
                                     style={{
                                         width: `${Math.min(
-                                            attendance?.attendancePercentage ?? 0,
+                                            summary?.attendancePercentage ?? 0,
                                             100,
                                         )}%`,
                                     }}
@@ -239,6 +244,12 @@ export default function DashboardPage() {
                     </div>
                 </section>
 
+                <section className="grid gap-6 lg:grid-cols-2">
+                    <RecentAttendance days={last6Days} />
+
+                    <AnnouncementsPanel announcements={announcements} />
+                </section>
+
                 <section>
                     <div className="mb-4 flex items-center justify-between">
                         <div>
@@ -281,6 +292,159 @@ export default function DashboardPage() {
                 </section>
             </div>
         </AppShell>
+    );
+}
+
+function RecentAttendance({ days }: { days: AttendanceDay[] }) {
+    return (
+        <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="font-semibold">Recent attendance</h2>
+                    <p className="text-xs text-slate-500">
+                        Your last {days.length || "few"} class days
+                    </p>
+                </div>
+
+                <a
+                    href="/attendance"
+                    className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                >
+                    View all
+                </a>
+            </div>
+
+            {days.length === 0 ? (
+                <div className="mt-6 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+                    No recent attendance recorded yet.
+                </div>
+            ) : (
+                <ul className="mt-5 divide-y divide-slate-100">
+                    {days.map((day) => (
+                        <li
+                            key={day.date}
+                            className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
+                        >
+                            <div className="min-w-0">
+                                <div className="font-medium text-slate-900">
+                                    {formatDay(day.date)}
+                                </div>
+                                <div className="mt-0.5 text-xs text-slate-500">
+                                    {day.dayOrder !== null
+                                        ? `Day-${day.dayOrder}`
+                                        : "No day order"}
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                                {day.hours.map((hour) => (
+                                    <HourBadge key={hour.hour} hour={hour} />
+                                ))}
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}
+
+function HourBadge({ hour }: { hour: AttendanceHour }) {
+    const styles: Record<AttendanceHour["status"], string> = {
+        present: "bg-emerald-100 text-emerald-700",
+        absent: "bg-red-100 text-red-600",
+        not_scheduled: "bg-slate-100 text-slate-300",
+    };
+
+    const label: Record<AttendanceHour["status"], string> = {
+        present: "P",
+        absent: "A",
+        not_scheduled: "·",
+    };
+
+    return (
+        <span
+            title={`Hour ${hour.hour}: ${hour.status.replace("_", " ")}`}
+            className={`inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold ${styles[hour.status]}`}
+        >
+            {label[hour.status]}
+        </span>
+    );
+}
+
+function AnnouncementsPanel({
+    announcements,
+}: {
+    announcements: WebsiteAnnouncement[];
+}) {
+    const visible = announcements.slice(0, 4);
+
+    return (
+        <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="rounded-xl bg-[#8b0000]/5 p-3 text-[#8b0000]">
+                        <Megaphone size={21} />
+                    </div>
+
+                    <div>
+                        <h2 className="font-semibold">Announcements</h2>
+                        <p className="text-xs text-slate-500">
+                            Latest from the college website
+                        </p>
+                    </div>
+                </div>
+
+                <a
+                    href="/announcements"
+                    className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                >
+                    View all
+                </a>
+            </div>
+
+            {visible.length === 0 ? (
+                <div className="mt-6 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+                    No announcements right now.
+                </div>
+            ) : (
+                <ul className="mt-5 space-y-3">
+                    {visible.map((item) => (
+                        <li
+                            key={item.id}
+                            className="flex items-start gap-3 rounded-2xl border border-slate-100 p-3 transition hover:border-slate-200"
+                        >
+                            <div className="rounded-lg bg-red-50 p-2 text-[#8b0000]">
+                                <FileText size={16} />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                                <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="line-clamp-2 text-sm font-medium leading-snug text-slate-900 transition hover:text-[#8b0000]"
+                                >
+                                    {item.title}
+                                </a>
+
+                                {item.attachment && (
+                                    <a
+                                        href={item.attachment.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-slate-700"
+                                    >
+                                        <Download size={13} />
+                                        PDF
+                                    </a>
+                                )}
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
     );
 }
 

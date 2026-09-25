@@ -2,6 +2,7 @@ import { apiFetch } from "./client";
 import { getToken } from "../auth/session";
 import type {
   AttendanceSummaryResponse,
+  BootstrapResponse,
   DashboardResponse,
 } from "../../types/api";
 
@@ -31,6 +32,17 @@ export async function getAttendanceSummary(): Promise<AttendanceSummaryResponse>
 
 export async function getAttendanceHourly() {
   return apiFetch("/attendance/hourly", {
+    headers: authHeaders(),
+  });
+}
+
+/**
+ * One call that returns everything the home screen needs: student profile +
+ * fees, attendance summary, the 6 most recent class days, and the current
+ * college announcements.
+ */
+export async function getBootstrap(): Promise<BootstrapResponse> {
+  return apiFetch<BootstrapResponse>("/bootstrap", {
     headers: authHeaders(),
   });
 }

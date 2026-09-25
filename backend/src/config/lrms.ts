@@ -2,6 +2,11 @@ export const LRMS_CONFIG = {
   baseUrl:
     process.env.LRMS_BASE_URL ?? "https://lrms.loyolacollege.edu/studenterp",
 
+  // How long one authenticated LRMS session is reused in memory before a
+  // fresh login is performed. Tune below the college server's real session
+  // lifetime (start ~45 min).
+  sessionTtlSeconds: Number(process.env.LRMS_SESSION_TTL_SECONDS ?? 2700),
+
   endpoints: {
     login: "/ajax/validateLogin.jsp",
 
