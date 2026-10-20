@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Award, BookOpenCheck, ChartNoAxesColumn, RefreshCw } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
 import { getInternalMarks, type InternalMarkRecord } from "@/lib/api/erp";
@@ -11,12 +11,12 @@ export default function MarksPage() {
   const [error, setError] = useState("");
   const [semester, setSemester] = useState("all");
 
-  async function load() {
+  const load = useCallback(async () => {
     try { setLoading(true); setError(""); const response = await getInternalMarks(); setMarks(response.data ?? []); }
     catch (e) { setError(e instanceof Error ? e.message : "Unable to load internal marks."); }
     finally { setLoading(false); }
-  }
-  useEffect(() => { void load(); }, []);
+  }, []);
+  useEffect(() => { void load(); }, [load]);
   const semesters = useMemo(() => Array.from(new Set(marks.map(m => m.semester).filter(Boolean))).sort((a,b) => a-b), [marks]);
   const filtered = marks.filter(m => semester === "all" || String(m.semester) === semester);
   const available = marks.filter(m => m.marksAvailable);
