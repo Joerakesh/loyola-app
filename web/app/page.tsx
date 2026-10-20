@@ -18,11 +18,11 @@ export default function HomePage(){
    <div className="pointer-events-none absolute -right-32 top-4 h-96 w-96 rounded-full bg-[#d9f06a]/25 blur-3xl"/>
    <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1fr_.88fr]">
     <div>
-     <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#e4dfd5] bg-white/80 px-3.5 py-2 text-xs font-semibold text-stone-600"><Sparkles size={14} className="text-[#8b0000}"/> Your campus, connected</div>
+     <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#e4dfd5] bg-white/80 px-3.5 py-2 text-xs font-semibold text-stone-600"><Sparkles size={14} className="text-[#8b0000]"/> Your campus, connected</div>
      <h1 className="max-w-2xl text-4xl font-semibold leading-[1.08] tracking-[-.045em] sm:text-6xl lg:text-[68px]">Make space for <span className="text-[#8b0000]">what matters.</span></h1>
      <p className="mt-6 max-w-xl text-base leading-7 text-stone-600 sm:text-lg sm:leading-8">Your academic essentials, brought together in one clear, personal student portal—from attendance and marks to subjects and your timetable.</p>
      <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/login" className="app-button-primary min-h-12 px-6 text-sm">Open student portal <ArrowRight size={17}/></Link><Link href="/policy" className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[#ded9d0] bg-white px-5 text-sm font-semibold text-stone-700 transition hover:bg-stone-50">Privacy &amp; policies</Link></div>
-     <div className="mt-9 flex items-center gap-3 text-xs text-stone-500"><ShieldCheck size={17} className="text-[#8b0000}"/> Secure access to your student account</div>
+     <div className="mt-9 flex items-center gap-3 text-xs text-stone-500"><ShieldCheck size={17} className="text-[#8b0000]"/> Secure access to your student account</div>
     </div>
     <div className="relative mx-auto w-full max-w-[490px]">
      <div className="absolute -inset-4 rounded-[36px] bg-[#e7e3d9] rotate-[-3deg]"/>
