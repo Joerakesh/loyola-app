@@ -8,8 +8,8 @@ import type { DashboardData } from "@/types/api";
 
 export default function FeesPage(){
  const [dashboard,setDashboard]=useState<DashboardData|null>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
- const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getDashboard();setDashboard(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load fee information.")}finally{setLoading(false)}}
- useEffect(()=>{void load()},[]);
+ const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getDashboard();setDashboard(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load fee information.")}finally{setLoading(false)}},[]);
+ useEffect(()=>{void load()},[load]);
  const paid=dashboard?.fees?.totalPaid;
  return <AppShell><div className="space-y-7">
   <header><p className="app-kicker">Student finance</p><h1 className="app-page-title mt-2">Fees & payments</h1><p className="app-muted-text mt-2 max-w-xl text-sm leading-6">A simple overview of the fee information currently available from your student portal.</p></header>
