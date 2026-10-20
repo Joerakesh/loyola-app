@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Activity, ArrowUpRight, Bell, BookOpen, CalendarDays, CheckCircle2, Clock3, CreditCard, GraduationCap, Megaphone, RefreshCw, TrendingUp, UserRound, ClipboardList } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
 import { getAnnouncements, getAssignments, getAttendanceSummary, getDashboard, getNotifications, getReminders, getSchedules, type PlatformRecord } from "@/lib/api/erp";
@@ -18,7 +18,7 @@ export default function DashboardPage() {
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState("");
 
-  async function load(){
+  const load = useCallback(async () => {
     setLoading(true);setError("");
     const [dr,ar,asr,anr,sr,rr,nr]=await Promise.all([settle(getDashboard()),settle(getAttendanceSummary()),settle(getAssignments()),settle(getAnnouncements()),settle(getSchedules()),settle(getReminders()),settle(getNotifications())]);
     if(dr.ok)setDashboard(dr.value.data);else setError(dr.error instanceof Error?dr.error.message:"Unable to load student overview.");
@@ -29,10 +29,10 @@ export default function DashboardPage() {
     if(rr.ok)setReminders(rr.value.data??[]);
     if(nr.ok)setNotifications(nr.value.data??[]);
     setLoading(false);
-  }
-  useEffect(()=>{void load()},[]);
+  }, []);
+  useEffect(()=>{void load()},[load]);
   const student=dashboard?.student;
-  const openAssignments=assignments.filter(a=>!a.isCompleted);
+  const openAssignments=assignments.filter(a=>!a.isCompleted&&!a.isDone);
   const unread=notifications.filter(n=>!n.readAt).length+announcements.filter(a=>!a.readAt).length;
 
   return <AppShell><div className="space-y-7">
