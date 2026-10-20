@@ -1,12 +1,23 @@
-import AppShell from "../../components/layout/app-shell";
+"use client";
 
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CalendarDays, Clock3, MapPin, RefreshCw } from "lucide-react";
+import AppShell from "@/components/layout/app-shell";
+import { getSchedules, type PlatformRecord } from "@/lib/api/erp";
+
+const week = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 export default function TimetablePage() {
-  return (
-    <AppShell>
-      <h1 className="text-3xl font-bold">Timetable</h1>
-      <p className="mt-2 text-slate-500">
-        Your timetable will appear here.
-      </p>
-    </AppShell>
-  );
+  const [schedules,setSchedules]=useState<PlatformRecord[]>([]);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState("");
+  const [selected,setSelected]=useState("all");
+  const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getSchedules();setSchedules(r.data??[])}catch(e){setError(e instanceof Error?e.message:"Unable to load your timetable.")}finally{setLoading(false)}},[]);
+  useEffect(()=>{void load()},[load]);
+  const filtered=useMemo(()=>schedules.filter(s=>selected==="all"||s.dayOfWeek?.toLowerCase()===selected.toLowerCase()).sort((a,b)=>(a.dayOfWeek||"").localeCompare(b.dayOfWeek||"")||(a.startTime||"").localeCompare(b.startTime||"")),[schedules,selected]);
+  return <AppShell><div className="space-y-7">
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="app-kicker">Plan your week</p><h1 className="app-page-title mt-2">Timetable</h1><p className="app-muted-text mt-2 max-w-xl text-sm leading-6">Your saved class and study schedule, organised by day and time.</p></div><label className="text-sm"><span className="app-muted-text mb-1.5 block text-xs font-semibold">Show day</span><select className="app-input h-11 min-w-44 px-3 text-sm" value={selected} onChange={e=>setSelected(e.target.value)}><option value="all">All days</option>{week.map(d=><option key={d} value={d}>{d}</option>)}</select></label></header>
+    <section className="grid gap-4 sm:grid-cols-3"><div className="app-card p-5"><p className="app-muted-text text-sm">Scheduled items</p><p className="app-stat-value mt-3">{loading?"—":schedules.length}</p></div><div className="app-card p-5"><p className="app-muted-text text-sm">Days planned</p><p className="app-stat-value mt-3">{loading?"—":new Set(schedules.map(s=>s.dayOfWeek).filter(Boolean)).size}</p></div><div className="app-card p-5"><p className="app-muted-text text-sm">Upcoming view</p><p className="mt-3 text-sm font-semibold">Weekly schedule</p><p className="app-muted-text mt-1 text-xs">Based on your saved entries</p></div></section>
+    {loading?<div className="app-card flex min-h-48 items-center justify-center gap-3 app-muted-text"><span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--brand)]"/>Loading timetable…</div>:error?<div className="app-card p-6"><p className="font-semibold">Timetable unavailable</p><p className="app-muted-text mt-1 text-sm">{error}</p><button onClick={()=>void load()} className="app-button-primary mt-4 min-h-10 px-4 text-sm"><RefreshCw size={15}/>Try again</button></div>:filtered.length===0?<div className="app-empty"><CalendarDays size={28} className="mx-auto mb-3 opacity-60"/><p className="font-semibold text-[var(--foreground)]">{selected==="all"?"Your timetable is empty":"Nothing scheduled for "+selected}</p><p className="mt-1 text-sm">No schedule entries were returned by the backend. No classes have been invented or assumed.</p></div>:
+    <section className="space-y-4">{(selected==="all"?week:[selected]).map(day=>{const entries=filtered.filter(s=>s.dayOfWeek?.toLowerCase()===day.toLowerCase());if(!entries.length)return null;return <div key={day} className="app-card overflow-hidden"><div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4"><h2 className="font-semibold">{day}</h2><span className="app-pill">{entries.length} item{entries.length===1?"":"s"}</span></div><div className="divide-y divide-[var(--line)]">{entries.map((s,i)=><article key={s._id||i} className="flex gap-4 p-5"><div className="flex w-16 shrink-0 flex-col items-center justify-center rounded-xl bg-[var(--surface-soft)] px-2 py-3 text-center"><Clock3 size={16} className="mb-2 text-[var(--brand)]"/><span className="text-xs font-semibold">{s.startTime||"Time TBA"}</span></div><div className="min-w-0 flex-1"><h3 className="font-semibold">{s.title||"Scheduled activity"}</h3><p className="app-muted-text mt-1 text-sm">{s.startTime||"—"}{s.endTime? ` – ${s.endTime}`:""}</p>{s.location&&<p className="app-muted-text mt-2 flex items-center gap-1.5 text-xs"><MapPin size={14}/>{s.location}</p>}</div></article>)}</div></div>})}</section>}
+  </div></AppShell>;
 }

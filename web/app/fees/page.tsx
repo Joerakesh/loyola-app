@@ -1,12 +1,20 @@
-import AppShell from "../../components/layout/app-shell";
+"use client";
 
-export default function FeesPage() {
-  return (
-    <AppShell>
-      <h1 className="text-3xl font-bold">Fees</h1>
-      <p className="mt-2 text-slate-500">
-        Fee information will appear here.
-      </p>
-    </AppShell>
-  );
+import { useCallback, useEffect, useState } from "react";
+import { BadgeIndianRupee, FileCheck2, ReceiptText, ShieldCheck, RefreshCw } from "lucide-react";
+import AppShell from "@/components/layout/app-shell";
+import { getDashboard } from "@/lib/api/erp";
+import type { DashboardData } from "@/types/api";
+
+export default function FeesPage(){
+ const [dashboard,setDashboard]=useState<DashboardData|null>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
+ const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getDashboard();setDashboard(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load fee information.")}finally{setLoading(false)}},[]);
+ useEffect(()=>{void load()},[load]);
+ const paid=dashboard?.fees?.totalPaid;
+ return <AppShell><div className="space-y-7">
+  <header><p className="app-kicker">Student finance</p><h1 className="app-page-title mt-2">Fees & payments</h1><p className="app-muted-text mt-2 max-w-xl text-sm leading-6">A simple overview of the fee information currently available from your student portal.</p></header>
+  {loading?<div className="app-card flex min-h-48 items-center justify-center gap-3 app-muted-text"><span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--brand)]"/>Loading fee information…</div>:error?<div className="app-card p-6"><p className="font-semibold">Fee information unavailable</p><p className="app-muted-text mt-1 text-sm">{error}</p><button onClick={()=>void load()} className="app-button-primary mt-4 min-h-10 px-4 text-sm"><RefreshCw size={15}/>Retry</button></div>:<><section className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]"><div className="relative overflow-hidden rounded-[24px] bg-[#72080c] p-7 text-white sm:p-9"><div className="relative z-10"><span className="inline-flex items-center gap-2 text-xs font-semibold text-white/70"><BadgeIndianRupee size={16}/>Total payments recorded</span><p className="mt-5 text-4xl font-bold tracking-tight sm:text-5xl">{typeof paid==="number"?paid.toLocaleString("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}):"Not available"}</p><p className="mt-3 max-w-md text-sm leading-6 text-white/70">This amount is the total-paid figure supplied by the dashboard API, not a statement of outstanding balance.</p></div><div className="pointer-events-none absolute -right-10 -top-16 h-64 w-64 rounded-full border border-white/10 shadow-[0_0_0_32px_rgba(255,255,255,.03),0_0_0_70px_rgba(255,255,255,.025)]"/></div><div className="app-card p-6"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]"><ShieldCheck size={21}/></div><h2 className="mt-5 font-semibold">Verified source</h2><p className="app-muted-text mt-2 text-sm leading-6">Figures on this page come from your authenticated Loyola backend. No estimated due amount or payment history is fabricated.</p></div></section>
+  <section className="app-card p-5 sm:p-6"><div className="flex items-start gap-4"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]"><ReceiptText size={20}/></div><div><h2 className="app-section-title">Payment history</h2><p className="app-muted-text mt-1 text-sm leading-6">The current backend exposes a total-paid summary only. It does not expose itemised receipts, fee categories, due dates or balances, so those details are not shown as if they were real.</p><span className="app-pill mt-4">Summary only</span></div></div></section>
+  <section className="app-card p-5 sm:p-6"><div className="flex items-start gap-4"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]"><FileCheck2 size={20}/></div><div><h2 className="app-section-title">Need a detailed statement?</h2><p className="app-muted-text mt-1 text-sm leading-6">Use the official college finance channel for an itemised statement or confirmation of outstanding fees. This portal currently has no dedicated fee-details endpoint.</p></div></div></section></>}
+ </div></AppShell>
 }
