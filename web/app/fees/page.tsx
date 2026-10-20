@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BadgeIndianRupee, FileCheck2, ReceiptText, ShieldCheck, RefreshCw } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
 import { getDashboard } from "@/lib/api/erp";
@@ -8,7 +8,7 @@ import type { DashboardData } from "@/types/api";
 
 export default function FeesPage(){
  const [dashboard,setDashboard]=useState<DashboardData|null>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
- async function load(){try{setLoading(true);setError("");const r=await getDashboard();setDashboard(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load fee information.")}finally{setLoading(false)}}
+ const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getDashboard();setDashboard(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load fee information.")}finally{setLoading(false)}}
  useEffect(()=>{void load()},[]);
  const paid=dashboard?.fees?.totalPaid;
  return <AppShell><div className="space-y-7">
