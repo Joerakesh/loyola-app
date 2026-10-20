@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Clock3, MapPin, RefreshCw } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
 import { getSchedules, type PlatformRecord } from "@/lib/api/erp";
@@ -11,7 +11,7 @@ export default function TimetablePage() {
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState("");
   const [selected,setSelected]=useState("all");
-  async function load(){try{setLoading(true);setError("");const r=await getSchedules();setSchedules(r.data??[])}catch(e){setError(e instanceof Error?e.message:"Unable to load your timetable.")}finally{setLoading(false)}}
+  const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getSchedules();setSchedules(r.data??[])}catch(e){setError(e instanceof Error?e.message:"Unable to load your timetable.")}finally{setLoading(false)}}
   useEffect(()=>{void load()},[]);
   const filtered=useMemo(()=>schedules.filter(s=>selected==="all"||s.dayOfWeek?.toLowerCase()===selected.toLowerCase()).sort((a,b)=>(a.dayOfWeek||"").localeCompare(b.dayOfWeek||"")||(a.startTime||"").localeCompare(b.startTime||"")),[schedules,selected]);
   return <AppShell><div className="space-y-7">
