@@ -20,14 +20,14 @@ export default function DashboardPage() {
 
   async function load(){
     setLoading(true);setError("");
-    const results=await Promise.allSettled([getDashboard(),getAttendanceSummary(),getAssignments(),getAnnouncements(),getSchedules(),getReminders(),getNotifications()]);
-    if(results[0].status==="fulfilled")setDashboard(results[0].value.data);else setError(results[0].reason instanceof Error?results[0].reason.message:"Unable to load student overview.");
-    if(results[1].status==="fulfilled")setAttendance(results[1].value.data);
-    if(results[2].status==="fulfilled")setAssignments(results[2].value.data??[]);
-    if(results[3].status==="fulfilled")setAnnouncements(results[3].value.data??[]);
-    if(results[4].status==="fulfilled")setSchedules(results[4].value.data??[]);
-    if(results[5].status==="fulfilled")setReminders(results[5].value.data??[]);
-    if(results[6].status==="fulfilled")setNotifications(results[6].value.data??[]);
+    const [dr,ar,asr,anr,sr,rr,nr]=await Promise.all([settle(getDashboard()),settle(getAttendanceSummary()),settle(getAssignments()),settle(getAnnouncements()),settle(getSchedules()),settle(getReminders()),settle(getNotifications())]);
+    if(dr.ok)setDashboard(dr.value.data);else setError(dr.error instanceof Error?dr.error.message:"Unable to load student overview.");
+    if(ar.ok)setAttendance(ar.value.data);
+    if(asr.ok)setAssignments(asr.value.data??[]);
+    if(anr.ok)setAnnouncements(anr.value.data??[]);
+    if(sr.ok)setSchedules(sr.value.data??[]);
+    if(rr.ok)setReminders(rr.value.data??[]);
+    if(nr.ok)setNotifications(nr.value.data??[]);
     setLoading(false);
   }
   useEffect(()=>{void load()},[]);
@@ -59,7 +59,7 @@ export default function DashboardPage() {
     <section><div className="mb-4"><h2 className="app-section-title">Your academic space</h2><p className="app-muted-text mt-1 text-sm">Jump directly to a section.</p></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><QuickLink href="/subjects" icon={<BookOpen size={19}/>} title="Subjects" text="Courses, credits and faculty"/><QuickLink href="/marks" icon={<GraduationCap size={19}/>} title="Internal marks" text="Published assessment results"/><QuickLink href="/fees" icon={<CreditCard size={19}/>} title="Fees" text="Recorded payment summary"/><QuickLink href="/timetable" icon={<CalendarDays size={19}/>} title="Timetable" text="Your saved weekly schedule"/></div></section>
   </div></AppShell>;
 }
-function Metric({icon,label,value,note,href}:{icon:React.ReactNode;label:string;value:string;note:string;href:string}){return <Link href={href} className="app-card app-card-hover block p-5"><div className="flex items-center justify-between gap-3"><span className="app-muted-text text-sm">{label}</span><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{icon}</span></div><p className="app-stat-value mt-4">{value}</p><p className="app-muted-text mt-2 text-xs">{note}</p></Link>}
+async function settle<T>(promise:Promise<T>):Promise<{ok:true;value:T}|{ok:false;error:unknown}>{try{return {ok:true,value:await promise}}catch(error){return {ok:false,error}}}\nfunction Metric({icon,label,value,note,href}:{icon:React.ReactNode;label:string;value:string;note:string;href:string}){return <Link href={href} className="app-card app-card-hover block p-5"><div className="flex items-center justify-between gap-3"><span className="app-muted-text text-sm">{label}</span><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{icon}</span></div><p className="app-stat-value mt-4">{value}</p><p className="app-muted-text mt-2 text-xs">{note}</p></Link>}
 function Info({label,value}:{label:string;value?:string|null}){return <div className="flex items-start justify-between gap-4 text-sm"><span className="app-muted-text">{label}</span><span className="max-w-[65%] break-words text-right font-medium">{value||"—"}</span></div>}
 function QuickLink({href,icon,title,text}:{href:string;icon:React.ReactNode;title:string;text:string}){return <Link href={href} className="app-card app-card-hover flex items-start gap-3 p-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{icon}</span><span><span className="block text-sm font-semibold">{title}</span><span className="app-muted-text mt-1 block text-xs leading-5">{text}</span></span><ArrowUpRight size={15} className="app-muted-text ml-auto shrink-0"/></Link>}
 function PanelLoading(){return <div className="p-6"><div className="h-4 w-2/3 animate-pulse rounded bg-[var(--surface-soft)]"/><div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-[var(--surface-soft)]"/></div>}
