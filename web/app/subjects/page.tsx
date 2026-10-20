@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BookOpen, Search, Users, Layers3, RefreshCw } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
 import { getSubjects, type SubjectRecord } from "@/lib/api/erp";
@@ -11,12 +11,12 @@ export default function SubjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     try { setLoading(true); setError(""); const response = await getSubjects(); setSubjects(response.data ?? []); }
     catch (e) { setError(e instanceof Error ? e.message : "Unable to load subjects."); }
     finally { setLoading(false); }
-  }
-  useEffect(() => { void load(); }, []);
+  }, []);
+  useEffect(() => { void load(); }, [load]);
 
   const filtered = useMemo(() => subjects.filter(s => [s.course_title, s.course_code, s.faculty, String(s.semester)].join(" ").toLowerCase().includes(search.toLowerCase())), [subjects, search]);
   const credits = subjects.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
