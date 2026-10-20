@@ -7,8 +7,8 @@ import { getStudentProfile, type StudentProfile } from "@/lib/api/erp";
 
 export default function ProfilePage(){
  const [profile,setProfile]=useState<StudentProfile|null>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
- const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getStudentProfile();setProfile(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load your profile.")}finally{setLoading(false)}}
- useEffect(()=>{void load()},[]);
+ const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getStudentProfile();setProfile(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load your profile.")}finally{setLoading(false)}},[]);
+ useEffect(()=>{void load()},[load]);
  const initials=profile?.name?.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toUpperCase()||"LC";
  return <AppShell><div className="space-y-7">
   <header><p className="app-kicker">Your account</p><h1 className="app-page-title mt-2">Student profile</h1><p className="app-muted-text mt-2 text-sm leading-6">Your academic identity as returned by the Loyola ERP.</p></header>
