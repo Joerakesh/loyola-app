@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { UserRound, Mail, Phone, GraduationCap, Building2, BadgeCheck, RefreshCw, Fingerprint } from "lucide-react";
+import { UserRound, Phone, GraduationCap, Building2, BadgeCheck, RefreshCw, Fingerprint } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
 import { getStudentProfile, type StudentProfile } from "@/lib/api/erp";
 
