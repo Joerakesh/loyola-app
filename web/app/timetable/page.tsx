@@ -11,8 +11,8 @@ export default function TimetablePage() {
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState("");
   const [selected,setSelected]=useState("all");
-  const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getSchedules();setSchedules(r.data??[])}catch(e){setError(e instanceof Error?e.message:"Unable to load your timetable.")}finally{setLoading(false)}}
-  useEffect(()=>{void load()},[]);
+  const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getSchedules();setSchedules(r.data??[])}catch(e){setError(e instanceof Error?e.message:"Unable to load your timetable.")}finally{setLoading(false)}},[]);
+  useEffect(()=>{void load()},[load]);
   const filtered=useMemo(()=>schedules.filter(s=>selected==="all"||s.dayOfWeek?.toLowerCase()===selected.toLowerCase()).sort((a,b)=>(a.dayOfWeek||"").localeCompare(b.dayOfWeek||"")||(a.startTime||"").localeCompare(b.startTime||"")),[schedules,selected]);
   return <AppShell><div className="space-y-7">
     <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="app-kicker">Plan your week</p><h1 className="app-page-title mt-2">Timetable</h1><p className="app-muted-text mt-2 max-w-xl text-sm leading-6">Your saved class and study schedule, organised by day and time.</p></div><label className="text-sm"><span className="app-muted-text mb-1.5 block text-xs font-semibold">Show day</span><select className="app-input h-11 min-w-44 px-3 text-sm" value={selected} onChange={e=>setSelected(e.target.value)}><option value="all">All days</option>{week.map(d=><option key={d} value={d}>{d}</option>)}</select></label></header>
