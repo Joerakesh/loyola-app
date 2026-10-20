@@ -1,16 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signInWithPopup } from "firebase/auth";
 import { firebaseAuth, googleProvider } from "@/lib/firebase";
 import { loginWithGoogle } from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
-import { ArrowRight, GraduationCap, Loader2, ShieldCheck } from "lucide-react";
+import { ArrowRight, GraduationCap, Loader2, ShieldCheck, Moon, Sun } from "lucide-react";
 
 export default function LoginPage() {
- const router=useRouter(); const [loading,setLoading]=useState(false); const [error,setError]=useState("");
+ const router=useRouter(); const [loading,setLoading]=useState(false); const [error,setError]=useState(""); const [theme,setTheme]=useState<"light"|"dark">("light");\n useEffect(()=>{const saved=window.localStorage.getItem("loyola.theme");const next=saved==="dark"||saved==="light"?saved:window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=next;setTheme(next)},[]);\n function toggleTheme(){const next=theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;window.localStorage.setItem("loyola.theme",next);setTheme(next)}
  async function handleGoogleLogin(){try{setLoading(true);setError("");const result=await signInWithPopup(firebaseAuth,googleProvider);const idToken=await result.user.getIdToken();const user=await loginWithGoogle(idToken);router.replace(user.erpLinked?"/dashboard":"/link-erp")}catch(error){console.error(error);setError("Unable to sign in with Google. Please try again.")}finally{setLoading(false)}}
  return <main className="login-page relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-12">
-  <div className="login-orb login-orb-one"/><div className="login-orb login-orb-two"/>
+  <button type="button" onClick={toggleTheme} className="app-icon-button fixed right-5 top-5 z-20" aria-label={theme==="dark"?"Switch to light theme":"Switch to dark theme"} title={theme==="dark"?"Light theme":"Dark theme"}>{theme==="dark"?<Sun size={18}/>:<Moon size={18}/>}</button>\n  <div className="login-orb login-orb-one"/><div className="login-orb login-orb-two"/>
   <div className="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-[30px] border border-white/70 bg-white shadow-[0_28px_100px_rgba(55,35,25,.12)] md:grid-cols-[1.05fr_.95fr]">
    <section className="login-story relative hidden min-h-[590px] flex-col justify-between overflow-hidden p-10 text-white md:flex lg:p-14">
     <div className="relative z-10 flex items-center gap-3"><div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/10"><GraduationCap size={26}/></div><div><p className="text-sm font-bold tracking-wide">LOYOLA COLLEGE</p><p className="mt-1 text-xs text-white/60">Student portal</p></div></div>
