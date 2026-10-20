@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UserRound, Mail, Phone, GraduationCap, Building2, BadgeCheck, RefreshCw, Fingerprint } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
 import { getStudentProfile, type StudentProfile } from "@/lib/api/erp";
 
 export default function ProfilePage(){
  const [profile,setProfile]=useState<StudentProfile|null>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
- async function load(){try{setLoading(true);setError("");const r=await getStudentProfile();setProfile(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load your profile.")}finally{setLoading(false)}}
+ const load = useCallback(async () => {try{setLoading(true);setError("");const r=await getStudentProfile();setProfile(r.data)}catch(e){setError(e instanceof Error?e.message:"Unable to load your profile.")}finally{setLoading(false)}}
  useEffect(()=>{void load()},[]);
  const initials=profile?.name?.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toUpperCase()||"LC";
  return <AppShell><div className="space-y-7">
