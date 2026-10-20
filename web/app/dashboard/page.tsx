@@ -1,370 +1,67 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-    Activity,
-    ArrowUpRight,
-    CalendarDays,
-    CheckCircle2,
-    Clock,
-    CreditCard,
-    GraduationCap,
-    TrendingUp,
-    UserRound,
-} from "lucide-react";
-
-import AppShell from "../../components/layout/app-shell";
-import {
-    getAttendanceSummary,
-    getDashboard,
-} from "../../lib/api/erp";
-
-import type {
-    AttendanceSummary,
-    DashboardData,
-} from "../../types/api";
+import { Activity, ArrowUpRight, Bell, BookOpen, CalendarDays, CheckCircle2, Clock3, CreditCard, GraduationCap, Megaphone, RefreshCw, TrendingUp, UserRound, ClipboardList } from "lucide-react";
+import AppShell from "@/components/layout/app-shell";
+import { getAnnouncements, getAssignments, getAttendanceSummary, getDashboard, getNotifications, getReminders, getSchedules, type PlatformRecord } from "@/lib/api/erp";
+import type { AttendanceSummary, DashboardData } from "@/types/api";
 
 export default function DashboardPage() {
-    const [dashboard, setDashboard] = useState<DashboardData | null>(null);
-    const [attendance, setAttendance] =
-        useState<AttendanceSummary | null>(null);
+  const [dashboard,setDashboard]=useState<DashboardData|null>(null);
+  const [attendance,setAttendance]=useState<AttendanceSummary|null>(null);
+  const [assignments,setAssignments]=useState<PlatformRecord[]>([]);
+  const [announcements,setAnnouncements]=useState<PlatformRecord[]>([]);
+  const [schedules,setSchedules]=useState<PlatformRecord[]>([]);
+  const [reminders,setReminders]=useState<PlatformRecord[]>([]);
+  const [notifications,setNotifications]=useState<PlatformRecord[]>([]);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState("");
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  async function load(){
+    setLoading(true);setError("");
+    const results=await Promise.allSettled([getDashboard(),getAttendanceSummary(),getAssignments(),getAnnouncements(),getSchedules(),getReminders(),getNotifications()]);
+    if(results[0].status==="fulfilled")setDashboard(results[0].value.data);else setError(results[0].reason instanceof Error?results[0].reason.message:"Unable to load student overview.");
+    if(results[1].status==="fulfilled")setAttendance(results[1].value.data);
+    if(results[2].status==="fulfilled")setAssignments(results[2].value.data??[]);
+    if(results[3].status==="fulfilled")setAnnouncements(results[3].value.data??[]);
+    if(results[4].status==="fulfilled")setSchedules(results[4].value.data??[]);
+    if(results[5].status==="fulfilled")setReminders(results[5].value.data??[]);
+    if(results[6].status==="fulfilled")setNotifications(results[6].value.data??[]);
+    setLoading(false);
+  }
+  useEffect(()=>{void load()},[]);
+  const student=dashboard?.student;
+  const openAssignments=assignments.filter(a=>!a.isCompleted);
+  const unread=notifications.filter(n=>!n.readAt).length+announcements.filter(a=>!a.readAt).length;
 
-    useEffect(() => {
-        async function load() {
-            try {
-                setLoading(true);
-                setError(null);
-
-                const [dashboardResponse, attendanceResponse] =
-                    await Promise.all([
-                        getDashboard(),
-                        getAttendanceSummary(),
-                    ]);
-
-                setDashboard(dashboardResponse.data);
-                setAttendance(attendanceResponse.data);
-            } catch (err) {
-                console.error(err);
-
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : "Unable to load dashboard",
-                );
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        load();
-    }, []);
-
-    if (loading) {
-        return (
-            <AppShell>
-                <div className="flex min-h-[60vh] items-center justify-center">
-                    <div className="flex items-center gap-3 text-slate-500">
-                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-[#8b0000]" />
-                        Loading dashboard...
-                    </div>
-                </div>
-            </AppShell>
-        );
-    }
-
-    if (error) {
-        return (
-            <AppShell>
-                <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-                    <h2 className="font-semibold">Unable to load dashboard</h2>
-                    <p className="mt-1 text-sm">{error}</p>
-                </div>
-            </AppShell>
-        );
-    }
-
-    const student = dashboard?.student;
-
-    return (
-        <AppShell>
-            <div className="mx-auto max-w-7xl space-y-8">
-                <section>
-                    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-                        <div>
-                            <p className="text-sm font-medium text-[#8b0000]">
-                                Student Portal
-                            </p>
-
-                            <h1 className="mt-1 text-3xl font-bold tracking-tight md:text-4xl">
-                                Welcome back{student?.name ? `, ${student.name}` : ""} 👋
-                            </h1>
-
-                            <p className="mt-2 text-slate-500">
-                                Here's your academic overview.
-                            </p>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
-                            <CalendarDays size={17} />
-                            Academic Dashboard
-                        </div>
-                    </div>
-                </section>
-
-                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    <StatCard
-                        title="Attendance"
-                        value={
-                            attendance
-                                ? `${attendance.attendancePercentage}%`
-                                : "—"
-                        }
-                        description="Overall attendance"
-                        icon={<Activity size={20} />}
-                    />
-
-                    <StatCard
-                        title="Classes Present"
-                        value={attendance ? String(attendance.present) : "—"}
-                        description="Recorded classes"
-                        icon={<CheckCircle2 size={20} />}
-                    />
-
-                    <StatCard
-                        title="Classes Absent"
-                        value={attendance ? String(attendance.absent) : "—"}
-                        description="Recorded absences"
-                        icon={<Clock size={20} />}
-                    />
-
-                    <StatCard
-                        title="Fees Paid"
-                        value={
-                            dashboard
-                                ? `₹${dashboard.fees.totalPaid.toLocaleString("en-IN")}`
-                                : "—"
-                        }
-                        description="Total paid"
-                        icon={<CreditCard size={20} />}
-                    />
-                </section>
-
-                <section className="grid gap-6 lg:grid-cols-3">
-                    <div className="rounded-3xl bg-[#8b0000] p-7 text-white shadow-lg lg:col-span-2">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <div className="flex items-center gap-2 text-sm text-white/70">
-                                    <TrendingUp size={17} />
-                                    Attendance overview
-                                </div>
-
-                                <div className="mt-4 text-5xl font-bold">
-                                    {attendance
-                                        ? `${attendance.attendancePercentage}%`
-                                        : "—"}
-                                </div>
-
-                                <p className="mt-2 text-sm text-white/70">
-                                    Keep your attendance above the required minimum.
-                                </p>
-                            </div>
-
-                            <div className="rounded-2xl bg-white/10 p-3">
-                                <Activity size={25} />
-                            </div>
-                        </div>
-
-                        <div className="mt-8">
-                            <div className="h-3 overflow-hidden rounded-full bg-white/20">
-                                <div
-                                    className="h-full rounded-full bg-white transition-all"
-                                    style={{
-                                        width: `${Math.min(
-                                            attendance?.attendancePercentage ?? 0,
-                                            100,
-                                        )}%`,
-                                    }}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-4 flex justify-between text-xs text-white/70">
-                            <span>0%</span>
-                            <span>75% minimum</span>
-                            <span>100%</span>
-                        </div>
-                    </div>
-
-                    <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
-                        <div className="flex items-center gap-3">
-                            <div className="rounded-xl bg-slate-100 p-3">
-                                <UserRound size={21} />
-                            </div>
-
-                            <div>
-                                <h2 className="font-semibold">Student Profile</h2>
-                                <p className="text-xs text-slate-500">
-                                    Personal information
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 space-y-4">
-                            <InfoRow
-                                label="Name"
-                                value={student?.name || "—"}
-                            />
-
-                            <InfoRow
-                                label="Email"
-                                value={student?.email || "—"}
-                            />
-
-                            <InfoRow
-                                label="Mobile"
-                                value={student?.mobile || "—"}
-                            />
-                        </div>
-
-                        <a
-                            href="/profile"
-                            className="mt-6 flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-sm font-medium hover:bg-slate-100"
-                        >
-                            View profile
-                            <ArrowUpRight size={17} />
-                        </a>
-                    </div>
-                </section>
-
-                <section>
-                    <div className="mb-4 flex items-center justify-between">
-                        <div>
-                            <h2 className="text-xl font-bold">Quick access</h2>
-                            <p className="text-sm text-slate-500">
-                                Frequently used sections
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <QuickCard
-                            href="/attendance"
-                            icon={<Activity size={22} />}
-                            title="Attendance"
-                            description="View attendance details"
-                        />
-
-                        <QuickCard
-                            href="/subjects"
-                            icon={<GraduationCap size={22} />}
-                            title="Subjects"
-                            description="View enrolled subjects"
-                        />
-
-                        <QuickCard
-                            href="/marks"
-                            icon={<TrendingUp size={22} />}
-                            title="Marks"
-                            description="View internal marks"
-                        />
-
-                        <QuickCard
-                            href="/fees"
-                            icon={<CreditCard size={22} />}
-                            title="Fees"
-                            description="View fee information"
-                        />
-                    </div>
-                </section>
-            </div>
-        </AppShell>
-    );
+  return <AppShell><div className="space-y-7">
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="app-kicker">Your campus, at a glance</p><h1 className="app-page-title mt-2">Welcome back{student?.name ? ", "+student.name : ""}.</h1><p className="app-muted-text mt-2 text-sm leading-6">A calm space to keep track of your academic life.</p></div><div className="flex items-center gap-2"><span className="app-pill"><span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]"/>Connected portal</span><button onClick={()=>void load()} disabled={loading} className="app-icon-button" aria-label="Refresh dashboard" title="Refresh dashboard"><RefreshCw size={17} className={loading?"animate-spin":""}/></button></div></header>
+    {error&&<div className="app-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Some academic data could not be loaded</p><p className="app-muted-text mt-1 text-sm">{error}</p></div><button onClick={()=>void load()} className="app-button-primary min-h-10 px-4 text-sm">Retry</button></div>}
+    <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <Metric icon={<Activity size={19}/>} label="Attendance" value={loading?"—":attendance?String(attendance.attendancePercentage)+"%":"—"} note="Overall recorded attendance" href="/attendance"/>
+      <Metric icon={<CheckCircle2 size={19}/>} label="Classes attended" value={loading?"—":attendance?String(attendance.present):"—"} note="Present sessions" href="/attendance"/>
+      <Metric icon={<ClipboardList size={19}/>} label="Open assignments" value={loading?"—":String(openAssignments.length)} note="Saved tasks not completed" href="/dashboard"/>
+      <Metric icon={<CreditCard size={19}/>} label="Fees paid" value={loading?"—":typeof dashboard?.fees?.totalPaid==="number"?dashboard.fees.totalPaid.toLocaleString("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}):"—"} note="Total recorded by ERP" href="/fees"/>
+    </section>
+    <section className="grid gap-5 xl:grid-cols-[1.25fr_.75fr]">
+      <div className="rounded-[24px] bg-[#72080c] p-6 text-white sm:p-8"><div className="flex items-start justify-between gap-4"><div><p className="flex items-center gap-2 text-sm text-white/70"><TrendingUp size={17}/>Attendance overview</p><p className="mt-4 text-5xl font-bold tracking-tight">{attendance?String(attendance.attendancePercentage)+"%":"—"}</p><p className="mt-3 max-w-md text-sm leading-6 text-white/70">{attendance?(attendance.attendancePercentage>=75?"You’re currently at or above the 75% reference point. Keep building consistency.":"Your current attendance is below the 75% reference point. Review your records and plan ahead."):"Attendance data has not been returned."}</p></div><div className="rounded-2xl bg-white/10 p-3"><Activity size={24}/></div></div><div className="mt-8 h-2.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-white transition-all" style={{width:String(Math.min(100,Math.max(0,attendance?.attendancePercentage??0)))+"%"}}/></div><div className="mt-3 flex justify-between text-xs text-white/60"><span>0%</span><span>75% reference</span><span>100%</span></div><Link href="/attendance" className="mt-6 inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-[#72080c] transition hover:bg-white/90">View attendance <ArrowUpRight size={16}/></Link></div>
+      <div className="app-card p-6 sm:p-7"><div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]"><UserRound size={21}/></div><div><h2 className="app-section-title">Student profile</h2><p className="app-muted-text mt-1 text-xs">Linked academic identity</p></div></div><div className="mt-6 space-y-4"><Info label="Name" value={student?.name}/><Info label="Email" value={student?.email}/><Info label="Mobile" value={student?.mobile}/><Info label="Department" value={student?.department}/></div><Link href="/profile" className="mt-6 flex min-h-11 items-center justify-between rounded-xl bg-[var(--surface-soft)] px-4 text-sm font-semibold transition hover:opacity-80">View full profile <ArrowUpRight size={16}/></Link></div>
+    </section>
+    <section className="grid gap-5 xl:grid-cols-2">
+      <div className="app-card overflow-hidden"><div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4 sm:px-6"><div className="flex items-center gap-2"><Megaphone size={18} className="text-[var(--brand)]"/><h2 className="app-section-title">Campus announcements</h2></div><span className="app-pill">{announcements.length} saved</span></div>{loading?<PanelLoading/>:announcements.length===0?<PanelEmpty text="No announcements have been returned by the backend yet."/>:<div className="divide-y divide-[var(--line)]">{[...announcements].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).slice(0,4).map((a,i)=><article key={a._id||i} className="p-5"><div className="flex items-start justify-between gap-3"><h3 className="text-sm font-semibold leading-5">{a.title}</h3>{a.pinned&&<span className="app-pill">Pinned</span>}</div>{a.body&&<p className="app-muted-text mt-2 line-clamp-3 text-sm leading-6">{a.body}</p>}</article>)}</div>}</div>
+      <div className="app-card overflow-hidden"><div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4 sm:px-6"><div className="flex items-center gap-2"><ClipboardList size={18} className="text-[var(--brand)]"/><h2 className="app-section-title">Assignments & reminders</h2></div><span className="app-pill">{openAssignments.length+reminders.filter(r=>!r.isDone).length} open</span></div>{loading?<PanelLoading/>:openAssignments.length===0&&reminders.filter(r=>!r.isDone).length===0?<PanelEmpty text="No open assignments or reminders in your saved records."/>:<div className="divide-y divide-[var(--line)]">{[...openAssignments.map(a=>({...a,kind:"Assignment"})),...reminders.filter(r=>!r.isDone).map(r=>({...r,kind:"Reminder"}))].slice(0,5).map((item,i)=><article key={item._id||i} className="flex items-start gap-3 p-5"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{item.kind==="Reminder"?<Clock3 size={17}/>:<BookOpen size={17}/>}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="text-sm font-semibold">{item.title}</h3><span className="app-pill">{item.kind}</span></div>{(item.description||item.body)&&<p className="app-muted-text mt-1 text-xs leading-5">{item.description||item.body}</p>}{item.dueDate&&<p className="app-muted-text mt-2 text-xs">Due {formatDate(item.dueDate)}</p>}{item.remindAt&&<p className="app-muted-text mt-2 text-xs">Reminder {formatDate(item.remindAt)}</p>}</div></article>)}</div>}</div>
+    </section>
+    <section className="grid gap-5 md:grid-cols-2">
+      <div className="app-card p-5 sm:p-6"><div className="flex items-center gap-2"><Bell size={18} className="text-[var(--brand)]"/><h2 className="app-section-title">Notifications</h2></div><p className="app-muted-text mt-2 text-sm leading-6">Your saved notifications and unread campus updates.</p><p className="app-stat-value mt-5">{loading?"—":unread}</p><p className="app-muted-text mt-1 text-xs">Unread items across notifications and announcements</p><p className="app-muted-text mt-3 text-xs">{notifications.length} notification records returned</p></div>
+      <div className="app-card p-5 sm:p-6"><div className="flex items-center gap-2"><CalendarDays size={18} className="text-[var(--brand)]"/><h2 className="app-section-title">Your schedule</h2></div><p className="app-muted-text mt-2 text-sm leading-6">Quick look at saved timetable entries.</p>{loading?<PanelLoading/>:schedules.length===0?<p className="app-muted-text mt-5 text-sm">No schedule entries returned.</p>:<div className="mt-4 space-y-3">{schedules.slice(0,3).map((s,i)=><div key={s._id||i} className="flex items-start justify-between gap-3 rounded-xl bg-[var(--surface-soft)] p-3"><div><p className="text-sm font-semibold">{s.title}</p><p className="app-muted-text mt-1 text-xs">{s.dayOfWeek||"Day not set"}{s.location?" · "+s.location:""}</p></div><span className="app-pill">{s.startTime||"Time TBA"}</span></div>)}</div>}<Link href="/timetable" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--brand)]">Open timetable <ArrowUpRight size={15}/></Link></div>
+    </section>
+    <section><div className="mb-4"><h2 className="app-section-title">Your academic space</h2><p className="app-muted-text mt-1 text-sm">Jump directly to a section.</p></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><QuickLink href="/subjects" icon={<BookOpen size={19}/>} title="Subjects" text="Courses, credits and faculty"/><QuickLink href="/marks" icon={<GraduationCap size={19}/>} title="Internal marks" text="Published assessment results"/><QuickLink href="/fees" icon={<CreditCard size={19}/>} title="Fees" text="Recorded payment summary"/><QuickLink href="/timetable" icon={<CalendarDays size={19}/>} title="Timetable" text="Your saved weekly schedule"/></div></section>
+  </div></AppShell>;
 }
-
-function StatCard({
-    title,
-    value,
-    description,
-    icon,
-}: {
-    title: string;
-    value: string;
-    description: string;
-    icon: React.ReactNode;
-}) {
-    return (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-                <div className="text-sm font-medium text-slate-500">
-                    {title}
-                </div>
-
-                <div className="rounded-xl bg-slate-100 p-2.5 text-slate-600">
-                    {icon}
-                </div>
-            </div>
-
-            <div className="mt-4 text-3xl font-bold">{value}</div>
-
-            <div className="mt-1 text-xs text-slate-500">
-                {description}
-            </div>
-        </div>
-    );
-}
-
-function InfoRow({
-    label,
-    value,
-}: {
-    label: string;
-    value: string;
-}) {
-    return (
-        <div>
-            <div className="text-xs text-slate-400">{label}</div>
-            <div className="mt-1 truncate text-sm font-medium">
-                {value}
-            </div>
-        </div>
-    );
-}
-
-function QuickCard({
-    href,
-    icon,
-    title,
-    description,
-}: {
-    href: string;
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-}) {
-    return (
-        <a
-            href={href}
-            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
-        >
-            <div className="flex items-center justify-between">
-                <div className="rounded-xl bg-slate-100 p-3 text-slate-700">
-                    {icon}
-                </div>
-
-                <ArrowUpRight
-                    size={18}
-                    className="text-slate-400 transition group-hover:text-slate-700"
-                />
-            </div>
-
-            <h3 className="mt-5 font-semibold">{title}</h3>
-
-            <p className="mt-1 text-sm text-slate-500">
-                {description}
-            </p>
-        </a>
-    );
-}
+function Metric({icon,label,value,note,href}:{icon:React.ReactNode;label:string;value:string;note:string;href:string}){return <Link href={href} className="app-card app-card-hover block p-5"><div className="flex items-center justify-between gap-3"><span className="app-muted-text text-sm">{label}</span><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{icon}</span></div><p className="app-stat-value mt-4">{value}</p><p className="app-muted-text mt-2 text-xs">{note}</p></Link>}
+function Info({label,value}:{label:string;value?:string|null}){return <div className="flex items-start justify-between gap-4 text-sm"><span className="app-muted-text">{label}</span><span className="max-w-[65%] break-words text-right font-medium">{value||"—"}</span></div>}
+function QuickLink({href,icon,title,text}:{href:string;icon:React.ReactNode;title:string;text:string}){return <Link href={href} className="app-card app-card-hover flex items-start gap-3 p-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{icon}</span><span><span className="block text-sm font-semibold">{title}</span><span className="app-muted-text mt-1 block text-xs leading-5">{text}</span></span><ArrowUpRight size={15} className="app-muted-text ml-auto shrink-0"/></Link>}
+function PanelLoading(){return <div className="p-6"><div className="h-4 w-2/3 animate-pulse rounded bg-[var(--surface-soft)]"/><div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-[var(--surface-soft)]"/></div>}
+function PanelEmpty({text}:{text:string}){return <div className="p-6"><p className="app-muted-text text-sm leading-6">{text}</p></div>}
+function formatDate(value:string){const date=new Date(value);return Number.isNaN(date.getTime())?value:date.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}
