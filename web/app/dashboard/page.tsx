@@ -19,21 +19,53 @@ export default function DashboardPage() {
   const [error,setError]=useState("");
 
   const load = useCallback(async () => {
-    setLoading(true);setError("");
-    const [dr,ar,asr,anr,sr,rr,nr]=await Promise.all([settle(getDashboard()),settle(getAttendanceSummary()),settle(getAssignments()),settle(getAnnouncements()),settle(getSchedules()),settle(getReminders()),settle(getNotifications())]);
-    if(dr.ok)setDashboard(dr.value.data);else setError(dr.error instanceof Error?dr.error.message:"Unable to load student overview.");
-    if(ar.ok)setAttendance(ar.value.data);
-    if(asr.ok)setAssignments(asr.value.data??[]);
-    if(anr.ok)setAnnouncements(anr.value.data??[]);
-    if(sr.ok)setSchedules(sr.value.data??[]);
-    if(rr.ok)setReminders(rr.value.data??[]);
-    if(nr.ok)setNotifications(nr.value.data??[]);
-    setLoading(false);
+    setLoading(true);
+    setError("");
+
+    try {
+      // Treat the dashboard as one coherent snapshot: don't reveal a partly
+      // populated page when one of its required backend requests has failed.
+      const [dr, ar, asr, anr, sr, rr, nr] = await Promise.all([
+        getDashboard(),
+        getAttendanceSummary(),
+        getAssignments(),
+        getAnnouncements(),
+        getSchedules(),
+        getReminders(),
+        getNotifications(),
+      ]);
+
+      setDashboard(dr.data);
+      setAttendance(ar.data);
+      setAssignments(asr.data ?? []);
+      setAnnouncements(anr.data ?? []);
+      setSchedules(sr.data ?? []);
+      setReminders(rr.data ?? []);
+      setNotifications(nr.data ?? []);
+    } catch (loadError) {
+      setDashboard(null);
+      setAttendance(null);
+      setAssignments([]);
+      setAnnouncements([]);
+      setSchedules([]);
+      setReminders([]);
+      setNotifications([]);
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Unable to retrieve your academic records.",
+      );
+    } finally {
+      setLoading(false);
+    }
   }, []);
-  useEffect(()=>{void load()},[load]);
+  useEffect(() => { void load(); }, [load]);
   const student=dashboard?.student;
   const openAssignments=assignments.filter(a=>!a.isCompleted&&!a.isDone);
   const unread=notifications.filter(n=>!n.readAt).length+announcements.filter(a=>!a.readAt).length;
+
+  if (loading) return <DashboardLoadingScreen />;
+  if (error) return <AppShell><section className="flex min-h-[65vh] items-center justify-center px-4 py-12"><div className="app-card w-full max-w-xl p-7 text-center sm:p-10"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)]"><RefreshCw size={25}/></div><p className="app-kicker mt-6">Connection interrupted</p><h1 className="mt-2 text-2xl font-semibold tracking-tight">We couldn’t load your student data.</h1><p className="app-muted-text mx-auto mt-3 max-w-md text-sm leading-6">{error}</p><p className="app-muted-text mt-2 text-xs">Your dashboard is paused so incomplete records are not shown as current.</p><button onClick={() => void load()} className="app-button-primary mt-7 min-h-11 px-6 text-sm"><RefreshCw size={16}/> Try again</button></div></section></AppShell>;
 
   return <AppShell><div className="space-y-7">
     <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="app-kicker">Your campus, at a glance</p><h1 className="app-page-title mt-2">Welcome back{student?.name ? ", "+student.name : ""}.</h1><p className="app-muted-text mt-2 text-sm leading-6">A calm space to keep track of your academic life.</p></div><div className="flex items-center gap-2"><span className="app-pill"><span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]"/>Connected portal</span><button onClick={()=>void load()} disabled={loading} className="app-icon-button" aria-label="Refresh dashboard" title="Refresh dashboard"><RefreshCw size={17} className={loading?"animate-spin":""}/></button></div></header>
@@ -59,7 +91,59 @@ export default function DashboardPage() {
     <section><div className="mb-4"><h2 className="app-section-title">Your academic space</h2><p className="app-muted-text mt-1 text-sm">Jump directly to a section.</p></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><QuickLink href="/subjects" icon={<BookOpen size={19}/>} title="Subjects" text="Courses, credits and faculty"/><QuickLink href="/marks" icon={<GraduationCap size={19}/>} title="Internal marks" text="Published assessment results"/><QuickLink href="/fees" icon={<CreditCard size={19}/>} title="Fees" text="Recorded payment summary"/><QuickLink href="/timetable" icon={<CalendarDays size={19}/>} title="Timetable" text="Your saved weekly schedule"/></div></section>
   </div></AppShell>;
 }
-async function settle<T>(promise:Promise<T>):Promise<{ok:true;value:T}|{ok:false;error:unknown}>{try{return {ok:true,value:await promise}}catch(error){return {ok:false,error}}}
+function DashboardLoadingScreen() {
+  return (
+    <main className="min-h-screen bg-[var(--background)] px-5 py-7 text-[var(--foreground)] sm:px-8 sm:py-9" aria-live="polite" aria-busy="true">
+      <div className="mx-auto max-w-7xl">
+        <header className="flex items-center justify-between gap-4 border-b border-[var(--line)] pb-5">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#8b0000] text-white"><GraduationCap size={23}/></span>
+            <span><span className="block text-sm font-bold">Loyola College</span><span className="app-muted-text mt-0.5 block text-xs">Student portal</span></span>
+          </div>
+          <span className="app-pill"><span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--success)]"/>Connecting securely</span>
+        </header>
+
+        <section className="py-10 sm:py-14">
+          <p className="app-kicker">Your campus, at a glance</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Preparing your dashboard<span className="text-[#8b0000]">.</span></h1>
+          <p className="app-muted-text mt-3 max-w-xl text-sm leading-6">We’re retrieving your attendance, academic records and campus updates. Your dashboard will appear when everything is ready.</p>
+          <div className="mt-6 flex items-center gap-3 text-xs font-medium text-[var(--brand)]"><span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--brand)]"/><span>Syncing your student records…</span></div>
+        </section>
+
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {["Attendance","Classes attended","Open assignments","Fees paid"].map((label) => (
+            <div key={label} className="app-card p-5">
+              <div className="flex items-center justify-between"><div className="h-3 w-28 animate-pulse rounded-full bg-[var(--surface-soft)]"/><div className="h-9 w-9 animate-pulse rounded-xl bg-[var(--surface-soft)]"/></div>
+              <div className="mt-5 h-8 w-24 animate-pulse rounded-lg bg-[var(--surface-soft)]"/>
+              <div className="mt-3 h-3 w-36 animate-pulse rounded-full bg-[var(--surface-soft)]"/>
+              <span className="sr-only">Loading {label}</span>
+            </div>
+          ))}
+        </section>
+
+        <section className="mt-5 grid gap-5 xl:grid-cols-[1.25fr_.75fr]">
+          <div className="app-card min-h-64 overflow-hidden p-6 sm:p-8">
+            <div className="h-3 w-36 animate-pulse rounded-full bg-[var(--surface-soft)]"/>
+            <div className="mt-7 h-12 w-32 animate-pulse rounded-xl bg-[var(--surface-soft)]"/>
+            <div className="mt-5 h-3 w-3/4 animate-pulse rounded-full bg-[var(--surface-soft)]"/>
+            <div className="mt-3 h-2.5 w-full animate-pulse rounded-full bg-[var(--surface-soft)]"/>
+            <div className="mt-8 h-10 w-36 animate-pulse rounded-xl bg-[var(--surface-soft)]"/>
+          </div>
+          <div className="app-card min-h-64 p-6">
+            <div className="h-4 w-32 animate-pulse rounded-full bg-[var(--surface-soft)]"/>
+            {Array.from({length:4}).map((_,i)=><div key={i} className="mt-6 flex items-center gap-3"><div className="h-9 w-9 animate-pulse rounded-xl bg-[var(--surface-soft)]"/><div className="flex-1"><div className="h-3 w-2/3 animate-pulse rounded-full bg-[var(--surface-soft)]"/><div className="mt-2 h-2.5 w-1/2 animate-pulse rounded-full bg-[var(--surface-soft)]"/></div></div>)}
+          </div>
+        </section>
+
+        <section className="mt-5 grid gap-5 xl:grid-cols-2">
+          {[0,1].map((panel)=><div key={panel} className="app-card min-h-56 p-6"><div className="h-4 w-40 animate-pulse rounded-full bg-[var(--surface-soft)]"/>{[0,1,2].map((row)=><div key={row} className="mt-7 flex items-center gap-3"><div className="h-10 w-10 animate-pulse rounded-xl bg-[var(--surface-soft)]"/><div className="flex-1"><div className="h-3 w-3/4 animate-pulse rounded-full bg-[var(--surface-soft)]"/><div className="mt-2 h-2.5 w-1/2 animate-pulse rounded-full bg-[var(--surface-soft)]"/></div></div>)}</div>)}
+        </section>
+        <p className="app-muted-text mt-8 text-center text-xs">Please keep this page open while your records sync.</p>
+      </div>
+    </main>
+  );
+}
+
 function Metric({icon,label,value,note,href}:{icon:React.ReactNode;label:string;value:string;note:string;href:string}){return <Link href={href} className="app-card app-card-hover block p-5"><div className="flex items-center justify-between gap-3"><span className="app-muted-text text-sm">{label}</span><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{icon}</span></div><p className="app-stat-value mt-4">{value}</p><p className="app-muted-text mt-2 text-xs">{note}</p></Link>}
 function Info({label,value}:{label:string;value?:string|null}){return <div className="flex items-start justify-between gap-4 text-sm"><span className="app-muted-text">{label}</span><span className="max-w-[65%] break-words text-right font-medium">{value||"—"}</span></div>}
 function QuickLink({href,icon,title,text}:{href:string;icon:React.ReactNode;title:string;text:string}){return <Link href={href} className="app-card app-card-hover flex items-start gap-3 p-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{icon}</span><span><span className="block text-sm font-semibold">{title}</span><span className="app-muted-text mt-1 block text-xs leading-5">{text}</span></span><ArrowUpRight size={15} className="app-muted-text ml-auto shrink-0"/></Link>}
