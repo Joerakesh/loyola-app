@@ -1,7 +1,7 @@
-// Use the same deployment origin by default. This keeps production and
-// preview deployments talking to their own Vercel API instead of a stale host.
+// The Next.js frontend is deployed separately from the Express API project.
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") || "/api/v1";
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "") ||
+  "https://loyola-app-livid.vercel.app/api/v1";
 
 export class ApiError extends Error {
   status: number;
