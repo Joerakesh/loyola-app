@@ -22,7 +22,7 @@ export async function requireErpClient(
 
     next();
   } catch (error) {
-    console.error("LRMS bridge error:", error);
+    console.error("LRMS bridge error:", error instanceof Error ? error.message : "Unknown error");
 
     return res.status(502).json({
       status: "error",

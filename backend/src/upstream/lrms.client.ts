@@ -10,27 +10,58 @@ export interface LRMSSessionState {
 
 export class LRMSClient {
   private readonly client;
-  private cookies = "";
+  private readonly origin: string;
+  private readonly loginReferer: string;
+  private readonly dashboardReferer: string;
+  private readonly cookies = new Map<string, string>();
 
-  constructor(cookies = "") {
-    this.cookies = cookies;
+  constructor(cookieHeader = "") {
+    const baseUrl = LRMS_CONFIG.baseUrl.replace(/\/+$/, "");
+    this.origin = new URL(baseUrl).origin;
+    this.loginReferer = baseUrl + "/";
+    this.dashboardReferer = baseUrl + "/dashboard.jsp";
 
     this.client = axios.create({
-      baseURL: LRMS_CONFIG.baseUrl,
-      timeout: 15000,
+      baseURL: baseUrl + "/",
+      timeout: 20000,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; CollegeMobileApp/1.0)",
-        Accept: "*/*",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
       },
     });
+
+    this.mergeCookieHeader(cookieHeader);
   }
 
-  private getHeaders() {
-    return this.cookies
-      ? {
-          Cookie: this.cookies,
-        }
-      : {};
+  private getCookieHeader() {
+    return [...this.cookies.entries()]
+      .map(([name, value]) => name + "=" + value)
+      .join("; ");
+  }
+
+  private getCookieHeaders() {
+    const cookie = this.getCookieHeader();
+    return cookie ? { Cookie: cookie } : {};
+  }
+
+  private getAjaxHeaders(referer = this.dashboardReferer) {
+    return {
+      ...this.getCookieHeaders(),
+      Accept: "application/json, text/javascript, */*; q=0.01",
+      Origin: this.origin,
+      Referer: referer,
+      "X-Requested-With": "XMLHttpRequest",
+    };
+  }
+
+  private mergeCookieHeader(cookieHeader: string) {
+    for (const pair of cookieHeader.split(";")) {
+      const separator = pair.indexOf("=");
+      if (separator <= 0) continue;
+      const name = pair.slice(0, separator).trim();
+      const value = pair.slice(separator + 1).trim();
+      if (name) this.cookies.set(name, value);
+    }
   }
 
   private updateCookies(response: {
@@ -38,34 +69,30 @@ export class LRMSClient {
       "set-cookie"?: string[];
     };
   }) {
-    const setCookie = response.headers["set-cookie"];
-
-    if (!setCookie) {
-      return;
-    }
-
-    const newCookies = setCookie
-      .map((cookie) => cookie.split(";")[0])
-      .join("; ");
-
-    if (newCookies) {
-      this.cookies = newCookies;
+    for (const setCookie of response.headers["set-cookie"] ?? []) {
+      const pair = setCookie.split(";", 1)[0];
+      this.mergeCookieHeader(pair);
     }
   }
 
   async getLoginPage() {
     const response = await this.client.get("/", {
-      headers: this.getHeaders(),
+      headers: {
+        ...this.getCookieHeaders(),
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
     });
 
     this.updateCookies(response);
 
     const $ = cheerio.load(response.data);
-
     const captcha = $(".captcha__text").first().text().trim();
 
     if (!captcha) {
-      throw new Error("CAPTCHA not found in LRMS login page");
+      throw new Error(
+        "CAPTCHA not found in LRMS login page (HTTP " + response.status + ")",
+      );
     }
 
     return {
@@ -76,7 +103,6 @@ export class LRMSClient {
 
   async login(registrationNumber: string, password: string, captcha: string) {
     const body = new URLSearchParams();
-
     body.append("registerno", registrationNumber);
     body.append("password", password);
     body.append("captcha", captcha);
@@ -86,45 +112,37 @@ export class LRMSClient {
       body.toString(),
       {
         headers: {
-          ...this.getHeaders(),
+          ...this.getAjaxHeaders(this.loginReferer),
           "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          "X-Requested-With": "XMLHttpRequest",
         },
       },
     );
 
     this.updateCookies(response);
-
     return response.data;
   }
 
   async get<T = unknown>(url: string) {
     const response = await this.client.get<T>(url, {
-      headers: this.getHeaders(),
+      headers: this.getAjaxHeaders(),
     });
 
     this.updateCookies(response);
-
     return response;
   }
 
   async post<T = unknown>(url: string, data?: unknown) {
     const response = await this.client.post<T>(url, data, {
-      headers: this.getHeaders(),
+      headers: this.getAjaxHeaders(),
     });
 
     this.updateCookies(response);
-
     return response;
   }
 
   async exportSession(registrationNumber: string): Promise<LRMSSessionState> {
-    if (!this.cookies) {
-      throw new Error("Cannot export LRMS session: no cookies found");
-    }
-
     return {
-      cookies: this.cookies,
+      cookies: this.getCookieHeader(),
       registrationNumber,
       createdAt: Date.now(),
     };

@@ -13,7 +13,7 @@ export class MarksController {
 
       const marksService = new MarksService(client);
 
-      const data = await marksService.getInternalMarks(profile.registerNumber);
+      const data = await marksService.getInternalMarks(profile.studentId);
 
       return res.json({
         status: "success",

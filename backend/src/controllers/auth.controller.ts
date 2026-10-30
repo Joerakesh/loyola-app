@@ -163,7 +163,7 @@ export class AuthController {
         user: userRepository.toPublicUser(updated!),
       });
     } catch (error) {
-      console.error("Bind ERP error:", error);
+      console.error("Bind ERP error:", error instanceof Error ? error.message : "Unknown error");
 
       return res.status(400).json({
         status: "error",
