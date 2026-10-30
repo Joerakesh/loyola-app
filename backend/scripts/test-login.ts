@@ -71,10 +71,12 @@ try {
 
   console.log(`\n→ Creating Firebase user ${testUid} (local RS256 custom-token signing)…`);
 
+  // Signing in with a valid custom token creates the test account on first use.
   await exchangeForIdToken();
 
-  await getFirebaseAuth().setCustomUserClaims(testUid, { isE2ETest: true });
-  await getFirebaseAuth().updateUser(testUid, {
+  const firebaseAuth = await getFirebaseAuth();
+  await firebaseAuth.setCustomUserClaims(testUid, { isE2ETest: true });
+  await firebaseAuth.updateUser(testUid, {
     email: testEmail,
     displayName: testName,
   });
@@ -126,11 +128,13 @@ try {
     process.exit(1);
   }
 
-  await getFirebaseAuth().deleteUser(testUid).catch(() => {});
+  await firebaseAuth.deleteUser(testUid);
 
   console.log("\nAll login checks passed.");
 } catch (error: any) {
   console.error("\n✗ Test error:", error.message ?? error);
-  await getFirebaseAuth().deleteUser(testUid).catch(() => {});
+  await getFirebaseAuth()
+    .then((firebaseAuth) => firebaseAuth.deleteUser(testUid))
+    .catch(() => undefined);
   process.exit(1);
 }

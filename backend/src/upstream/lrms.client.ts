@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
 import { LRMS_CONFIG } from "../config/lrms.js";
 
@@ -24,6 +24,7 @@ export class LRMSClient {
     this.client = axios.create({
       baseURL: baseUrl + "/",
       timeout: 20000,
+      maxRedirects: 5,
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
@@ -75,6 +76,50 @@ export class LRMSClient {
     }
   }
 
+  /**
+   * The ERP sometimes redirects an expired/invalid session to an HTML login
+   * page while still returning HTTP 200. Treat that as an upstream failure
+   * instead of passing HTML into a data transformer and returning empty data.
+   */
+  private parseJsonResponse<T>(
+    response: AxiosResponse<unknown>,
+    endpoint: string,
+  ): T {
+    let data = response.data;
+
+    if (typeof data === "string") {
+      try {
+        data = JSON.parse(data) as unknown;
+      } catch {
+        const kind = /^\s*</.test(data) ? "HTML" : "non-JSON content";
+        throw new Error(
+          `LRMS endpoint "${endpoint}" returned ${kind} (HTTP ${response.status}). The ERP may have redirected the request to its login page or the endpoint may be unavailable.`,
+        );
+      }
+    }
+
+    if (data === null || typeof data !== "object") {
+      throw new Error(
+        `LRMS endpoint "${endpoint}" returned an unexpected response (HTTP ${response.status}).`,
+      );
+    }
+
+    if (
+      !Array.isArray(data) &&
+      "status" in data &&
+      data.status === "error"
+    ) {
+      const message =
+        "message" in data && typeof data.message === "string"
+          ? data.message
+          : "the ERP rejected the request";
+
+      throw new Error(`LRMS endpoint "${endpoint}" failed: ${message}`);
+    }
+
+    return data as T;
+  }
+
   async getLoginPage() {
     const response = await this.client.get("/", {
       headers: {
@@ -119,25 +164,36 @@ export class LRMSClient {
     );
 
     this.updateCookies(response);
-    return response.data;
+    return this.parseJsonResponse<{
+      status?: string;
+      message?: string;
+    }>(response, LRMS_CONFIG.endpoints.login);
   }
 
   async get<T = unknown>(url: string) {
-    const response = await this.client.get<T>(url, {
+    const response = await this.client.get<unknown>(url, {
       headers: this.getAjaxHeaders(),
     });
 
     this.updateCookies(response);
-    return response;
+
+    return {
+      ...response,
+      data: this.parseJsonResponse<T>(response, url),
+    };
   }
 
   async post<T = unknown>(url: string, data?: unknown) {
-    const response = await this.client.post<T>(url, data, {
+    const response = await this.client.post<unknown>(url, data, {
       headers: this.getAjaxHeaders(),
     });
 
     this.updateCookies(response);
-    return response;
+
+    return {
+      ...response,
+      data: this.parseJsonResponse<T>(response, url),
+    };
   }
 
   async exportSession(registrationNumber: string): Promise<LRMSSessionState> {

@@ -16,6 +16,11 @@ import { platformControllers } from "./controllers/platform.controllers.js";
 
 const app = express();
 
+// Vercel terminates the public connection and forwards requests with
+// X-Forwarded-For. Trust only the nearest proxy so Express can safely resolve
+// the client IP used by express-rate-limit.
+app.set("trust proxy", 1);
+
 app.use(helmet());
 
 app.use(
@@ -24,13 +29,15 @@ app.use(
   }),
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 app.use(
   rateLimit({
     windowMs: 60 * 1000,
     limit: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
   }),
 );
 
@@ -63,7 +70,6 @@ app.use(
 );
 
 app.get("/api/health", (_req, res) => {
-  console.log("req came from", _req.originalUrl);
   res.json({
     status: "ok",
     service: "college-mobile-backend",

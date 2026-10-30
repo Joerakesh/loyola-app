@@ -13,14 +13,20 @@ export function connectMongo(): Promise<MongoClient> {
 
   if (!connectionPromise) {
     const mongoClient = new MongoClient(mongoUri, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
     });
 
     mongoClient.on("error", (error) => {
       console.error("MongoDB error:", error);
     });
 
-    connectionPromise = mongoClient.connect();
+    // Cache a successful connection for warm serverless invocations, but do
+    // not leave a rejected promise cached forever after a transient failure.
+    connectionPromise = mongoClient.connect().catch((error: unknown) => {
+      connectionPromise = null;
+      void mongoClient.close().catch(() => undefined);
+      throw error;
+    });
   }
 
   return connectionPromise;
