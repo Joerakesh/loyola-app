@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { dashboardController } from "../controllers/dashboard.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
+import { responseCache } from "../middleware/response-cache.middleware.js";
 import { requireErpClient } from "../middleware/lrms-bridge.middleware.js";
 
 const router = Router();
@@ -8,6 +9,7 @@ const router = Router();
 router.get(
   "/",
   requireAuth,
+  responseCache("dashboard"),
   requireErpClient,
   dashboardController.getDashboard.bind(dashboardController),
 );

@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { studentController } from "../controllers/student.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
+import { responseCache } from "../middleware/response-cache.middleware.js";
 import { requireErpClient } from "../middleware/lrms-bridge.middleware.js";
 
 const router = Router();
 router.get(
   "/profile",
   requireAuth,
+  responseCache("profile"),
   requireErpClient,
   studentController.profile.bind(studentController),
 );

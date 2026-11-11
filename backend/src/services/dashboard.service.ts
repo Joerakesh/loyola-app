@@ -1,11 +1,11 @@
 import { LRMS_CONFIG } from "../config/lrms.js";
-import { LRMSClient } from "../upstream/lrms.client.js";
+import type { LRMSRequester } from "../upstream/lrms.client.js";
 import {
   LRMSDashboardResponse,
   transformDashboard,
 } from "../transformers/dashboard.transformer.js";
 export class DashboardService {
-  constructor(private readonly lrms: LRMSClient) {}
+  constructor(private readonly lrms: LRMSRequester) {}
 
   async getDashboard() {
     const response = await this.lrms.post<LRMSDashboardResponse>(

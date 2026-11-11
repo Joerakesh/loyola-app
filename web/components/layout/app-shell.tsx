@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { BarChart3, BookOpen, CalendarDays, CircleUserRound, CreditCard, GraduationCap, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from "lucide-react";
+import IhsMark from "@/components/brand/ihs-mark";
+import { BRAND } from "@/lib/brand";
 import { useEffect, useState } from "react";
 import { logout } from "@/lib/api/auth";
 
@@ -49,12 +51,12 @@ export default function AppShell({ children }: AppShellProps) {
       <div className="flex h-full flex-col">
         <div className="app-brand flex h-[88px] items-center justify-between px-6">
           <Link href="/dashboard" className="flex items-center gap-3" onClick={() => setMobileOpen(false)}>
-            <div className="app-brand-mark flex h-11 w-11 items-center justify-center rounded-2xl text-white"><GraduationCap size={23}/></div>
-            <div><div className="text-[15px] font-bold tracking-tight">Loyola</div><div className="mt-0.5 text-xs app-muted">Student space</div></div>
+            <div className="app-brand-mark flex h-11 w-11 items-center justify-center rounded-xl"><IhsMark size={32} className="text-white"/></div>
+            <div><div className="app-section-title leading-5">Loyola</div><div className="mt-0.5 text-xs app-muted">{BRAND.product}</div></div>
           </Link>
           <button onClick={() => setMobileOpen(false)} className="app-icon-button lg:hidden" aria-label="Close navigation"><X size={19}/></button>
         </div>
-        <div className="px-5 pb-2 pt-5"><p className="app-eyebrow px-3">YOUR CAMPUS</p></div>
+        <div className="px-5 pb-2 pt-5"><p className="app-eyebrow px-3">Your campus</p></div>
         <nav className="flex-1 space-y-1 px-3 py-2" aria-label="Main navigation">
           {navigation.map(item => {
             const Icon = item.icon;
@@ -65,7 +67,7 @@ export default function AppShell({ children }: AppShellProps) {
           })}
         </nav>
         <div className="p-4">
-          <div className="app-sidebar-note rounded-2xl p-4"><div className="text-sm font-semibold">A little more clarity, every day.</div><p className="mt-1 text-xs leading-5 app-muted">Your academic essentials, thoughtfully organised.</p></div>
+          <div className="app-sidebar-note rounded-[12px] border-l-[3px] border-[var(--gold)] p-4"><div className="login-motto text-[15px] leading-5">{BRAND.motto}</div><p className="mt-1 text-xs leading-5 app-muted">{BRAND.mottoMeaning}</p></div>
           <div className="mt-4 border-t app-divider pt-3">
             <button onClick={toggleTheme} className="app-nav-link w-full text-left" aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}>
               {theme === "dark" ? <Sun size={18}/> : <Moon size={18}/>}<span>{theme === "dark" ? "Light appearance" : "Dark appearance"}</span>
@@ -82,7 +84,7 @@ export default function AppShell({ children }: AppShellProps) {
       <header className="app-topbar sticky top-0 z-30 flex h-[72px] items-center justify-between px-4 sm:px-6 lg:px-10">
         <div className="flex items-center gap-3">
           <button onClick={() => setMobileOpen(true)} className="app-icon-button lg:hidden" aria-label="Open navigation"><Menu size={21}/></button>
-          <div><p className="app-eyebrow hidden sm:block">LOYOLA COLLEGE</p><h1 className="text-[15px] font-semibold tracking-tight sm:mt-1">Student portal</h1></div>
+          <div><p className="app-eyebrow hidden sm:block">{BRAND.name}, {BRAND.city}</p><h1 className="text-[15px] font-semibold tracking-tight sm:mt-0.5">{BRAND.product}</h1></div>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={toggleTheme} className="app-icon-button" aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} title={theme === "dark" ? "Light theme" : "Dark theme"}>{theme === "dark" ? <Sun size={18}/> : <Moon size={18}/>}</button>

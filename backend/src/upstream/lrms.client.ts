@@ -8,7 +8,26 @@ export interface LRMSSessionState {
   createdAt: number;
 }
 
-export class LRMSClient {
+/**
+ * Thrown when the ERP answers with its HTML login page (or anything that is not
+ * JSON). That is how LRMS signals an expired session, so callers can log in
+ * again and retry instead of surfacing a failure.
+ */
+export class SessionExpiredError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "SessionExpiredError";
+  }
+}
+
+/** The surface the data services need. Implemented by LRMSClient and by the
+ * self-healing client in lrms-bridge.service.ts. */
+export interface LRMSRequester {
+  get<T = unknown>(url: string): Promise<{ data: T }>;
+  post<T = unknown>(url: string, data?: unknown): Promise<{ data: T }>;
+}
+
+export class LRMSClient implements LRMSRequester {
   private readonly client;
   private readonly origin: string;
   private readonly loginReferer: string;
@@ -88,11 +107,13 @@ export class LRMSClient {
     let data = response.data;
 
     if (typeof data === "string") {
+      const text = data;
+
       try {
-        data = JSON.parse(data) as unknown;
+        data = JSON.parse(text) as unknown;
       } catch {
-        const kind = /^\s*</.test(data) ? "HTML" : "non-JSON content";
-        throw new Error(
+        const kind = /^\s*</.test(text) ? "HTML" : "non-JSON content";
+        throw new SessionExpiredError(
           `LRMS endpoint "${endpoint}" returned ${kind} (HTTP ${response.status}). The ERP may have redirected the request to its login page or the endpoint may be unavailable.`,
         );
       }

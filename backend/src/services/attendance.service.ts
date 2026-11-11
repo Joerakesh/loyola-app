@@ -1,5 +1,5 @@
 import { LRMS_CONFIG } from "../config/lrms.js";
-import { LRMSClient } from "../upstream/lrms.client.js";
+import type { LRMSRequester } from "../upstream/lrms.client.js";
 import { transformHourlyAttendance } from "../transformers/attendance.transformer.js";
 
 interface LRMSHourlyAttendance {
@@ -26,7 +26,7 @@ function toFiniteNumber(value: unknown): number {
 }
 
 export class AttendanceService {
-  constructor(private readonly lrms: LRMSClient) {}
+  constructor(private readonly lrms: LRMSRequester) {}
 
   async getSummary() {
     // The captured ERP response sends attendancePercentage as a string while

@@ -11,6 +11,8 @@ import subjectsRoutes from "./routes/subjects.routes.js";
 import studentRoutes from "./routes/student.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import homeRoutes from "./routes/home.routes.js";
+import reflectionsRoutes from "./routes/reflections.routes.js";
 import { createPlatformRouter } from "./routes/platform.routes.js";
 import { platformControllers } from "./controllers/platform.controllers.js";
 
@@ -23,19 +25,39 @@ app.set("trust proxy", 1);
 
 app.use(helmet());
 
+// CORS_ORIGINS="https://your-web-app.vercel.app,http://localhost:3000"
+// Left unset it stays open, which is what the native mobile app needs anyway
+// (it does not use CORS); set it in production to lock the browser origin down.
+const allowedOrigins = process.env.CORS_ORIGINS?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: "*",
+    origin: allowedOrigins?.length ? allowedOrigins : "*",
   }),
 );
 
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
+// Students on campus Wi-Fi share one public IP, and a screen can make several
+// requests, so the general limit is generous. Sign-in and ERP linking get a much
+// tighter limit because they are the brute-force targets.
 app.use(
   rateLimit({
     windowMs: 60 * 1000,
-    limit: 100,
+    limit: 600,
+    standardHeaders: true,
+    legacyHeaders: false,
+  }),
+);
+
+app.use(
+  "/api/v1/auth",
+  rateLimit({
+    windowMs: 60 * 1000,
+    limit: 30,
     standardHeaders: true,
     legacyHeaders: false,
   }),
@@ -47,6 +69,8 @@ app.use("/api/v1/subjects", subjectsRoutes);
 app.use("/api/v1/student", studentRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/home", homeRoutes);
+app.use("/api/v1/reflections", reflectionsRoutes);
 
 app.use(
   "/api/v1/schedules",
@@ -85,7 +109,10 @@ async function start() {
   });
 }
 
-if (process.env.NODE_ENV !== "production") {
+if (
+  process.env.NODE_ENV !== "production" &&
+  process.env.NODE_ENV !== "test"
+) {
   start().catch((error) => {
     console.error("Failed to start backend:", error);
     process.exit(1);

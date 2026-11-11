@@ -1,3 +1,4 @@
+import { invalidateUserCache } from "../lib/erp-cache.js";
 import { Request, Response } from "express";
 
 import { authService } from "../services/auth.service.js";
@@ -151,6 +152,8 @@ export class AuthController {
         passwordCiphertext,
         createdAt: new Date(),
       });
+      await lrmsBridgeService.invalidate(user._id.toHexString());
+      invalidateUserCache(user._id.toHexString());
 
       if (normalizedEmail && normalizedEmail !== user.email) {
         await userRepository.bindEmail(user._id, normalizedEmail);
@@ -233,6 +236,8 @@ export class AuthController {
       const user = res.locals.userDocument;
 
       await userRepository.clearErpCredentials(user._id);
+      await lrmsBridgeService.invalidate(user._id.toHexString());
+      invalidateUserCache(user._id.toHexString());
 
       const updated = await userRepository.findById(user._id.toHexString());
 

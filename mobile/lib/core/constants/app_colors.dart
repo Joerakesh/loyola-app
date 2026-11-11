@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  static const Color background = Color(0xFF0F0E17);
+  static const Color background = Color(0xFF141013);
   static const Color surface = Color(0xFFFFFFFF);
 
-  static const Color crimson = Color(0xFF8B0000);
+  static const Color crimson = Color(0xFF7A1A2E);
+  static const Color gold = Color(0xFFD4AE5E);
   static const Color blue = Color(0xFF007AFF);
   static const Color purple = Color(0xFFAF52DE);
   static const Color orange = Color(0xFFFF9500);

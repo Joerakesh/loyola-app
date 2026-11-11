@@ -102,7 +102,7 @@ export default function AttendancePage() {
       <AppShell>
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="flex items-center gap-3 text-slate-500">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-[#8b0000]" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-[var(--brand)]" />
             Loading attendance details...
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function AttendancePage() {
         <section>
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <p className="text-sm font-medium text-[#8b0000]">
+              <p className="text-sm font-medium text-[var(--brand)]">
                 Academic overview
               </p>
 
@@ -151,7 +151,7 @@ export default function AttendancePage() {
         {/* Overview Section */}
         <section className="grid gap-6 lg:grid-cols-3">
           {/* Main Percentage Card */}
-          <div className="rounded-3xl bg-[#8b0000] p-7 text-white shadow-lg lg:col-span-1">
+          <div className="rounded-3xl bg-[var(--brand-deep)] p-7 text-white shadow-lg lg:col-span-1">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 text-sm text-white/70">

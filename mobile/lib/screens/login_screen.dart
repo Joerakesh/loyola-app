@@ -122,6 +122,33 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                      const SizedBox(height: 14),
+                      const Text(
+                        'Ad majorem Dei gloriam',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.gold,
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Center(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(60),
+                          ),
+                          child: Image.asset(
+                            'assets/images/loyola_church.png',
+                            width: 92,
+                            height: 112,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const SizedBox(width: 92, height: 112),
+                          ),
+                        ),
+                      ),
                       SizedBox(height: Responsive.dp(context, 32)),
                       _buildGoogleButton(provider),
                       SizedBox(height: Responsive.dp(context, 20)),

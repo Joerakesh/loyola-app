@@ -2,12 +2,15 @@ import { Request, Response, NextFunction } from "express";
 
 import { appSessionService } from "../services/app-session.service.js";
 import { userRepository } from "../repositories/user.repository.js";
+import { ensureIndexesOnce } from "../config/bootstrap.js";
 
 export async function requireAuth(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  void ensureIndexesOnce();
+
   try {
     const authorization = req.headers.authorization;
 

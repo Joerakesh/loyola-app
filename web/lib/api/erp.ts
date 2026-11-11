@@ -1,7 +1,9 @@
 import { apiFetch } from "./client";
 import { getToken } from "../auth/session";
 import type {
+  AttendanceSummary,
   AttendanceSummaryResponse,
+  DashboardData,
   DashboardResponse,
 } from "../../types/api";
 
@@ -113,4 +115,27 @@ export async function getReminders() {
 
 export async function getNotifications() {
   return apiFetch<DataResponse<PlatformRecord[]>>("/notifications", { headers: authHeaders() });
+}
+
+export interface IgnatianValue { name: string; meaning: string }
+export interface Reflection { theme: string; prompt: string; value: IgnatianValue }
+
+/** Everything the dashboard shows, from one request. A section that failed on
+ * the server is null and named in `failed`, so the rest of the page still works. */
+export interface HomeData {
+  dashboard: DashboardData | null;
+  attendance: AttendanceSummary | null;
+  assignments: PlatformRecord[] | null;
+  announcements: PlatformRecord[] | null;
+  schedules: PlatformRecord[] | null;
+  reminders: PlatformRecord[] | null;
+  notifications: PlatformRecord[] | null;
+  reflection: Reflection;
+}
+
+export async function getHome(options: { refresh?: boolean } = {}) {
+  return apiFetch<{ status: string; data: HomeData; failed: string[] }>(
+    options.refresh ? "/home?refresh=1" : "/home",
+    { headers: authHeaders() },
+  );
 }
