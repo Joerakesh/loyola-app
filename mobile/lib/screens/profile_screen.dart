@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -138,7 +140,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-              _buildHeader(_profile!),
+              _buildHeader(
+                _profile!,
+                context.watch<AuthProvider>().user?.avatarUrl,
+              ),
               const SizedBox(height: 16), // Tighter spacing
               _buildDetailsCard(_profile!),
               const SizedBox(height: 16), // Tighter spacing
@@ -173,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ---------------------------------------------------------------------------
   // PROFILE HEADER
   // ---------------------------------------------------------------------------
-  Widget _buildHeader(StudentProfile profile) {
+  Widget _buildHeader(StudentProfile profile, String? avatarUrl) {
     return GlassContainer(
       // Reduced padding
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -197,16 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            child: Center(
-              child: Text(
-                profile.name.isNotEmpty ? profile.name[0].toUpperCase() : 'S',
-                style: const TextStyle(
-                  color: AppColors.white,
-                  fontSize: 24, // Smaller font
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            child: ClipOval(child: _buildAvatar(profile, avatarUrl)),
           ),
           const SizedBox(height: 12),
           Text(
@@ -234,6 +230,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildAvatar(StudentProfile profile, String? avatarUrl) {
+    final url = avatarUrl?.trim();
+    final fallback = Center(
+      child: Text(
+        profile.name.isNotEmpty ? profile.name[0].toUpperCase() : 'S',
+        style: const TextStyle(
+          color: AppColors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+
+    if (url == null || url.isEmpty) return fallback;
+
+    try {
+      return url.startsWith('data:image/')
+          ? Image.memory(
+              base64Decode(url.substring(url.indexOf(',') + 1)),
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => fallback,
+            )
+          : Image.network(
+              url,
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => fallback,
+            );
+    } on FormatException {
+      return fallback;
+    }
   }
 
   Widget _buildInfoChipRow(StudentProfile profile) {

@@ -9,16 +9,26 @@ plugins {
 // private Admin SDK credential and must remain on the backend.
 val rootGoogleServices = rootProject.file("../../google-services.json")
 val appGoogleServices = file("google-services.json")
-val syncRootGoogleServices = tasks.register<Copy>("syncRootGoogleServices") {
-    from(rootGoogleServices)
-    into(layout.projectDirectory)
-    onlyIf { rootGoogleServices.isFile }
-}
 
+val syncRootGoogleServices = tasks.register("syncRootGoogleServices") {
+    inputs.file(rootGoogleServices)
+    outputs.file(appGoogleServices)
+
+    onlyIf { rootGoogleServices.isFile }
+
+    doLast {
+        rootGoogleServices.copyTo(appGoogleServices, overwrite = true)
+    }
+}
 if (rootGoogleServices.isFile || appGoogleServices.isFile) {
     apply(plugin = "com.google.gms.google-services")
+
     tasks.configureEach {
-        if (name.startsWith("process") && name.endsWith("GoogleServices")) {
+        if (
+            name.startsWith("process") && name.endsWith("GoogleServices") ||
+            name == "generateDebugResources" ||
+            name == "generateReleaseResources"
+        ) {
             dependsOn(syncRootGoogleServices)
         }
     }
