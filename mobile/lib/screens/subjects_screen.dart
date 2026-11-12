@@ -52,7 +52,9 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
         if (result.changed) {
           _subjects = result.data;
           if (_selectedSemester != null &&
-              !_subjects.any((subject) => subject.semester == _selectedSemester)) {
+              !_subjects.any(
+                (subject) => subject.semester == _selectedSemester,
+              )) {
             _selectedSemester = null;
           }
         }
@@ -70,18 +72,19 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     }
   }
 
-  List<int> get _semesters => _subjects
-      .map((subject) => subject.semester)
-      .where((semester) => semester > 0)
-      .toSet()
-      .toList()
-    ..sort();
+  List<int> get _semesters =>
+      _subjects
+          .map((subject) => subject.semester)
+          .where((semester) => semester > 0)
+          .toSet()
+          .toList()
+        ..sort();
 
   List<Subject> get _visibleSubjects => _selectedSemester == null
       ? _subjects
       : _subjects
-          .where((subject) => subject.semester == _selectedSemester)
-          .toList();
+            .where((subject) => subject.semester == _selectedSemester)
+            .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -119,10 +122,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   List<Widget> _buildContentSlivers() {
     if (_isLoading) {
       return const [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: LoadingView(),
-        ),
+        SliverFillRemaining(hasScrollBody: false, child: LoadingView()),
       ];
     }
 
@@ -158,29 +158,26 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           Responsive.dp(context, 130),
         ),
         sliver: SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              if (index == 0) return _buildSummaryCard(visibleSubjects);
-              if (index == 1) return const SizedBox(height: 32);
-              if (index == 2) {
-                return SectionHeader(
-                  title: 'Curriculum',
-                  subtitle: _selectedSemester == null
-                      ? '${visibleSubjects.length} subjects across semesters'
-                      : '${visibleSubjects.length} subjects · Semester $_selectedSemester',
-                );
-              }
-              if (index == 3) return _buildSemesterFilter();
-              if (index == 4) return const SizedBox(height: 16);
-
-              final subject = visibleSubjects[index - 5];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: _buildSubjectCard(subject),
+          delegate: SliverChildBuilderDelegate((context, index) {
+            if (index == 0) return _buildSummaryCard(visibleSubjects);
+            if (index == 1) return const SizedBox(height: 32);
+            if (index == 2) {
+              return SectionHeader(
+                title: 'Curriculum',
+                subtitle: _selectedSemester == null
+                    ? '${visibleSubjects.length} subjects across semesters'
+                    : '${visibleSubjects.length} subjects · Semester $_selectedSemester',
               );
-            },
-            childCount: visibleSubjects.length + 5,
-          ),
+            }
+            if (index == 3) return _buildSemesterFilter();
+            if (index == 4) return const SizedBox(height: 16);
+
+            final subject = visibleSubjects[index - 5];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: _buildSubjectCard(subject),
+            );
+          }, childCount: visibleSubjects.length + 5),
         ),
       ),
     ];
@@ -253,10 +250,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
             _semesterChip(label: 'All', semester: null),
             for (final semester in _semesters) ...[
               const SizedBox(width: 8),
-              _semesterChip(
-                label: 'Semester $semester',
-                semester: semester,
-              ),
+              _semesterChip(label: 'Semester $semester', semester: semester),
             ],
           ],
         ),
@@ -277,9 +271,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
-            color: selected
-                ? AppColors.crimson
-                : AppColors.backgroundSoft,
+            color: selected ? AppColors.crimson : AppColors.backgroundSoft,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: selected ? AppColors.crimson : AppColors.outline,

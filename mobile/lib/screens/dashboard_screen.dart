@@ -4,14 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../app/app_router.dart';
 import '../core/cache/data_cache.dart';
 import '../core/constants/app_colors.dart';
 import '../core/theme/responsive.dart';
 import '../models/attendance_model.dart';
+import '../models/college_announcement.dart';
 import '../models/dashboard_model.dart';
 import '../services/attendance_service.dart';
 import '../services/auth_provider.dart';
+import '../services/college_updates_service.dart';
 import '../services/dashboard_service.dart';
+import '../utils/announcement_links.dart';
+import '../widgets/announcement_card.dart';
 import '../widgets/app_state_views.dart';
 import '../widgets/glass_background.dart';
 import '../widgets/glass_container.dart';
@@ -22,10 +27,12 @@ class DashboardScreen extends StatefulWidget {
     super.key,
     required this.dashboardService,
     required this.attendanceService,
+    required this.collegeUpdatesService,
   });
 
   final DashboardService dashboardService;
   final AttendanceService attendanceService;
+  final CollegeUpdatesService collegeUpdatesService;
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -37,12 +44,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
   String? _error;
   dynamic _attendanceSummary;
+  List<CollegeAnnouncement> _announcements = [];
+  bool _announcementsLoading = true;
+  String? _announcementsError;
 
   @override
   void initState() {
     super.initState();
     _loadCached();
     _refreshData();
+    _refreshAnnouncements();
   }
 
   double _getAttendancePercentage() {
@@ -125,6 +136,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Future<void> _refreshAnnouncements({bool refresh = false}) async {
+    setState(() {
+      _announcementsLoading = true;
+      _announcementsError = null;
+    });
+
+    try {
+      final announcements = await widget.collegeUpdatesService.fetchAnnouncements(
+        refresh: refresh,
+      );
+      if (!mounted) return;
+      setState(() {
+        _announcements = announcements;
+        _announcementsLoading = false;
+        _announcementsError = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _announcementsLoading = false;
+        _announcementsError = error.toString();
+      });
+    }
+  }
+
+  Future<void> _refreshAll() async {
+    await Future.wait([
+      _refreshData(),
+      _refreshAnnouncements(refresh: true),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     final content = _isLoading
@@ -147,7 +190,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return SafeArea(
       bottom: false,
       child: RefreshIndicator(
-        onRefresh: _refreshData,
+        onRefresh: _refreshAll,
         color: AppColors.white,
         backgroundColor: AppColors.glass,
         child: CustomScrollView(
@@ -165,8 +208,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildHeroCard(todayRecord),
-                  const SizedBox(height: 28),
+                  _buildAcademicOverview(todayRecord),
+                  const SizedBox(height: 26),
+                  _buildAnnouncementsSection(),
+                  const SizedBox(height: 24),
                   _buildRecentLogsSection(),
                 ]),
               ),
@@ -174,6 +219,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _openAnnouncement(CollegeAnnouncement announcement) async {
+    final opened = await openAnnouncementLink(announcement.url);
+    if (!mounted || opened) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Could not open this announcement link.')),
+    );
+  }
+
+  Widget _buildAnnouncementsSection() {
+    final visibleAnnouncements = _announcements.take(4).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeader(
+          title: 'Campus announcements',
+          subtitle: 'Notices and documents from Loyola College',
+          trailing: TextButton.icon(
+            onPressed: () => context.push(AppRoutes.updates),
+            icon: const Icon(Icons.arrow_outward_rounded, size: 15),
+            label: const Text('All updates'),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.crimson,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        if (_announcementsLoading && _announcements.isEmpty)
+          const GlassContainer(
+            padding: EdgeInsets.all(18),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 17,
+                  height: 17,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 12),
+                Text(
+                  'Loading campus updates…',
+                  style: TextStyle(color: AppColors.white54, fontSize: 13),
+                ),
+              ],
+            ),
+          )
+        else if (_announcementsError != null && _announcements.isEmpty)
+          GlassContainer(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Campus announcements are unavailable right now.',
+                    style: TextStyle(color: AppColors.white54, fontSize: 13),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Retry announcements',
+                  onPressed: () => _refreshAnnouncements(refresh: true),
+                  icon: const Icon(Icons.refresh_rounded),
+                  color: AppColors.crimson,
+                ),
+              ],
+            ),
+          )
+        else if (visibleAnnouncements.isEmpty)
+          const GlassContainer(
+            padding: EdgeInsets.all(18),
+            child: Text(
+              'No campus announcements are available.',
+              style: TextStyle(color: AppColors.white54, fontSize: 13),
+            ),
+          )
+        else
+          ...visibleAnnouncements.map(
+            (announcement) => AnnouncementCard(
+              announcement: announcement,
+              onTap: () => _openAnnouncement(announcement),
+            ),
+          ),
+      ],
     );
   }
 
@@ -228,97 +359,118 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildHeroCard(AttendanceRecord? record) {
-    final dayOrder = record?.dayOrder ?? 0;
+  Widget _buildAcademicOverview(AttendanceRecord? record) {
     final hours = record?.hours.take(5).toList() ?? [];
     final percentage = _getAttendancePercentage();
     final progressColor = percentage >= 75 ? AppColors.crimson : AppColors.red;
-    final compact = Responsive.isCompact(context);
-    final ringSize = Responsive.dp(context, compact ? 70 : 85);
+    final scheduledHours = hours
+        .where((hour) => hour.status != AttendanceStatus.notScheduled)
+        .length;
 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeader(
+          title: 'Academic overview',
+          subtitle: 'Attendance and today’s schedule',
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(
+              child: _buildMetricCard(
+                label: 'Attendance',
+                value: _attendanceSummary == null
+                    ? '—'
+                    : '${percentage.toStringAsFixed(1)}%',
+                caption: percentage >= 75 ? 'On track' : 'Below 75% target',
+                icon: Icons.track_changes_rounded,
+                accent: progressColor,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildMetricCard(
+                label: 'Today',
+                value: (record?.dayOrder ?? 0) > 0
+                    ? 'Day ${record!.dayOrder}'
+                    : 'No class',
+                caption: '$scheduledHours scheduled sessions',
+                icon: Icons.calendar_month_rounded,
+                accent: AppColors.gold,
+              ),
+            ),
+          ],
+        ),
+        if (hours.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          GlassContainer(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Wrap(
+              spacing: 18,
+              runSpacing: 10,
+              children: hours.map(_buildHourStatusPill).toList(),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMetricCard({
+    required String label,
+    required String value,
+    required String caption,
+    required IconData icon,
+    required Color accent,
+  }) {
     return GlassContainer(
-      padding: EdgeInsets.all(Responsive.dp(context, 24)),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Icon(icon, color: accent, size: 17),
+              const SizedBox(width: 7),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Today's Attendance",
-                      style: TextStyle(
-                        color: AppColors.white70,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      dayOrder > 0 ? 'Day Order $dayOrder' : 'No Schedule',
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontSize: Responsive.sp(context, 24),
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      hours.isNotEmpty
-                          ? 'Keep up the good work! 🚀'
-                          : 'Enjoy your day off ✨',
-                      style: TextStyle(
-                        color: AppColors.white54,
-                        fontSize: Responsive.sp(context, 13),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: ringSize,
-                width: ringSize,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CircularProgressIndicator(
-                      value: (percentage / 100).clamp(0.0, 1.0),
-                      strokeWidth: 8,
-                      strokeCap: StrokeCap.round,
-                      backgroundColor: AppColors.white.withValues(alpha: 0.05),
-                      valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                    ),
-                    Center(
-                      child: Text(
-                        '${percentage.toDouble()}%',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: Responsive.sp(context, 20),
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  label.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.white54,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.7,
+                  ),
                 ),
               ),
             ],
           ),
-
-          if (hours.isNotEmpty) ...[
-            const SizedBox(height: 22),
-            Container(height: 1, color: AppColors.white.withValues(alpha: 0.1)),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 18,
-              runSpacing: 10,
-              children: hours.map((h) => _buildHourStatusPill(h)).toList(),
+          const SizedBox(height: 13),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: AppColors.white,
+              fontSize: Responsive.sp(context, 23),
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.6,
             ),
-          ],
+          ),
+          const SizedBox(height: 5),
+          Text(
+            caption,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: accent,
+              fontSize: Responsive.sp(context, 11),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );

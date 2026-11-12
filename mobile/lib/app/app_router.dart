@@ -80,6 +80,7 @@ class AppRouter {
                 builder: (context, state) => DashboardScreen(
                   dashboardService: dashboardService,
                   attendanceService: attendanceService,
+                  collegeUpdatesService: collegeUpdatesService,
                 ),
               ),
             ],

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_colors.dart';
+import '../models/college_announcement.dart';
 import '../services/college_updates_service.dart';
+import '../utils/announcement_links.dart';
+import '../widgets/announcement_card.dart';
 import '../widgets/glass_background.dart';
 import '../widgets/glass_container.dart';
 
@@ -206,24 +209,16 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
   }
 
   Widget _announcementCard(Map<String, dynamic> item) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: GlassContainer(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.campaign_rounded, color: AppColors.crimson),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                item['title']?.toString() ?? 'Announcement',
-                style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        ),
-      ),
+    final announcement = CollegeAnnouncement.fromJson(item);
+    return AnnouncementCard(
+      announcement: announcement,
+      onTap: () async {
+        final opened = await openAnnouncementLink(announcement.url);
+        if (!mounted || opened) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open this announcement link.')),
+        );
+      },
     );
   }
 

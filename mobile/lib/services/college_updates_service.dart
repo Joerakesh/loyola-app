@@ -1,5 +1,6 @@
 import '../core/constants/api_constants.dart';
 import '../core/network/api_client.dart';
+import '../models/college_announcement.dart';
 
 class CollegeUpdatesService {
   CollegeUpdatesService(this._apiClient);
@@ -27,5 +28,17 @@ class CollegeUpdatesService {
     }
 
     return data.cast<String, dynamic>();
+  }
+
+  Future<List<CollegeAnnouncement>> fetchAnnouncements({bool refresh = false}) async {
+    final updates = await fetchUpdates(refresh: refresh);
+    final rawAnnouncements = updates['announcements'];
+    if (rawAnnouncements is! List) return const [];
+
+    return rawAnnouncements
+        .whereType<Map>()
+        .map((item) => CollegeAnnouncement.fromJson(item.cast<String, dynamic>()))
+        .where((item) => item.title.isNotEmpty && item.url.isNotEmpty)
+        .toList(growable: false);
   }
 }
