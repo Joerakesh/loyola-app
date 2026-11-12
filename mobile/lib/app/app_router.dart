@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/network/api_client.dart';
 import '../screens/attendance_screen.dart';
+import '../screens/academic_calendar_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/college_updates_screen.dart';
 import '../screens/login_screen.dart';
@@ -67,6 +68,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.updates,
         builder: (context, state) => CollegeUpdatesScreen(service: collegeUpdatesService),
+      ),
+      GoRoute(
+        path: AppRoutes.calendar,
+        builder: (context, state) => AcademicCalendarScreen(service: collegeUpdatesService),
       ),
       // AppShell containing the 5 main navigation tabs
       StatefulShellRoute.indexedStack(
@@ -155,6 +160,7 @@ class AppRoutes {
   static const String marks = '/marks';
   static const String profile = '/profile';
   static const String updates = '/updates';
+  static const String calendar = '/calendar';
 }
 
 class _NotFoundScreen extends StatelessWidget {

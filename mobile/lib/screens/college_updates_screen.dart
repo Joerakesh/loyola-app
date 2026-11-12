@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../app/app_router.dart';
 import '../core/constants/app_colors.dart';
 import '../models/college_announcement.dart';
 import '../services/college_updates_service.dart';
@@ -54,11 +56,6 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
   Widget build(BuildContext context) {
     final announcements = _items(_updates?['announcements']);
     final events = _items(_updates?['events']);
-    final calendar = _updates?['calendar'] is Map
-        ? (_updates!['calendar'] as Map).cast<String, dynamic>()
-        : <String, dynamic>{};
-    final calendarEntries = _items(calendar['entries']);
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -94,10 +91,12 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
                       const Text('What’s happening at Loyola', style: TextStyle(color: AppColors.white, fontSize: 22, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 7),
                       const Text(
-                        'Notices, events and important academic dates from the college website.',
+                        'Notices and events from the Loyola College website.',
                         style: TextStyle(color: AppColors.white54, fontSize: 13, height: 1.45),
                       ),
                       const SizedBox(height: 25),
+                      _calendarShortcut(),
+                      const SizedBox(height: 24),
                       _sectionHeading('Announcements', announcements.length),
                       const SizedBox(height: 10),
                       if (announcements.isEmpty)
@@ -111,13 +110,6 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
                         _empty('No upcoming events were found.')
                       else
                         ...events.map(_eventItem),
-                      const SizedBox(height: 26),
-                      _sectionHeading('Academic calendar', calendarEntries.length, subtitle: calendar['month']?.toString()),
-                      const SizedBox(height: 10),
-                      if (calendarEntries.isEmpty)
-                        _empty('No calendar entries are available.')
-                      else
-                        _calendarList(calendarEntries),
                       if (_updates?['fetchedAt'] != null) ...[
                         const SizedBox(height: 20),
                         Text(
@@ -129,6 +121,46 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
                     ],
                   ),
                 ),
+    );
+  }
+
+  Widget _calendarShortcut() {
+    return InkWell(
+      onTap: () => context.push(AppRoutes.calendar),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.crimson.withValues(alpha: 0.09),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.crimson.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.crimson.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: const Icon(Icons.calendar_month_rounded, color: AppColors.crimson),
+            ),
+            const SizedBox(width: 13),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Academic calendar', style: TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                  SizedBox(height: 4),
+                  Text('Browse dates and day-wise schedule', style: TextStyle(color: AppColors.white54, fontSize: 12)),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 15, color: AppColors.crimson),
+          ],
+        ),
+      ),
     );
   }
 
@@ -215,51 +247,6 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
           if (url.isNotEmpty) ...[
             const SizedBox(height: 10),
             _linkButton('View event details', () => _openLink(url)),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _calendarList(List<Map<String, dynamic>> entries) {
-    return _card(
-      padding: EdgeInsets.zero,
-      child: Column(
-        children: [
-          for (var i = 0; i < entries.length; i++) ...[
-            _calendarRow(entries[i]),
-            if (i != entries.length - 1) const Divider(height: 1, color: AppColors.outline),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _calendarRow(Map<String, dynamic> item) {
-    final event = item['event']?.toString().trim() ?? '';
-    final dayOrder = item['dayOrder']?.toString() ?? '';
-    final noEvent = event.isEmpty || event == '—';
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 88,
-            child: Text(
-              item['dateLabel']?.toString() ?? '',
-              style: const TextStyle(color: AppColors.white70, fontSize: 11, fontWeight: FontWeight.w600),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              noEvent ? 'No scheduled event' : event,
-              style: TextStyle(color: noEvent ? AppColors.white38 : AppColors.white, fontSize: 12, height: 1.4),
-            ),
-          ),
-          if (dayOrder.isNotEmpty) ...[
-            const SizedBox(width: 8),
-            Text(dayOrder, style: const TextStyle(color: AppColors.crimson, fontSize: 10, fontWeight: FontWeight.w700)),
           ],
         ],
       ),

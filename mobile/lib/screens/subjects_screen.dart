@@ -24,6 +24,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   bool _isLoading = true;
   String? _error;
   int? _selectedSemester;
+  bool _semesterSelectionInitialized = false;
 
   @override
   void initState() {
@@ -38,6 +39,10 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
       if (!mounted || cached == null) return;
       setState(() {
         _subjects = cached;
+        if (!_semesterSelectionInitialized) {
+          _selectedSemester = _highestSemester(cached);
+          _semesterSelectionInitialized = true;
+        }
         _isLoading = false;
         _error = null;
       });
@@ -55,8 +60,11 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               !_subjects.any(
                 (subject) => subject.semester == _selectedSemester,
               )) {
-            _selectedSemester = null;
+            _selectedSemester = _highestSemester(_subjects);
+          } else if (!_semesterSelectionInitialized) {
+            _selectedSemester = _highestSemester(_subjects);
           }
+          _semesterSelectionInitialized = true;
         }
         _isLoading = false;
         _error = null;
@@ -72,13 +80,20 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     }
   }
 
+  int? _highestSemester(List<Subject> subjects) {
+    final semesters = subjects
+        .map((subject) => subject.semester)
+        .where((semester) => semester > 0);
+    return semesters.isEmpty ? null : semesters.reduce((a, b) => a > b ? a : b);
+  }
+
   List<int> get _semesters =>
       _subjects
           .map((subject) => subject.semester)
           .where((semester) => semester > 0)
           .toSet()
           .toList()
-        ..sort();
+        ..sort((a, b) => b.compareTo(a));
 
   List<Subject> get _visibleSubjects => _selectedSemester == null
       ? _subjects
@@ -266,7 +281,10 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
       selected: selected,
       label: label,
       child: GestureDetector(
-        onTap: () => setState(() => _selectedSemester = semester),
+        onTap: () => setState(() {
+          _selectedSemester = semester;
+          _semesterSelectionInitialized = true;
+        }),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
