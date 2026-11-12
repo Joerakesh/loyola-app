@@ -14,6 +14,7 @@ import authRoutes from "./routes/auth.routes.js";
 import homeRoutes from "./routes/home.routes.js";
 import reflectionsRoutes from "./routes/reflections.routes.js";
 import v2Routes from "./routes/v2.routes.js";
+import collegeRoutes from "./routes/college.routes.js";
 import { createPlatformRouter } from "./routes/platform.routes.js";
 import { platformControllers } from "./controllers/platform.controllers.js";
 
@@ -89,6 +90,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/home", homeRoutes);
 app.use("/api/v1/reflections", reflectionsRoutes);
 app.use("/api/v2", v2Routes);
+app.use("/api/v1/college", collegeRoutes);
 
 app.use(
   "/api/v1/schedules",
