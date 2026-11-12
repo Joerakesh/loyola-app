@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../core/cache/data_cache.dart';
 import '../core/constants/app_colors.dart';
@@ -6,6 +9,7 @@ import '../core/theme/responsive.dart';
 import '../models/attendance_model.dart';
 import '../models/dashboard_model.dart';
 import '../services/attendance_service.dart';
+import '../services/auth_provider.dart';
 import '../services/dashboard_service.dart';
 import '../widgets/app_state_views.dart';
 import '../widgets/glass_background.dart';
@@ -212,7 +216,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
-          Row(children: [GlassAvatar(name: student.name)]),
+          Row(children: [
+            GlassAvatar(
+              name: student.name,
+              imageDataUri: context.watch<AuthProvider>().studentPhotoDataUri,
+            ),
+          ]),
         ],
       ),
     );
@@ -557,9 +566,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class GlassAvatar extends StatelessWidget {
-  const GlassAvatar({super.key, required this.name});
+  const GlassAvatar({super.key, required this.name, this.imageDataUri});
 
   final String name;
+  final String? imageDataUri;
+
+  Widget _buildPhotoOrInitial(String initial, double size) {
+    final value = imageDataUri?.trim();
+    if (value != null && value.startsWith('data:image/')) {
+      try {
+        final bytes = base64Decode(value.substring(value.indexOf(',') + 1));
+        return Image.memory(
+          bytes,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _initial(initial),
+        );
+      } on FormatException {
+        return _initial(initial);
+      }
+    }
+    return _initial(initial);
+  }
+
+  Widget _initial(String initial) {
+    return Center(
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: AppColors.white,
+          fontSize: Responsive.sp(context, 20),
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -584,15 +626,8 @@ class GlassAvatar extends StatelessWidget {
           ),
         ],
       ),
-      child: Center(
-        child: Text(
-          initial,
-          style: TextStyle(
-            color: AppColors.white,
-            fontSize: Responsive.sp(context, 20),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      child: ClipOval(
+        child: _buildPhotoOrInitial(initial, size),
       ),
     );
   }
