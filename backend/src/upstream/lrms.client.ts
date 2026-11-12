@@ -224,7 +224,7 @@ export class LRMSClient implements LRMSRequester {
 
     const html = String(response.data ?? "");
     if (
-      /captcha__text|validateLogin\\.jsp/i.test(html) &&
+      /captcha__text|validateLogin\.jsp/i.test(html) &&
       /type=["']password["']/i.test(html)
     ) {
       throw new SessionExpiredError("LRMS dashboard returned the login page.");
