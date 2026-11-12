@@ -9,22 +9,20 @@ export class StudentController {
 
       const html = response.data;
       const imageElement = html.match(
-        /<img\\b[^>]*(?:id|name)=["']studentPhoto["'][^>]*>/i,
+        /<img\b[^>]*(?:id|name)=["']studentPhoto["'][^>]*>/i,
       )?.[0];
       const imageSource = imageElement?.match(
         /src=["']([^"']+)["']/i,
       )?.[1];
 
-      const candidates = [
-        imageSource,
-        ...[...html.matchAll(/data:image\\/[a-zA-Z0-9.+-]+;base64,[a-zA-Z0-9+/=\\r\\n]+/g)]
-          .map((match) => match[0]),
-        ...[...html.matchAll(/imageDataUri\\s*=\\s*["'](data:image\\/[^"']+)["']/g)]
-          .map((match) => match[1]),
-      ];
+      // The ERP page assigns the student's Base64 photo to imageDataUri and
+      // then sets it on #studentPhoto. Support either representation.
+      const embeddedPhoto = html.match(
+        /data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\r\n]+/,
+      )?.[0];
 
-      const photoDataUri = candidates
-        .map((value) => value?.replace(/\\\\n/g, "").trim())
+      const photoDataUri = [imageSource, embeddedPhoto]
+        .map((value) => value?.replace(/\s/g, "").trim())
         .find((value) => value?.startsWith("data:image/"));
 
       if (!photoDataUri) {
