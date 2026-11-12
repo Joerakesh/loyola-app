@@ -25,10 +25,13 @@ export class AcademicCalendarController {
       res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
       return res.json({ status: "success", data });
     } catch (error) {
-      console.error(
-        "Academic calendar fetch failed:",
-        error instanceof Error ? error.message : error,
-      );
+      console.error("Academic calendar fetch failed", {
+        year,
+        month,
+        refresh: req.query.refresh === "1",
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return res.status(502).json({
         status: "error",
         message: "Unable to fetch the requested academic calendar month from Loyola College",
