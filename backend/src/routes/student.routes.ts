@@ -6,6 +6,12 @@ import { requireErpClient } from "../middleware/lrms-bridge.middleware.js";
 
 const router = Router();
 router.get(
+  "/photo",
+  requireAuth,
+  requireErpClient,
+  studentController.photo.bind(studentController),
+);
+router.get(
   "/profile",
   requireAuth,
   responseCache("profile"),

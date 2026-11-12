@@ -12,6 +12,7 @@ class CacheKeys {
   static const String marks = 'cache.marks';
   static const String subjects = 'cache.subjects';
   static const String profile = 'cache.profile';
+  static const String studentPhoto = 'cache.student_photo';
 }
 
 /// Result returned by the versioned fetch methods on services.
@@ -82,7 +83,7 @@ class DataCache {
 
   Future<void> clearAll() async {
     final sp = await _sp;
-    for (final key in [CacheKeys.dashboard, CacheKeys.attendanceHourly, CacheKeys.attendanceSummary, CacheKeys.marks, CacheKeys.subjects, CacheKeys.profile]) {
+    for (final key in [CacheKeys.dashboard, CacheKeys.attendanceHourly, CacheKeys.attendanceSummary, CacheKeys.marks, CacheKeys.subjects, CacheKeys.profile, CacheKeys.studentPhoto]) {
       await sp.remove(_rawKey(key));
       await sp.remove(_versionKey(key));
     }

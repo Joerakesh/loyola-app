@@ -65,6 +65,26 @@ class AuthService {
     }
   }
 
+  /// Fetches the student's ERP photo using the authenticated backend session.
+  Future<String?> fetchStudentPhoto() async {
+    final response = await _apiClient.dio.get(ApiConstants.studentPhoto);
+    final data = response.data;
+
+    if (data is! Map || data['status'] != 'success') {
+      throw Exception(
+        data is Map ? data['message'] ?? 'Unable to fetch student photo' : 'Invalid student photo response',
+      );
+    }
+
+    final payload = data['data'];
+    final photo = payload is Map ? payload['photoDataUri'] : null;
+    if (photo is! String || !photo.startsWith('data:image/')) {
+      throw Exception('Student photo is missing from the ERP response');
+    }
+
+    return photo;
+  }
+
   /// Re-issues the session JWT using the existing (still valid) token.
   Future<AuthUser?> refresh() async {
     final token = await _storage.getToken();
