@@ -4,13 +4,9 @@ import '../core/constants/app_colors.dart';
 import '../models/college_announcement.dart';
 import '../services/college_updates_service.dart';
 import '../utils/announcement_links.dart';
-import '../widgets/announcement_card.dart';
-import '../widgets/glass_background.dart';
-import '../widgets/glass_container.dart';
 
 class CollegeUpdatesScreen extends StatefulWidget {
   const CollegeUpdatesScreen({super.key, required this.service});
-
   final CollegeUpdatesService service;
 
   @override
@@ -33,7 +29,6 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
       _loading = true;
       _error = null;
     });
-
     try {
       final result = await widget.service.fetchUpdates(refresh: refresh);
       if (!mounted) return;
@@ -65,215 +60,283 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
     final calendarEntries = _items(calendar['entries']);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: GlassBackground(
-        child: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () => _load(refresh: true),
-            color: AppColors.white,
-            backgroundColor: AppColors.glass,
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics(),
-              ),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          onPressed: () => Navigator.of(context).maybePop(),
-                          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.white),
-                        ),
-                        const Expanded(
-                          child: Text(
-                            'College Updates',
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 23,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: _loading ? null : () => _load(refresh: true),
-                          icon: const Icon(Icons.refresh_rounded, color: AppColors.white),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).maybePop(),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+        title: const Text('College updates', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh',
+            onPressed: _loading ? null : () => _load(refresh: true),
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+          const SizedBox(width: 6),
+        ],
+      ),
+      body: _loading && _updates == null
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null && _updates == null
+              ? _errorView()
+              : RefreshIndicator(
+                  onRefresh: () => _load(refresh: true),
+                  color: AppColors.crimson,
+                  backgroundColor: AppColors.backgroundSoft,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                    padding: const EdgeInsets.fromLTRB(18, 8, 18, 32),
+                    children: [
+                      const Text('What’s happening at Loyola', style: TextStyle(color: AppColors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 7),
+                      const Text(
+                        'Notices, events and important academic dates from the college website.',
+                        style: TextStyle(color: AppColors.white54, fontSize: 13, height: 1.45),
+                      ),
+                      const SizedBox(height: 25),
+                      _sectionHeading('Announcements', announcements.length),
+                      const SizedBox(height: 10),
+                      if (announcements.isEmpty)
+                        _empty('No announcements are available right now.')
+                      else
+                        ...announcements.map(_announcementItem),
+                      const SizedBox(height: 26),
+                      _sectionHeading('Upcoming events', events.length),
+                      const SizedBox(height: 10),
+                      if (events.isEmpty)
+                        _empty('No upcoming events were found.')
+                      else
+                        ...events.map(_eventItem),
+                      const SizedBox(height: 26),
+                      _sectionHeading('Academic calendar', calendarEntries.length, subtitle: calendar['month']?.toString()),
+                      const SizedBox(height: 10),
+                      if (calendarEntries.isEmpty)
+                        _empty('No calendar entries are available.')
+                      else
+                        _calendarList(calendarEntries),
+                      if (_updates?['fetchedAt'] != null) ...[
+                        const SizedBox(height: 20),
+                        Text(
+                          'Last synced: ' + _updates!['fetchedAt'].toString(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: AppColors.white38, fontSize: 11),
                         ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
-                if (_loading && _updates == null)
-                  const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (_error != null && _updates == null)
-                  SliverFillRemaining(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.cloud_off_rounded, color: AppColors.white54, size: 42),
-                            const SizedBox(height: 12),
-                            Text(
-                              _error!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: AppColors.white70),
-                            ),
-                            const SizedBox(height: 16),
-                            FilledButton(
-                              onPressed: () => _load(refresh: true),
-                              child: const Text('Try again'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _sectionTitle('Announcements', announcements.length),
-                        if (announcements.isEmpty)
-                          _empty('No announcements were found on the college website.')
-                        else
-                          ...announcements.map((item) => _announcementCard(item)),
-                        const SizedBox(height: 24),
-                        _sectionTitle('Upcoming Events', events.length),
-                        if (events.isEmpty)
-                          _empty('No upcoming events were found.')
-                        else
-                          ...events.map((item) => _eventCard(item)),
-                        const SizedBox(height: 24),
-                        _sectionTitle(
-                          'Academic Calendar',
-                          calendarEntries.length,
-                          subtitle: calendar['month']?.toString(),
-                        ),
-                        if (calendarEntries.isEmpty)
-                          _empty('No calendar entries were returned by the college website.')
-                        else
-                          ...calendarEntries.map((item) => _calendarCard(item)),
-                        if (_updates?['fetchedAt'] != null) ...[
-                          const SizedBox(height: 12),
-                          Text(
-                            'Last synced: ${_updates!['fetchedAt']}',
-                            style: const TextStyle(color: AppColors.white30, fontSize: 11),
-                          ),
-                        ],
-                      ]),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 
-  Widget _sectionTitle(String title, int count, {String? subtitle}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(color: AppColors.white, fontSize: 18, fontWeight: FontWeight.w800)),
-                if (subtitle != null && subtitle.isNotEmpty)
-                  Text(subtitle, style: const TextStyle(color: AppColors.white54, fontSize: 12)),
+  Widget _sectionHeading(String title, int count, {String? subtitle}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(color: AppColors.white, fontSize: 17, fontWeight: FontWeight.w700)),
+              if (subtitle != null && subtitle.isNotEmpty) ...[
+                const SizedBox(height: 3),
+                Text(subtitle, style: const TextStyle(color: AppColors.white54, fontSize: 12)),
               ],
-            ),
+            ],
           ),
-          Text('$count', style: const TextStyle(color: AppColors.white54, fontWeight: FontWeight.w700)),
+        ),
+        Text(count.toString(), style: const TextStyle(color: AppColors.white38, fontSize: 12, fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+
+  Widget _announcementItem(Map<String, dynamic> item) {
+    final announcement = CollegeAnnouncement.fromJson(item);
+    final details = item['details']?.toString().trim() ?? '';
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.campaign_outlined, color: AppColors.crimson, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  announcement.title,
+                  style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w700, height: 1.4),
+                ),
+              ),
+            ],
+          ),
+          if (details.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(details, style: const TextStyle(color: AppColors.white70, fontSize: 13, height: 1.5)),
+          ],
+          const SizedBox(height: 12),
+          _linkButton(announcement.isPdf ? 'Read full notice (PDF)' : 'Open notice', () => _openLink(announcement.url)),
         ],
       ),
     );
   }
 
-  Widget _empty(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: GlassContainer(
-        padding: const EdgeInsets.all(18),
-        child: Text(text, style: const TextStyle(color: AppColors.white54, fontSize: 13)),
+  Widget _eventItem(Map<String, dynamic> item) {
+    final title = item['title']?.toString() ?? 'College event';
+    final details = item['details']?.toString().trim() ?? '';
+    final department = item['department']?.toString().trim() ?? '';
+    final date = item['dateLabel']?.toString().trim() ?? '';
+    final location = item['location']?.toString().trim() ?? '';
+    final url = item['url']?.toString() ?? '';
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w700, height: 1.4)),
+          if (date.isNotEmpty) ...[
+            const SizedBox(height: 9),
+            _detailLine(Icons.calendar_today_outlined, date),
+          ],
+          if (department.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            _detailLine(Icons.account_balance_outlined, department),
+          ],
+          if (location.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            _detailLine(Icons.location_on_outlined, location),
+          ],
+          if (details.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(details, style: const TextStyle(color: AppColors.white54, fontSize: 12, height: 1.45)),
+          ],
+          if (url.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _linkButton('View event details', () => _openLink(url)),
+          ],
+        ],
       ),
     );
   }
 
-  Widget _announcementCard(Map<String, dynamic> item) {
-    final announcement = CollegeAnnouncement.fromJson(item);
-    return AnnouncementCard(
-      announcement: announcement,
-      onTap: () async {
-        final opened = await openAnnouncementLink(announcement.url);
-        if (!mounted || opened) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open this announcement link.')),
-        );
-      },
+  Widget _calendarList(List<Map<String, dynamic>> entries) {
+    return _card(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var i = 0; i < entries.length; i++) ...[
+            _calendarRow(entries[i]),
+            if (i != entries.length - 1) const Divider(height: 1, color: AppColors.outline),
+          ],
+        ],
+      ),
     );
   }
 
-  Widget _eventCard(Map<String, dynamic> item) {
-    final metadata = [
-      item['department']?.toString(),
-      item['dateLabel']?.toString(),
-      item['location']?.toString(),
-    ].where((value) => value != null && value.isNotEmpty).join(' · ');
-    final details = metadata.isNotEmpty
-        ? metadata
-        : (item['details']?.toString() ?? '');
-
+  Widget _calendarRow(Map<String, dynamic> item) {
+    final event = item['event']?.toString().trim() ?? '';
+    final dayOrder = item['dayOrder']?.toString() ?? '';
+    final noEvent = event.isEmpty || event == '—';
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: GlassContainer(
-        padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 88,
+            child: Text(
+              item['dateLabel']?.toString() ?? '',
+              style: const TextStyle(color: AppColors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              noEvent ? 'No scheduled event' : event,
+              style: TextStyle(color: noEvent ? AppColors.white38 : AppColors.white, fontSize: 12, height: 1.4),
+            ),
+          ),
+          if (dayOrder.isNotEmpty) ...[
+            const SizedBox(width: 8),
+            Text(dayOrder, style: const TextStyle(color: AppColors.crimson, fontSize: 10, fontWeight: FontWeight.w700)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _detailLine(IconData icon, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 14, color: AppColors.white38),
+        const SizedBox(width: 7),
+        Expanded(child: Text(value, style: const TextStyle(color: AppColors.white70, fontSize: 12, height: 1.4))),
+      ],
+    );
+  }
+
+  Widget _card({required Widget child, EdgeInsetsGeometry? padding}) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 9),
+      padding: padding ?? const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSoft,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.outline),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _linkButton(String label, VoidCallback onPressed) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.crimson,
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
+          visualDensity: VisualDensity.compact,
+        ),
+        icon: const Icon(Icons.open_in_new_rounded, size: 15),
+        label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+      ),
+    );
+  }
+
+  Widget _empty(String message) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Text(message, style: const TextStyle(color: AppColors.white54, fontSize: 13, height: 1.4)),
+    );
+  }
+
+  Widget _errorView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(item['title']?.toString() ?? 'College event', style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-            if (details.isNotEmpty) ...[
-              const SizedBox(height: 7),
-              Text(details, style: const TextStyle(color: AppColors.white54, fontSize: 12)),
-            ],
+            const Icon(Icons.cloud_off_outlined, size: 38, color: AppColors.white54),
+            const SizedBox(height: 12),
+            Text(_error ?? 'Unable to load college updates.', textAlign: TextAlign.center, style: const TextStyle(color: AppColors.white70, fontSize: 13)),
+            const SizedBox(height: 14),
+            FilledButton(onPressed: () => _load(refresh: true), child: const Text('Try again')),
           ],
         ),
       ),
     );
   }
 
-  Widget _calendarCard(Map<String, dynamic> item) {
-    final event = item['event']?.toString() ?? '';
-    final dayOrder = item['dayOrder']?.toString();
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: GlassContainer(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 90,
-              child: Text(item['dateLabel']?.toString() ?? '', style: const TextStyle(color: AppColors.white70, fontWeight: FontWeight.w700, fontSize: 12)),
-            ),
-            Expanded(
-              child: Text(
-                event.isEmpty ? 'No event' : event,
-                style: const TextStyle(color: AppColors.white, fontSize: 13),
-              ),
-            ),
-            if (dayOrder != null && dayOrder.isNotEmpty)
-              Text(dayOrder, style: const TextStyle(color: AppColors.crimson, fontSize: 11, fontWeight: FontWeight.w700)),
-          ],
-        ),
-      ),
+  Future<void> _openLink(String url) async {
+    final opened = await openAnnouncementLink(url);
+    if (!mounted || opened) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Could not open this link.')),
     );
   }
 }
