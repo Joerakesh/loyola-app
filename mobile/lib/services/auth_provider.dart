@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../core/cache/data_cache.dart';
@@ -15,11 +17,13 @@ class AuthProvider extends ChangeNotifier {
   bool _isAuthenticated = false;
   String? _error;
   AuthUser? _user;
+  String? _studentPhotoDataUri;
 
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _isAuthenticated;
   String? get error => _error;
   AuthUser? get user => _user;
+  String? get studentPhotoDataUri => _studentPhotoDataUri;
 
   /// Attempts to restore the previous session automatically. Returns true
   /// when the user is in, false when the splash screen should send them to
@@ -28,6 +32,8 @@ class AuthProvider extends ChangeNotifier {
     if (await _authService.hasValidSession()) {
       _user = await _authService.getUser();
       _isAuthenticated = true;
+      await _loadCachedStudentPhoto();
+      if (_user?.erpLinked == true) unawaited(_refreshStudentPhoto());
       _error = null;
       notifyListeners();
       return true;
@@ -37,6 +43,8 @@ class AuthProvider extends ChangeNotifier {
     try {
       _user = await _authService.refresh();
       _isAuthenticated = true;
+      await _loadCachedStudentPhoto();
+      if (_user?.erpLinked == true) unawaited(_refreshStudentPhoto());
       _error = null;
       notifyListeners();
       return true;
@@ -59,6 +67,8 @@ class AuthProvider extends ChangeNotifier {
 
       _user = user;
       _isAuthenticated = true;
+      await _loadCachedStudentPhoto();
+      if (user.erpLinked) unawaited(_refreshStudentPhoto());
     } catch (error) {
       debugPrint('LOGIN ERROR: $error');
       _error = error.toString();
@@ -76,9 +86,31 @@ class AuthProvider extends ChangeNotifier {
     await DataCache.instance.clearAll();
 
     _user = null;
+    _studentPhotoDataUri = null;
     _isAuthenticated = false;
 
     notifyListeners();
+  }
+
+  Future<void> _loadCachedStudentPhoto() async {
+    final cached = await DataCache.instance.load(CacheKeys.studentPhoto);
+    if (cached is String && cached.startsWith('data:image/')) {
+      _studentPhotoDataUri = cached;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _refreshStudentPhoto() async {
+    try {
+      final photo = await _authService.fetchStudentPhoto();
+      if (photo == null || photo == _studentPhotoDataUri) return;
+
+      await DataCache.instance.save(CacheKeys.studentPhoto, photo);
+      _studentPhotoDataUri = photo;
+      notifyListeners();
+    } catch (error) {
+      debugPrint('STUDENT PHOTO FETCH FAILED: $error');
+    }
   }
 
   void _setLoading(bool value) {
