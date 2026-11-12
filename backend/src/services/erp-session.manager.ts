@@ -159,6 +159,10 @@ class ManagedLRMSClient implements LRMSRequester {
     return this.run((client) => client.post<T>(url, data));
   }
 
+  getHtml(url: string) {
+    return this.run((client) => client.getHtml(url));
+  }
+
   private async run<R>(operation: (client: LRMSClient) => Promise<R>): Promise<R> {
     const client = this.current ?? (await this.manager.acquire(this.user));
     this.current = client;
