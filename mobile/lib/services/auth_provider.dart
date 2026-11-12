@@ -25,6 +25,23 @@ class AuthProvider extends ChangeNotifier {
   AuthUser? get user => _user;
   String? get studentPhotoDataUri => _studentPhotoDataUri;
 
+  /// Prefer the ERP photo, but always fall back to the Google account photo.
+  String? get profileAvatarUrl {
+    final erpPhoto = _studentPhotoDataUri;
+    if (erpPhoto != null && erpPhoto.startsWith('data:image/')) {
+      return erpPhoto;
+    }
+
+    final googlePhoto = _user?.avatarUrl?.trim();
+    return googlePhoto == null || googlePhoto.isEmpty ? null : googlePhoto;
+  }
+
+  /// Allows screens to retry the ERP photo fetch when the user opens Profile.
+  Future<void> refreshStudentPhoto() async {
+    if (_user?.erpLinked != true) return;
+    await _refreshStudentPhoto();
+  }
+
   /// Attempts to restore the previous session automatically. Returns true
   /// when the user is in, false when the splash screen should send them to
   /// the login screen.
