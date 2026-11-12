@@ -228,11 +228,14 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
   }
 
   Widget _eventCard(Map<String, dynamic> item) {
-    final details = [
+    final metadata = [
       item['department']?.toString(),
       item['dateLabel']?.toString(),
       item['location']?.toString(),
     ].where((value) => value != null && value.isNotEmpty).join(' · ');
+    final details = metadata.isNotEmpty
+        ? metadata
+        : (item['details']?.toString() ?? '');
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
