@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/network/api_client.dart';
 import '../screens/attendance_screen.dart';
 import '../screens/dashboard_screen.dart';
+import '../screens/college_updates_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/marks_screen.dart';
 import '../screens/profile_screen.dart';
@@ -14,6 +15,7 @@ import '../services/attendance_service.dart';
 import '../services/auth_provider.dart';
 import '../services/cache_warmup.dart';
 import '../services/dashboard_service.dart';
+import '../services/college_updates_service.dart';
 import '../services/marks_service.dart';
 import '../services/profile_service.dart';
 import '../services/subject_service.dart';
@@ -21,6 +23,7 @@ import '../services/subject_service.dart';
 class AppRouter {
   AppRouter({required this.apiClient, required this.authProvider}) {
     dashboardService = DashboardService(apiClient);
+    collegeUpdatesService = CollegeUpdatesService(apiClient);
     attendanceService = AttendanceService(apiClient);
     marksService = MarksService(apiClient);
     subjectService = SubjectService(apiClient);
@@ -38,6 +41,7 @@ class AppRouter {
   final AuthProvider authProvider;
 
   late final DashboardService dashboardService;
+  late final CollegeUpdatesService collegeUpdatesService;
   late final AttendanceService attendanceService;
   late final MarksService marksService;
   late final SubjectService subjectService;
@@ -59,6 +63,10 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.updates,
+        builder: (context, state) => CollegeUpdatesScreen(service: collegeUpdatesService),
       ),
       // AppShell containing the 5 main navigation tabs
       StatefulShellRoute.indexedStack(
@@ -145,6 +153,7 @@ class AppRoutes {
   static const String subjects = '/subjects';
   static const String marks = '/marks';
   static const String profile = '/profile';
+  static const String updates = '/updates';
 }
 
 class _NotFoundScreen extends StatelessWidget {
