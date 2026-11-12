@@ -69,6 +69,11 @@ function normalizeDate(label: string, year: number, monthNumber: number): { date
   };
 }
 
+/**
+ * Only retain rows whose date can be normalized into the requested month.
+ * The upstream page can return an adjacent month's calendar, so accepting
+ * unvalidated rows would silently label the wrong month as the requested one.
+ */
 function parseEntries(markup: string, year: number, monthNumber: number): CalendarEntry[] {
   const $ = cheerio.load(markup);
   const entries: CalendarEntry[] = [];
@@ -77,17 +82,23 @@ function parseEntries(markup: string, year: number, monthNumber: number): Calend
   $("tr").each((_, row) => {
     const cells = $(row).find("th, td").toArray().map((cell) => clean($(cell).text()));
     if (cells.length < 2 || /^date$/i.test(cells[0] ?? "")) return;
+
     const dateLabel = cells[0] ?? "";
     const event = cells[1] ?? "";
     if (!/\d/.test(dateLabel)) return;
+
+    const normalized = normalizeDate(dateLabel, year, monthNumber);
+    if (!normalized.date) return;
+
     const dayOrderCell = cells[2] ?? "";
-    const key = [dateLabel, event, dayOrderCell].join("|");
+    const key = [normalized.date, event, dayOrderCell].join("|");
     if (seen.has(key)) return;
     seen.add(key);
+
     entries.push({
       dateLabel,
       event,
-      ...normalizeDate(dateLabel, year, monthNumber),
+      ...normalized,
       ...(dayOrderCell && /day\s*[- ]?\d+/i.test(dayOrderCell)
         ? { dayOrder: dayOrderCell.match(/day\s*[- ]?\d+/i)?.[0] }
         : {}),
@@ -97,44 +108,89 @@ function parseEntries(markup: string, year: number, monthNumber: number): Calend
   return entries;
 }
 
+function parsePayload(data: unknown): string {
+  let payload = data;
+  if (typeof payload === "string") {
+    const trimmed = payload.trim();
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+      try {
+        payload = JSON.parse(trimmed) as unknown;
+      } catch {
+        // The endpoint may return an HTML fragment rather than JSON.
+      }
+    }
+  }
+  return getMarkup(payload);
+}
+
+function getErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    return status
+      ? `upstream HTTP ${status}: ${error.message}`
+      : error.message;
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
 export class AcademicCalendarService {
   async getMonth(year: number, monthNumber: number, refresh = false): Promise<AcademicCalendarMonth> {
     const key = year + "-" + String(monthNumber).padStart(2, "0");
     const cached = cache.get(key);
     if (!refresh && cached && cached.expiresAt > Date.now()) return cached.value;
+
     const pending = inFlight.get(key);
     if (!refresh && pending) return pending;
 
-    const sourceUrl = ORIGIN + "/acnew.php?action=list_next&year=" + year + "&month=" + monthNumber;
-    const request = http.get(sourceUrl, {
-      responseType: "text",
-      transformResponse: [(data) => data],
-    }).then((response) => {
-      let payload: unknown = response.data;
-      if (typeof payload === "string") {
-        const trimmed = payload.trim();
-        if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
-          try { payload = JSON.parse(trimmed) as unknown; } catch { /* HTML fragment response */ }
-        }
-      }
-      const entries = parseEntries(getMarkup(payload), year, monthNumber);
-      if (entries.length === 0) {
-        throw new Error("The college calendar response did not contain recognizable date rows");
-      }
-      const value: AcademicCalendarMonth = {
-        year,
-        monthNumber,
-        month: MONTHS[monthNumber - 1],
-        entries,
-        sourceUrl,
-        fetchedAt: new Date().toISOString(),
-      };
-      cache.set(key, { value, expiresAt: Date.now() + TTL });
-      return value;
-    }).finally(() => inFlight.delete(key));
+    const request = this.fetchMonth(year, monthNumber)
+      .then((value) => {
+        cache.set(key, { value, expiresAt: Date.now() + TTL });
+        return value;
+      })
+      .finally(() => inFlight.delete(key));
 
     inFlight.set(key, request);
     return request;
+  }
+
+  private async fetchMonth(year: number, monthNumber: number): Promise<AcademicCalendarMonth> {
+    // Loyola's endpoint appears to use a zero-based month in some responses.
+    // Try that first, then the one-based form for compatibility. Every response
+    // is checked against the requested month before it can be returned or cached.
+    const upstreamMonths = [...new Set([monthNumber - 1, monthNumber])];
+    const failures: string[] = [];
+
+    for (const upstreamMonth of upstreamMonths) {
+      const sourceUrl = `${ORIGIN}/acnew.php?action=list_next&year=${year}&month=${upstreamMonth}`;
+
+      try {
+        const response = await http.get(sourceUrl, {
+          responseType: "text",
+          transformResponse: [(data) => data],
+        });
+
+        const entries = parseEntries(parsePayload(response.data), year, monthNumber);
+        if (entries.length === 0) {
+          failures.push(`month=${upstreamMonth}: response contained no rows for ${MONTHS[monthNumber - 1]} ${year}`);
+          continue;
+        }
+
+        return {
+          year,
+          monthNumber,
+          month: MONTHS[monthNumber - 1],
+          entries,
+          sourceUrl,
+          fetchedAt: new Date().toISOString(),
+        };
+      } catch (error) {
+        failures.push(`month=${upstreamMonth}: ${getErrorMessage(error)}`);
+      }
+    }
+
+    throw new Error(
+      `Could not retrieve ${MONTHS[monthNumber - 1]} ${year} from Loyola College calendar. ${failures.join("; ")}`,
+    );
   }
 }
 
