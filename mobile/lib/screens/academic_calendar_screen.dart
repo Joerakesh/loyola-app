@@ -48,15 +48,23 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
     });
 
     try {
-      final updates = await widget.service.fetchUpdates(refresh: refresh);
-      final rawCalendar = updates['calendar'];
-      final calendar = rawCalendar is Map
-          ? rawCalendar.cast<String, dynamic>()
-          : <String, dynamic>{};
-      final month = _parseMonth(calendar['month']?.toString());
+      final requestedMonth = _month;
+      final calendar = await widget.service.fetchCalendarMonth(
+        year: requestedMonth.year,
+        month: requestedMonth.month,
+        refresh: refresh,
+      );
+      final year = _toInt(calendar['year']) ?? requestedMonth.year;
+      final monthNumber = _toInt(calendar['monthNumber']) ?? requestedMonth.month;
+      final month = DateTime(year, monthNumber);
       final entries = _items(calendar['entries']);
       final entryDates = entries
-          .map((entry) => _dateForEntry(entry['dateLabel']?.toString() ?? '', month))
+          .map(
+            (entry) => _dateForEntry(
+              entry['date']?.toString() ?? entry['dateLabel']?.toString() ?? '',
+              month,
+            ),
+          )
           .whereType<DateTime>()
           .where((date) => date.year == month.year && date.month == month.month)
           .toList();
@@ -88,16 +96,19 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
     return value.whereType<Map>().map((item) => item.cast<String, dynamic>()).toList();
   }
 
-  DateTime _parseMonth(String? value) {
-    final match = RegExp(r'^\s*([A-Za-z]+)\s+(\d{4})\s*$').firstMatch(value ?? '');
-    if (match != null) {
-      final monthIndex = _monthNames.indexWhere(
-        (name) => name.toLowerCase() == match.group(1)!.toLowerCase(),
-      );
-      final year = int.tryParse(match.group(2)!);
-      if (monthIndex >= 0 && year != null) return DateTime(year, monthIndex + 1);
-    }
-    return DateTime(DateTime.now().year, DateTime.now().month);
+  int? _toInt(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '');
+  }
+
+  void _changeMonth(int offset) {
+    final nextMonth = DateTime(_month.year, _month.month + offset);
+    setState(() {
+      _month = nextMonth;
+      _calendar = null;
+      _selectedDate = DateTime(nextMonth.year, nextMonth.month, 1);
+    });
+    _load();
   }
 
   DateTime? _dateForEntry(String label, DateTime month) {
@@ -153,7 +164,10 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
     if (calendar == null) return const {};
     final result = <int, List<Map<String, dynamic>>>{};
     for (final entry in _items(calendar['entries'])) {
-      final date = _dateForEntry(entry['dateLabel']?.toString() ?? '', _month);
+      final date = _dateForEntry(
+        entry['date']?.toString() ?? entry['dateLabel']?.toString() ?? '',
+        _month,
+      );
       if (date == null || date.year != _month.year || date.month != _month.month) {
         continue;
       }
@@ -237,23 +251,29 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
+              const SizedBox(height: 5),
+              Text(
+                '${_entriesByDay.length} scheduled days',
+                style: const TextStyle(
+                  color: AppColors.crimson,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppColors.crimson.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            '${_entriesByDay.length} scheduled days',
-            style: const TextStyle(
-              color: AppColors.crimson,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+        IconButton(
+          tooltip: 'Previous month',
+          onPressed: _loading ? null : () => _changeMonth(-1),
+          icon: const Icon(Icons.chevron_left_rounded),
+          color: AppColors.white,
+        ),
+        IconButton(
+          tooltip: 'Next month',
+          onPressed: _loading ? null : () => _changeMonth(1),
+          icon: const Icon(Icons.chevron_right_rounded),
+          color: AppColors.white,
         ),
       ],
     );

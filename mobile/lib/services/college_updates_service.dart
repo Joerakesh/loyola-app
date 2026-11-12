@@ -41,4 +41,35 @@ class CollegeUpdatesService {
         .where((item) => item.title.isNotEmpty && item.url.isNotEmpty)
         .toList(growable: false);
   }
+
+  Future<Map<String, dynamic>> fetchCalendarMonth({
+    required int year,
+    required int month,
+    bool refresh = false,
+  }) async {
+    final response = await _apiClient.dio.get(
+      ApiConstants.collegeCalendar,
+      queryParameters: {
+        'year': year,
+        'month': month,
+        if (refresh) 'refresh': 1,
+      },
+    );
+
+    final payload = response.data;
+    if (payload is! Map<String, dynamic> || payload['status'] != 'success') {
+      throw Exception(
+        payload is Map && payload['message'] != null
+            ? payload['message'].toString()
+            : 'Unable to load the requested academic calendar month',
+      );
+    }
+
+    final data = payload['data'];
+    if (data is! Map) {
+      throw Exception('The academic calendar API returned an invalid response');
+    }
+
+    return data.cast<String, dynamic>();
+  }
 }
