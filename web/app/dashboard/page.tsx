@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Activity, ArrowUpRight, Bell, BookOpen, CalendarDays, CheckCircle2, Clock3, CreditCard, GraduationCap, Megaphone, RefreshCw, TrendingUp, UserRound, ClipboardList } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
-import { getAnnouncements, getAssignments, getAttendanceSummary, getDashboard, getNotifications, getReminders, getSchedules, type PlatformRecord } from "@/lib/api/erp";
+import { getHome, getPortalSection, type PlatformRecord, type Reflection } from "@/lib/api/erp";
+import IhsMark from "@/components/brand/ihs-mark";
+import { BRAND } from "@/lib/brand";
 import type { AttendanceSummary, DashboardData } from "@/types/api";
 
 export default function DashboardPage() {
@@ -15,41 +17,36 @@ export default function DashboardPage() {
   const [schedules,setSchedules]=useState<PlatformRecord[]>([]);
   const [reminders,setReminders]=useState<PlatformRecord[]>([]);
   const [notifications,setNotifications]=useState<PlatformRecord[]>([]);
+  const [reflection,setReflection]=useState<Reflection|null>(null);
+  const [failed,setFailed]=useState<string[]>([]);
   const [loading,setLoading]=useState(true);
+  const [refreshing,setRefreshing]=useState(false);
   const [error,setError]=useState("");
+  const [registrationStatus,setRegistrationStatus]=useState<Record<string,unknown>|null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  // One request instead of seven; sections that fail arrive as null so the rest
+  // of the dashboard still renders.
+  const load = useCallback(async (refresh = false) => {
+    if (refresh) setRefreshing(true); else setLoading(true);
     setError("");
 
     try {
-      // Treat the dashboard as one coherent snapshot: don't reveal a partly
-      // populated page when one of its required backend requests has failed.
-      const [dr, ar, asr, anr, sr, rr, nr] = await Promise.all([
-        getDashboard(),
-        getAttendanceSummary(),
-        getAssignments(),
-        getAnnouncements(),
-        getSchedules(),
-        getReminders(),
-        getNotifications(),
-      ]);
+      const { data, failed: failedSections } = await getHome({ refresh });
+      void getPortalSection<Record<string,unknown>>("registrations")
+        .then((result) => setRegistrationStatus(result.data))
+        .catch((statusError) => console.error("[Dashboard] Registration status unavailable", statusError));
 
-      setDashboard(dr.data);
-      setAttendance(ar.data);
-      setAssignments(asr.data ?? []);
-      setAnnouncements(anr.data ?? []);
-      setSchedules(sr.data ?? []);
-      setReminders(rr.data ?? []);
-      setNotifications(nr.data ?? []);
+      setDashboard(data.dashboard);
+      setAttendance(data.attendance);
+      setAssignments(data.assignments ?? []);
+      setAnnouncements(data.announcements ?? []);
+      setSchedules(data.schedules ?? []);
+      setReminders(data.reminders ?? []);
+      setNotifications(data.notifications ?? []);
+      setReflection(data.reflection);
+      setFailed(failedSections ?? []);
     } catch (loadError) {
-      setDashboard(null);
-      setAttendance(null);
-      setAssignments([]);
-      setAnnouncements([]);
-      setSchedules([]);
-      setReminders([]);
-      setNotifications([]);
+      console.error("[Dashboard] Failed to load student data", loadError);
       setError(
         loadError instanceof Error
           ? loadError.message
@@ -57,6 +54,7 @@ export default function DashboardPage() {
       );
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
   useEffect(() => { void load(); }, [load]);
@@ -68,8 +66,9 @@ export default function DashboardPage() {
   if (error) return <AppShell><section className="flex min-h-[65vh] items-center justify-center px-4 py-12"><div className="app-card w-full max-w-xl p-7 text-center sm:p-10"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface-soft)] text-[var(--brand)]"><RefreshCw size={25}/></div><p className="app-kicker mt-6">Connection interrupted</p><h1 className="mt-2 text-2xl font-semibold tracking-tight">We couldn’t load your student data.</h1><p className="app-muted-text mx-auto mt-3 max-w-md text-sm leading-6">{error}</p><p className="app-muted-text mt-2 text-xs">Your dashboard is paused so incomplete records are not shown as current.</p><button onClick={() => void load()} className="app-button-primary mt-7 min-h-11 px-6 text-sm"><RefreshCw size={16}/> Try again</button></div></section></AppShell>;
 
   return <AppShell><div className="space-y-7">
-    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="app-kicker">Your campus, at a glance</p><h1 className="app-page-title mt-2">Welcome back{student?.name ? ", "+student.name : ""}.</h1><p className="app-muted-text mt-2 text-sm leading-6">A calm space to keep track of your academic life.</p></div><div className="flex items-center gap-2"><span className="app-pill"><span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]"/>Connected portal</span><button onClick={()=>void load()} disabled={loading} className="app-icon-button" aria-label="Refresh dashboard" title="Refresh dashboard"><RefreshCw size={17} className={loading?"animate-spin":""}/></button></div></header>
-    {error&&<div className="app-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Some academic data could not be loaded</p><p className="app-muted-text mt-1 text-sm">{error}</p></div><button onClick={()=>void load()} className="app-button-primary min-h-10 px-4 text-sm">Retry</button></div>}
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="app-muted-text text-sm">{new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"})}</p><h1 className="app-page-title mt-1">Welcome back{student?.name ? ", "+student.name.split(" ")[0] : ""}.</h1></div><div className="flex items-center gap-2"><span className="app-pill"><span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]"/>Connected to ERP</span><button onClick={()=>void load(true)} disabled={refreshing} className="app-icon-button" aria-label="Refresh dashboard" title="Refresh dashboard"><RefreshCw size={17} className={refreshing?"animate-spin":""}/></button></div></header>
+    {failed.length>0&&<div role="status" className="app-card flex flex-col gap-3 border-[var(--warning)]/40 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Some sections could not load</p><p className="app-muted-text mt-1 text-sm">Showing everything else. Missing: {failed.join(", ")}.</p></div><button onClick={()=>void load(true)} className="app-button-primary min-h-10 px-4 text-sm">Try again</button></div>}
+    {registrationStatus&&<section className="app-card p-5"><h2 className="app-section-title">College registration status</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[["Semester registration",registrationStatus.semester],["Course registration",registrationStatus.course],["Assessment",registrationStatus.assessment],["Hall ticket",registrationStatus.hallTicket],["Club registration",registrationStatus.club],["Student club",registrationStatus.studentClub]].map(([label,value])=>{const record=value&&typeof value==="object"?value as Record<string,unknown>:{};const detail=record.message??record.examMonthYear??record.monthName??(typeof record.isOpen==="boolean"?null:record.status)??(typeof record.open==="boolean"?null:"Not returned");const isOpen=typeof record.isOpen==="boolean"?record.isOpen:typeof record.open==="boolean"?record.open:null;return <div key={String(label)} className="rounded-xl bg-[var(--surface-soft)] p-4"><p className="app-muted-text text-xs">{String(label)}</p><p className="mt-1 text-sm font-semibold">{detail==null?(isOpen===null?"Not returned":isOpen?"Open":"Closed"):String(detail)}</p>{isOpen!==null&&detail!=null&&<span className="app-pill mt-2">{isOpen?"Open":"Closed"}</span>}</div>})}</div></section>}
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Metric icon={<Activity size={19}/>} label="Attendance" value={loading?"—":attendance?String(attendance.attendancePercentage)+"%":"—"} note="Overall recorded attendance" href="/attendance"/>
       <Metric icon={<CheckCircle2 size={19}/>} label="Classes attended" value={loading?"—":attendance?String(attendance.present):"—"} note="Present sessions" href="/attendance"/>
@@ -77,9 +76,10 @@ export default function DashboardPage() {
       <Metric icon={<CreditCard size={19}/>} label="Fees paid" value={loading?"—":typeof dashboard?.fees?.totalPaid==="number"?dashboard.fees.totalPaid.toLocaleString("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}):"—"} note="Total recorded by ERP" href="/fees"/>
     </section>
     <section className="grid gap-5 xl:grid-cols-[1.25fr_.75fr]">
-      <div className="rounded-[24px] bg-[#72080c] p-6 text-white sm:p-8"><div className="flex items-start justify-between gap-4"><div><p className="flex items-center gap-2 text-sm text-white/70"><TrendingUp size={17}/>Attendance overview</p><p className="mt-4 text-5xl font-bold tracking-tight">{attendance?String(attendance.attendancePercentage)+"%":"—"}</p><p className="mt-3 max-w-md text-sm leading-6 text-white/70">{attendance?(attendance.attendancePercentage>=75?"You’re currently at or above the 75% reference point. Keep building consistency.":"Your current attendance is below the 75% reference point. Review your records and plan ahead."):"Attendance data has not been returned."}</p></div><div className="rounded-2xl bg-white/10 p-3"><Activity size={24}/></div></div><div className="mt-8 h-2.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-white transition-all" style={{width:String(Math.min(100,Math.max(0,attendance?.attendancePercentage??0)))+"%"}}/></div><div className="mt-3 flex justify-between text-xs text-white/60"><span>0%</span><span>75% reference</span><span>100%</span></div><Link href="/attendance" className="mt-6 inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-[#72080c] transition hover:bg-white/90">View attendance <ArrowUpRight size={16}/></Link></div>
+      <div className="rounded-[14px] bg-[var(--brand-deep)] p-6 text-white sm:p-8"><div className="flex items-start justify-between gap-4"><div><p className="flex items-center gap-2 text-sm text-white/70"><TrendingUp size={17}/>Attendance overview</p><p className="app-stat-value mt-4 !text-5xl sm:!text-6xl">{attendance?String(attendance.attendancePercentage)+"%":"—"}</p><p className="mt-3 max-w-md text-sm leading-6 text-white/70">{attendance?(attendance.attendancePercentage>=75?"You’re currently at or above the 75% reference point. Keep building consistency.":"Your current attendance is below the 75% reference point. Review your records and plan ahead."):"Attendance data has not been returned."}</p></div><div className="rounded-2xl bg-white/10 p-3"><Activity size={24}/></div></div><div className="mt-8 h-2.5 overflow-hidden rounded-full bg-white/20"><div className="h-full rounded-full bg-white transition-all" style={{width:String(Math.min(100,Math.max(0,attendance?.attendancePercentage??0)))+"%"}}/></div><div className="mt-3 flex justify-between text-xs text-white/60"><span>0%</span><span>75% reference</span><span>100%</span></div><Link href="/attendance" className="mt-6 inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-[var(--brand-deep)] transition hover:bg-white/90">View attendance <ArrowUpRight size={16}/></Link></div>
       <div className="app-card p-6 sm:p-7"><div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]"><UserRound size={21}/></div><div><h2 className="app-section-title">Student profile</h2><p className="app-muted-text mt-1 text-xs">Linked academic identity</p></div></div><div className="mt-6 space-y-4"><Info label="Name" value={student?.name}/><Info label="Email" value={student?.email}/><Info label="Mobile" value={student?.mobile}/><Info label="Department" value={student?.department}/></div><Link href="/profile" className="mt-6 flex min-h-11 items-center justify-between rounded-xl bg-[var(--surface-soft)] px-4 text-sm font-semibold transition hover:opacity-80">View full profile <ArrowUpRight size={16}/></Link></div>
     </section>
+    {reflection&&<ReflectionCard reflection={reflection}/>}
     <section className="grid gap-5 xl:grid-cols-2">
       <div className="app-card overflow-hidden"><div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4 sm:px-6"><div className="flex items-center gap-2"><Megaphone size={18} className="text-[var(--brand)]"/><h2 className="app-section-title">Campus announcements</h2></div><span className="app-pill">{announcements.length} saved</span></div>{loading?<PanelLoading/>:announcements.length===0?<PanelEmpty text="No announcements have been returned by the backend yet."/>:<div className="divide-y divide-[var(--line)]">{[...announcements].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).slice(0,4).map((a,i)=><article key={a._id||i} className="p-5"><div className="flex items-start justify-between gap-3"><h3 className="text-sm font-semibold leading-5">{a.title}</h3>{a.pinned&&<span className="app-pill">Pinned</span>}</div>{a.body&&<p className="app-muted-text mt-2 line-clamp-3 text-sm leading-6">{a.body}</p>}</article>)}</div>}</div>
       <div className="app-card overflow-hidden"><div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4 sm:px-6"><div className="flex items-center gap-2"><ClipboardList size={18} className="text-[var(--brand)]"/><h2 className="app-section-title">Assignments & reminders</h2></div><span className="app-pill">{openAssignments.length+reminders.filter(r=>!r.isDone).length} open</span></div>{loading?<PanelLoading/>:openAssignments.length===0&&reminders.filter(r=>!r.isDone).length===0?<PanelEmpty text="No open assignments or reminders in your saved records."/>:<div className="divide-y divide-[var(--line)]">{[...openAssignments.map(a=>({...a,kind:"Assignment"})),...reminders.filter(r=>!r.isDone).map(r=>({...r,kind:"Reminder"}))].slice(0,5).map((item,i)=><article key={item._id||i} className="flex items-start gap-3 p-5"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-soft)] text-[var(--brand)]">{item.kind==="Reminder"?<Clock3 size={17}/>:<BookOpen size={17}/>}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="text-sm font-semibold">{item.title}</h3><span className="app-pill">{item.kind}</span></div>{(item.description||item.body)&&<p className="app-muted-text mt-1 text-xs leading-5">{item.description||item.body}</p>}{item.dueDate&&<p className="app-muted-text mt-2 text-xs">Due {formatDate(item.dueDate)}</p>}{item.remindAt&&<p className="app-muted-text mt-2 text-xs">Reminder {formatDate(item.remindAt)}</p>}</div></article>)}</div>}</div>
@@ -97,17 +97,16 @@ function DashboardLoadingScreen() {
       <div className="mx-auto max-w-7xl">
         <header className="flex items-center justify-between gap-4 border-b border-[var(--line)] pb-5">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#8b0000] text-white"><GraduationCap size={23}/></span>
-            <span><span className="block text-sm font-bold">Loyola College</span><span className="app-muted-text mt-0.5 block text-xs">Student portal</span></span>
+            <span className="app-brand-mark flex h-11 w-11 items-center justify-center rounded-xl"><IhsMark size={32} className="text-white"/></span>
+            <span><span className="app-section-title block leading-5">{BRAND.name}</span><span className="app-muted-text mt-0.5 block text-xs">{BRAND.product}</span></span>
           </div>
           <span className="app-pill"><span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--success)]"/>Connecting securely</span>
         </header>
 
         <section className="py-10 sm:py-14">
-          <p className="app-kicker">Your campus, at a glance</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Preparing your dashboard<span className="text-[#8b0000]">.</span></h1>
+          <h1 className="app-page-title">Preparing your dashboard</h1>
           <p className="app-muted-text mt-3 max-w-xl text-sm leading-6">We’re retrieving your attendance, academic records and campus updates. Your dashboard will appear when everything is ready.</p>
-          <div className="mt-6 flex items-center gap-3 text-xs font-medium text-[var(--brand)]"><span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--brand)]"/><span>Syncing your student records…</span></div>
+          <div className="mt-6 flex items-center gap-3 text-xs font-medium text-[var(--brand)]"><span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--line)] border-t-[var(--brand)]"/><span>Signing in to the ERP and fetching your records…</span></div>
         </section>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -150,3 +149,15 @@ function QuickLink({href,icon,title,text}:{href:string;icon:React.ReactNode;titl
 function PanelLoading(){return <div className="p-6"><div className="h-4 w-2/3 animate-pulse rounded bg-[var(--surface-soft)]"/><div className="mt-3 h-3 w-1/2 animate-pulse rounded bg-[var(--surface-soft)]"/></div>}
 function PanelEmpty({text}:{text:string}){return <div className="p-6"><p className="app-muted-text text-sm leading-6">{text}</p></div>}
 function formatDate(value:string){const date=new Date(value);return Number.isNaN(date.getTime())?value:date.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}
+function ReflectionCard({reflection}:{reflection:Reflection}){
+  return <section aria-labelledby="reflection-title" className="app-card relative overflow-hidden border-l-[3px] border-l-[var(--gold)] p-6 sm:p-8">
+    <div className="flex items-start gap-4 sm:gap-6">
+      <IhsMark size={52} className="hidden shrink-0 text-[var(--brand)] sm:block"/>
+      <div className="min-w-0">
+        <h2 id="reflection-title" className="app-section-title">Today’s reflection: {reflection.theme.toLowerCase()}</h2>
+        <p className="mt-3 max-w-2xl font-[family-name:var(--font-display)] text-xl leading-8 sm:text-2xl sm:leading-9">{reflection.prompt}</p>
+        <p className="app-muted-text mt-5 max-w-2xl text-sm leading-6"><span className="font-semibold text-[var(--foreground)]">{reflection.value.name}.</span> {reflection.value.meaning}</p>
+      </div>
+    </div>
+  </section>;
+}

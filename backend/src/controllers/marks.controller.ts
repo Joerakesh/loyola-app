@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { MarksService } from "../services/marks.service.js";
 import { StudentService } from "../services/student.service.js";
+import {
+  ERP_TTL_MS,
+  erpCacheKey,
+  erpResponseCache,
+} from "../lib/erp-cache.js";
 
 export class MarksController {
   async internal(req: Request, res: Response) {
@@ -9,7 +14,16 @@ export class MarksController {
 
       const studentService = new StudentService(client);
 
-      const profile = await studentService.getProfile();
+      // Reuse the profile cached by GET /student/profile when it is fresh.
+      const profileBody = await erpResponseCache.readThrough(
+        erpCacheKey(res.locals.user.id, "profile"),
+        ERP_TTL_MS.profile,
+        async () => ({
+          status: "success",
+          data: await studentService.getProfile(),
+        }),
+      );
+      const profile = profileBody.data as { studentId: string };
 
       const marksService = new MarksService(client);
 

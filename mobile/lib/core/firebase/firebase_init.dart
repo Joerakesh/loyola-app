@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
-/// Firebase configuration used on web (and as a fallback). On Android/iOS the
-/// SDK reads the native config files (google-services.json /
-/// GoogleService-Info.plist) and no options are needed.
+/// Public web client configuration. Android/iOS should read their native
+/// client configuration generated from google-services.json / plist.
 class FirebaseConfig {
   FirebaseConfig._();
 
@@ -16,23 +16,35 @@ class FirebaseConfig {
     measurementId: 'G-BCFWM37PYC',
   );
 
-  /// Android uses the same Firebase project. The value comes from the web app
-  /// config as a fallback when google-services.json is not yet present.
+  /// Fallback for local Android builds that do not yet have native config.
   static const FirebaseOptions androidOptions = webOptions;
 }
 
 /// Initialises Firebase once before the app starts.
 ///
-/// On web the options are passed explicitly. On Android the SDK picks up the
-/// native config if google-services.json is present, otherwise falls back to
-/// the explicit options so the app can still start.
+/// Web uses explicit public options. Native platforms prefer their platform
+/// config; Android falls back to the public web app options for local setup.
 Future<FirebaseApp> initialiseFirebase() async {
   if (Firebase.apps.isNotEmpty) {
     return Firebase.apps.first;
   }
 
   try {
-    return await Firebase.initializeApp(options: FirebaseConfig.webOptions);
+    if (kIsWeb) {
+      return await Firebase.initializeApp(options: FirebaseConfig.webOptions);
+    }
+
+    try {
+      return await Firebase.initializeApp();
+    } on FirebaseException catch (error) {
+      if (defaultTargetPlatform == TargetPlatform.android &&
+          (error.code == 'no-app' || error.code == 'core/no-app')) {
+        return await Firebase.initializeApp(
+          options: FirebaseConfig.androidOptions,
+        );
+      }
+      rethrow;
+    }
   } on FirebaseException catch (error) {
     // Handles hot reload/restart: the native app survives the restart but the
     // new Dart isolate starts with an empty apps list.

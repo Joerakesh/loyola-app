@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 constraints: const BoxConstraints(maxWidth: 440),
                 child: GlassContainer(
                   padding: EdgeInsets.all(Responsive.dp(context, 26)),
-                  blur: 18,
+                  blur: 12,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
@@ -120,6 +120,33 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: AppColors.white54,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      const Text(
+                        'Ad majorem Dei gloriam',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.gold,
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Center(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(60),
+                          ),
+                          child: Image.asset(
+                            'assets/images/loyola_church.png',
+                            width: 92,
+                            height: 112,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const SizedBox(width: 92, height: 112),
+                          ),
                         ),
                       ),
                       SizedBox(height: Responsive.dp(context, 32)),

@@ -55,15 +55,16 @@ class AppShell extends StatelessWidget {
         Responsive.dp(context, 14),
         0,
         Responsive.dp(context, 14),
-        Responsive.isCompact(context) ? 24 : 40,
+        Responsive.isCompact(context) ? 8 : 12,
       ),
       child: GlassContainer(
         padding: EdgeInsets.symmetric(
           horizontal: Responsive.dp(context, 8),
-          vertical: 10,
+          vertical: 8,
         ),
-        borderRadius: BorderRadius.circular(36),
-        blur: 22, // Moderate blur for smooth scrolling perf
+        borderRadius: BorderRadius.circular(28),
+        blur: 14,
+        color: const Color(0xDD211B24),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -92,7 +93,7 @@ class AppShell extends StatelessWidget {
     const animDuration = Duration(milliseconds: 300);
     const animCurve = Curves.easeOutCubic;
     final compact = Responsive.isCompact(context);
-    final iconSize = Responsive.dp(context, compact ? 20 : 22);
+    final iconSize = Responsive.dp(context, compact ? 19 : 21);
 
     return GestureDetector(
       onTap: () {
@@ -100,59 +101,45 @@ class AppShell extends StatelessWidget {
         _onNavigate(index);
       },
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: animDuration,
-        curve: animCurve,
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 10 : 14,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.white.withValues(alpha: 0.12)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) {
-                return ScaleTransition(scale: animation, child: child);
-              },
-              child: Icon(
-                isSelected ? selectedIcon : icon,
-                key: ValueKey<bool>(isSelected),
-                color: isSelected ? AppColors.white : AppColors.white38,
-                size: iconSize,
+      child: SizedBox(
+        width: compact ? 54 : 62,
+        child: AnimatedContainer(
+          duration: animDuration,
+          curve: animCurve,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.white.withValues(alpha: 0.13)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedScale(
+                duration: const Duration(milliseconds: 180),
+                scale: isSelected ? 1.04 : 1,
+                child: Icon(
+                  isSelected ? selectedIcon : icon,
+                  color: isSelected
+                      ? const Color(0xFFFFCAD3)
+                      : AppColors.white54,
+                  size: iconSize,
+                ),
               ),
-            ),
-            ClipRRect(
-              child: AnimatedSize(
-                duration: animDuration,
-                curve: animCurve,
-                child: isSelected
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 8),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: Responsive.sp(context, 13),
-                              letterSpacing: 0.3,
-                            ),
-                            maxLines: 1,
-                          ),
-                        ],
-                      )
-                    : const SizedBox(width: 0, height: 20),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.clip,
+                style: TextStyle(
+                  color: isSelected ? AppColors.white : AppColors.white54,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: Responsive.sp(context, compact ? 9 : 10),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

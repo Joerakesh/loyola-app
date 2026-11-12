@@ -155,7 +155,7 @@ export default function PolicyPage() {
                 <section>
                     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                         <div>
-                            <p className="text-sm font-medium text-[#8b0000]">
+                            <p className="text-sm font-medium text-[var(--brand)]">
                                 Rules & Regulations
                             </p>
                             <h1 className="mt-1 text-3xl font-bold tracking-tight md:text-4xl">
@@ -186,12 +186,12 @@ export default function PolicyPage() {
                                     key={policy.id}
                                     onClick={() => setActiveTab(policy.id)}
                                     className={`flex items-center justify-between rounded-xl px-4 py-3 text-left transition-all ${isActive
-                                        ? "bg-red-50 text-[#8b0000] ring-1 ring-[#8b0000]/20"
+                                        ? "bg-red-50 text-[var(--brand)] ring-1 ring-[var(--brand)]/20"
                                         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`${isActive ? "text-[#8b0000]" : "text-slate-400"}`}>
+                                        <div className={`${isActive ? "text-[var(--brand)]" : "text-slate-400"}`}>
                                             {policy.icon}
                                         </div>
                                         <span className="font-medium">{policy.title}</span>
@@ -204,7 +204,7 @@ export default function PolicyPage() {
                     {/* Active Policy Content Area */}
                     <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
                         <div className="mb-8 border-b border-slate-100 pb-8">
-                            <div className="flex items-center gap-3 text-[#8b0000]">
+                            <div className="flex items-center gap-3 text-[var(--brand)]">
                                 {activePolicy.icon}
                                 <h2 className="text-2xl font-bold text-slate-900">
                                     {activePolicy.title}

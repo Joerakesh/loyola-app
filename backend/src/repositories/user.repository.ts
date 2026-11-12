@@ -60,6 +60,13 @@ export class UserRepository {
     );
   }
 
+  async updateAvatar(id: ObjectId, avatarUrl: string): Promise<void> {
+    await (await this.collection()).updateOne(
+      { _id: id },
+      { $set: { avatarUrl, updatedAt: new Date() } },
+    );
+  }
+
   async bindErpCredentials(
     id: ObjectId,
     erpCredential: ErpCredential,

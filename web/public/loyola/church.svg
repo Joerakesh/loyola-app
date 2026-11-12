@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" role="img" aria-label="Illustration of a Jesuit church at dusk">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E0B16"/><stop offset=".42" stop-color="#5E1528"/>
+      <stop offset=".72" stop-color="#B2503F"/><stop offset=".9" stop-color="#E7B35E"/>
+    </linearGradient>
+    <linearGradient id="lit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBE7A6"/><stop offset="1" stop-color="#E9A93F"/>
+    </linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3A1A26"/><stop offset="1" stop-color="#22101A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="58%" r="45%">
+      <stop offset="0" stop-color="#FFE9A8" stop-opacity=".55"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="520" fill="url(#sky)"/>
+  <circle cx="40" cy="40" r="1.2" fill="#F6E7B8" opacity="0.8"/><circle cx="95" cy="90" r="1" fill="#F6E7B8" opacity="0.6"/><circle cx="150" cy="30" r="1.4" fill="#F6E7B8" opacity="0.9"/><circle cx="260" cy="55" r="1" fill="#F6E7B8" opacity="0.7"/><circle cx="330" cy="38" r="1.3" fill="#F6E7B8" opacity="0.8"/><circle cx="365" cy="100" r="1" fill="#F6E7B8" opacity="0.6"/><circle cx="210" cy="18" r="1" fill="#F6E7B8" opacity="0.7"/><circle cx="60" cy="140" r="0.9" fill="#F6E7B8" opacity="0.5"/><circle cx="345" cy="160" r="0.9" fill="#F6E7B8" opacity="0.5"/>
+  <g fill="#FFE9A8" opacity=".10"><path d="M200 300 L-377 135 L-348 56Z"/><path d="M200 300 L-320 -0 L-273 -69Z"/><path d="M200 300 L-232 -117 L-169 -173Z"/><path d="M200 300 L-118 -209 L-44 -248Z"/><path d="M200 300 L15 -271 L96 -291Z"/><path d="M200 300 L158 -299 L242 -299Z"/><path d="M200 300 L304 -291 L385 -271Z"/><path d="M200 300 L444 -248 L518 -209Z"/><path d="M200 300 L569 -173 L632 -117Z"/><path d="M200 300 L673 -69 L720 -0Z"/><path d="M200 300 L748 56 L777 135Z"/></g>
+  <rect width="400" height="520" fill="url(#glow)"/>
+  <!-- towers -->
+  <g fill="url(#stone)">
+    <rect x="58" y="236" width="84" height="214"/>
+    <rect x="258" y="236" width="84" height="214"/>
+    <path d="M52 238L100 116L148 238Z"/>
+    <path d="M252 238L300 116L348 238Z"/>
+    <!-- nave and gable -->
+    <rect x="136" y="288" width="128" height="162"/>
+    <path d="M128 290L200 206L272 290Z"/>
+  </g>
+  <!-- crosses -->
+  <g stroke="#E9B955" stroke-width="3" stroke-linecap="round">
+    <path d="M100 116V86M91 96H109"/><path d="M300 116V86M291 96H309"/><path d="M200 206V170M189 183H211"/>
+  </g>
+  <!-- belfry openings -->
+  <path d="M92.0 290V258.0A8.0 8.0 0 0 1 108.0 258.0V290Z" fill="url(#lit)"/><path d="M292.0 290V258.0A8.0 8.0 0 0 1 308.0 258.0V290Z" fill="url(#lit)"/>
+  <!-- tower windows -->
+  <path d="M77.0 348V327.0A5.0 5.0 0 0 1 87.0 327.0V348Z" fill="url(#lit)"/><path d="M113.0 348V327.0A5.0 5.0 0 0 1 123.0 327.0V348Z" fill="url(#lit)"/><path d="M277.0 348V327.0A5.0 5.0 0 0 1 287.0 327.0V348Z" fill="url(#lit)"/><path d="M313.0 348V327.0A5.0 5.0 0 0 1 323.0 327.0V348Z" fill="url(#lit)"/>
+  <path d="M77.0 398V377.0A5.0 5.0 0 0 1 87.0 377.0V398Z" fill="url(#lit)"/><path d="M113.0 398V377.0A5.0 5.0 0 0 1 123.0 377.0V398Z" fill="url(#lit)"/><path d="M277.0 398V377.0A5.0 5.0 0 0 1 287.0 377.0V398Z" fill="url(#lit)"/><path d="M313.0 398V377.0A5.0 5.0 0 0 1 323.0 377.0V398Z" fill="url(#lit)"/>
+  <!-- rose window -->
+  <circle cx="200" cy="262" r="21" fill="url(#lit)"/>
+  <g stroke="#3A1A26" stroke-width="2.2"><path d="M200 241v42M179 262h42M185 247l30 30M215 247l-30 30"/></g>
+  <circle cx="200" cy="262" r="21" fill="none" stroke="#3A1A26" stroke-width="3"/>
+  <!-- nave windows -->
+  <path d="M152.0 352V324.0A6.0 6.0 0 0 1 164.0 324.0V352Z" fill="url(#lit)"/><path d="M236.0 352V324.0A6.0 6.0 0 0 1 248.0 324.0V352Z" fill="url(#lit)"/>
+  <!-- doorway -->
+  <path d="M174 450V400A26 26 0 0 1 226 400V450Z" fill="url(#lit)"/>
+  <path d="M200 374V450M174 420H226" stroke="#3A1A26" stroke-width="2.4"/>
+  <path d="M174 450V400A26 26 0 0 1 226 400V450" fill="none" stroke="#3A1A26" stroke-width="4"/>
+  <!-- steps + ground -->
+  <g fill="#2B1320"><rect x="150" y="450" width="100" height="9"/><rect x="138" y="459" width="124" height="9"/><rect x="126" y="468" width="148" height="9"/></g>
+  <rect y="477" width="400" height="43" fill="#170A12"/>
+  <path d="M0 477Q200 462 400 477" fill="none" stroke="#E9B955" stroke-opacity=".35" stroke-width="2"/>
+</svg>

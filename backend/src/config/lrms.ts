@@ -4,10 +4,12 @@ export const LRMS_CONFIG = {
 
   endpoints: {
     login: "/ajax/validateLogin.jsp",
+    changePassword: "/ajax/changepassword.jsp",
 
     dashboard: "/ajax/getStudentDashboard.jsp",
     sidebar: "/ajax/getSidebarStudentDetails.jsp",
     profile: "/ajax/getStudentProfile.jsp",
+    subjectAttendance: "/ajax/getStudentAttendanceSubjectWise.jsp",
     department: "/ajax/getDepartmentName.jsp",
 
     subjects: "/ajax/getStudentSubjects.jsp",
@@ -25,6 +27,13 @@ export const LRMS_CONFIG = {
     feeDue: "/ajax/getFeeDueDetails.jsp",
     activeChallans: "/ajax/getActiveChallanConfigurations.jsp",
     feeNotification: "/ajax/checkFeeChallanNotification.jsp",
+    registrationNumberPayments: "/ajax/getRegisterNoPaymentDetails.jsp",
+    condonationPayments: "/ajax/getCondonationPaymentDetails.jsp",
+
+    courseRegistration: "/ajax/checkCourseRegistration.jsp",
+    assessmentRegistration: "/ajax/isStudentSubjectFacultyAssessmentOpen.jsp",
+    hallTicketRegistration: "/ajax/checkSemHTStatus.jsp",
+    studentClubRegistration: "/ajax/getStudentClubRegistrationStatus.jsp",
 
     examFee: "/ajax/getSemesterExamFeeStructure.jsp",
     examChallan: "/ajax/checkSemesterExamChallanStatus.jsp",

@@ -246,7 +246,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: TextStyle(
                         color: AppColors.white70,
                         fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -304,7 +304,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
 
           if (hours.isNotEmpty) ...[
-            const SizedBox(height: 28),
+            const SizedBox(height: 22),
             Container(
               height: 1,
               color: AppColors.white.withValues(alpha: 0.1),

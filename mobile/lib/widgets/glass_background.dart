@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_colors.dart';
@@ -39,17 +38,22 @@ class GlassBackground extends StatelessWidget {
         color: Color(0x44007AFF),
       ),
     ],
-    this.blur = 40,
   });
 
   final Widget child;
   final List<GlassGlow> glows;
-  final double blur;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColors.background,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF171119), AppColors.background, Color(0xFF0D1116)],
+          stops: [0, .52, 1],
+        ),
+      ),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -64,16 +68,13 @@ class GlassBackground extends StatelessWidget {
                 height: glow.size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: glow.color,
+                  gradient: RadialGradient(
+                    colors: [glow.color, glow.color.withValues(alpha: 0)],
+                  ),
                 ),
               ),
             ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-              child: Container(color: Colors.transparent),
-            ),
-          ),
+          // Keep ambient lighting cheap; localized glass cards apply blur.
           Positioned.fill(child: child),
         ],
       ),

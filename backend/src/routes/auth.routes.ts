@@ -15,6 +15,9 @@ router.post("/logout", requireAuth, (req, res) =>
 router.post("/bind-erp", requireAuth, (req, res) =>
   authController.bindErp(req, res),
 );
+router.put("/erp-password", requireAuth, (req, res) =>
+  authController.updateErpPassword(req, res),
+);
 router.post("/bind-email", requireAuth, (req, res) =>
   authController.bindEmail(req, res),
 );

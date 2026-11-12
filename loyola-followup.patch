@@ -1,0 +1,590 @@
+From e938ccc9f2637c16c504eff7821ad555cdb3463b Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 12 Nov 2026 13:04:33 +0000
+Subject: [PATCH] Fix Gradle wrapper; dedupe and cache v2 portal ERP calls
+
+- mobile: bump Gradle wrapper 9.1.0 -> 9.3.1 (Flutter requires >= 9.3.1)
+- v2 portal: memoize identical ERP calls within a request and cache each
+  section per user (?refresh=1 bypasses), so repeat requests skip the ERP
+- v2 portal: copy the dashboard before merging saved items; it could be the
+  shared cached object, leaking per-user data into the cache
+- v2 portal: return 502 pointing to Settings when every section fails
+  (usual cause is a changed ERP password) instead of 200 with all nulls
+- v2 portal: return generic section errors instead of upstream error text
+- rate-limit /api/v2 password routes (10/min)
+- ignore *.patch; 13 new tests
+---
+ .gitignore                                    |   3 +
+ .../src/controllers/portal-v2.controller.ts   |  27 +++-
+ backend/src/lib/erp-cache.ts                  |  10 ++
+ backend/src/lib/memoized-requester.ts         |  46 +++++++
+ backend/src/server.ts                         |  11 ++
+ backend/src/services/portal-v2.service.ts     |  54 ++++++--
+ backend/tests/memoized-requester.test.ts      |  50 ++++++++
+ backend/tests/portal-v2.controller.test.ts    | 121 ++++++++++++++++++
+ backend/tests/portal-v2.service.test.ts       |  97 ++++++++++++++
+ docs/api-v2.md                                |   8 ++
+ .../gradle/wrapper/gradle-wrapper.properties  |   2 +-
+ 11 files changed, 417 insertions(+), 12 deletions(-)
+ create mode 100644 backend/src/lib/memoized-requester.ts
+ create mode 100644 backend/tests/memoized-requester.test.ts
+ create mode 100644 backend/tests/portal-v2.controller.test.ts
+ create mode 100644 backend/tests/portal-v2.service.test.ts
+
+diff --git a/.gitignore b/.gitignore
+index 8cf50e3..13fb89c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -29,3 +29,6 @@ backend/firebase-service-account.json
+ firebase-service-account.json
+ 
+ google-services.json
++
++# Local patch files
++*.patch
+diff --git a/backend/src/controllers/portal-v2.controller.ts b/backend/src/controllers/portal-v2.controller.ts
+index 362c19a..f994097 100644
+--- a/backend/src/controllers/portal-v2.controller.ts
++++ b/backend/src/controllers/portal-v2.controller.ts
+@@ -1,5 +1,8 @@
+ import type { Request, Response } from "express";
+-import { PortalV2Service, type PortalSection } from "../services/portal-v2.service.js";
++import {
++  PortalV2Service,
++  type PortalSection,
++} from "../services/portal-v2.service.js";
+ import { LRMS_CONFIG } from "../config/lrms.js";
+ import { credentialEncryptionService } from "../services/credential-encryption.service.js";
+ import { lrmsBridgeService } from "../services/lrms-bridge.service.js";
+@@ -44,8 +47,22 @@ export class PortalV2Controller {
+     }
+ 
+     try {
+-      const service = new PortalV2Service(res.locals.lrmsClient);
++      const service = new PortalV2Service(res.locals.lrmsClient, {
++        cacheScope: res.locals.user.id,
++        refresh: req.query.refresh === "1",
++      });
+       const result = await service.get(section as PortalSection | "all");
++
++      // Every requested section failing means the ERP itself is unreachable or
++      // rejected the saved login, which is a failure, not an empty result.
++      const requestedCount = section === "all" ? sections.size : 1;
++      if (result.unavailable.length >= requestedCount) {
++        return res.status(502).json({
++          status: "error",
++          message:
++            "Unable to reach Loyola ERP. If you recently changed your ERP password, update it in Settings.",
++        });
++      }
+       if (section === "dashboard" || section === "all") {
+         const user = res.locals.userDocument;
+         const collections = ["assignments", "announcements", "schedules", "reminders", "notifications"] as const;
+@@ -57,7 +74,11 @@ export class PortalV2Controller {
+             return { name, data: null, error: error instanceof Error ? error.message : "Unable to load saved items" };
+           }
+         }));
+-        const dashboardData = (result.data.dashboard ?? { dashboard: null, attendance: null }) as Record<string, unknown>;
++        // Copy before adding saved items: this object may be the cached section, and
++        // user-specific lists must never be written into the cache.
++        const dashboardData = {
++          ...((result.data.dashboard ?? { dashboard: null, attendance: null }) as Record<string, unknown>),
++        };
+         for (const item of platformResults) dashboardData[item.name] = item.data;
+         dashboardData.reflection = getReflectionForDate();
+         result.data.dashboard = dashboardData;
+diff --git a/backend/src/lib/erp-cache.ts b/backend/src/lib/erp-cache.ts
+index c6008ab..11acd32 100644
+--- a/backend/src/lib/erp-cache.ts
++++ b/backend/src/lib/erp-cache.ts
+@@ -30,3 +30,13 @@ export function erpCacheKey(userId: string, resource: ErpResource) {
+ export function invalidateUserCache(userId: string) {
+   erpResponseCache.deletePrefix(`${userId}:`);
+ }
++
++/** Freshness of each v2 portal section, in milliseconds. */
++export const V2_SECTION_TTL_MS = {
++  profile: 30 * 60_000,
++  dashboard: 5 * 60_000,
++  attendance: 2 * 60_000,
++  academics: 5 * 60_000,
++  fees: 5 * 60_000,
++  registrations: 10 * 60_000,
++} as const;
+diff --git a/backend/src/lib/memoized-requester.ts b/backend/src/lib/memoized-requester.ts
+new file mode 100644
+index 0000000..76b32a6
+--- /dev/null
++++ b/backend/src/lib/memoized-requester.ts
+@@ -0,0 +1,46 @@
++import type { LRMSRequester } from "../upstream/lrms.client.js";
++
++function bodyKey(body: unknown): string {
++  if (body === undefined || body === null) return "";
++  if (body instanceof URLSearchParams) return body.toString();
++  return JSON.stringify(body);
++}
++
++/**
++ * Makes identical ERP calls within one logical request share a single result.
++ *
++ * Several portal sections need the same data (the student profile alone is used
++ * by attendance, academics and fees), and without this each one fetched it again.
++ * Failures are not remembered, so a retry still reaches the ERP.
++ *
++ * Read-only use only: never wrap a client that performs writes such as a
++ * password change.
++ */
++export function memoizeRequester(inner: LRMSRequester): LRMSRequester {
++  const calls = new Map<string, Promise<{ data: unknown }>>();
++
++  const run = <T>(key: string, call: () => Promise<{ data: T }>) => {
++    let pending = calls.get(key) as Promise<{ data: T }> | undefined;
++
++    if (!pending) {
++      pending = call().catch((error: unknown) => {
++        calls.delete(key);
++        throw error;
++      });
++      calls.set(key, pending);
++    }
++
++    return pending;
++  };
++
++  return {
++    get<T = unknown>(url: string) {
++      return run<T>(`GET ${url}`, () => inner.get<T>(url));
++    },
++    post<T = unknown>(url: string, data?: unknown) {
++      return run<T>(`POST ${url} ${bodyKey(data)}`, () =>
++        inner.post<T>(url, data),
++      );
++    },
++  };
++}
+diff --git a/backend/src/server.ts b/backend/src/server.ts
+index f0b96be..7ba6bce 100644
+--- a/backend/src/server.ts
++++ b/backend/src/server.ts
+@@ -70,6 +70,17 @@ app.use(
+   }),
+ );
+ 
++// ERP password changes and verification are brute-force targets too.
++app.use(
++  ["/api/v2/portal/credentials", "/api/v2/portal/password"],
++  rateLimit({
++    windowMs: 60 * 1000,
++    limit: 10,
++    standardHeaders: true,
++    legacyHeaders: false,
++  }),
++);
++
+ app.use(
+   "/api/v1/auth",
+   rateLimit({
+diff --git a/backend/src/services/portal-v2.service.ts b/backend/src/services/portal-v2.service.ts
+index ab71d03..b14ff50 100644
+--- a/backend/src/services/portal-v2.service.ts
++++ b/backend/src/services/portal-v2.service.ts
+@@ -5,6 +5,19 @@ import { MarksService } from "./marks.service.js";
+ import { StudentService } from "./student.service.js";
+ import { SubjectsService } from "./subjects.service.js";
+ import type { LRMSRequester } from "../upstream/lrms.client.js";
++import { memoizeRequester } from "../lib/memoized-requester.js";
++import { V2_SECTION_TTL_MS, erpResponseCache } from "../lib/erp-cache.js";
++
++export interface PortalV2Options {
++  /** Cache key prefix, normally the user id. Omit to disable caching. */
++  cacheScope?: string;
++  /** Skip cached sections and store the fresh result (pull-to-refresh). */
++  refresh?: boolean;
++}
++
++/** Shown to clients instead of upstream error text, which can name ERP endpoints. */
++export const SECTION_UNAVAILABLE_MESSAGE =
++  "This section could not be loaded from Loyola ERP";
+ 
+ export type PortalSection =
+   | "profile"
+@@ -29,7 +42,16 @@ function responseRows(value: unknown): unknown[] {
+ }
+ 
+ export class PortalV2Service {
+-  constructor(private readonly lrms: LRMSRequester) {}
++  private readonly lrms: LRMSRequester;
++
++  constructor(
++    lrms: LRMSRequester,
++    private readonly options: PortalV2Options = {},
++  ) {
++    // Sections overlap (profile, dashboard and attendance summary are each needed
++    // by several), so identical ERP calls within one request are made only once.
++    this.lrms = memoizeRequester(lrms);
++  }
+ 
+   async get(section: PortalSection | "all") {
+     const sections: Record<PortalSection, Loader> = {
+@@ -139,19 +161,35 @@ export class PortalV2Service {
+     };
+   }
+ 
+-  private async settle(name: string, loader: Loader): Promise<{ data: unknown; error?: string }> {
++  private async settle(
++    name: string,
++    loader: Loader,
++  ): Promise<{ data: unknown; error?: string }> {
+     try {
+-      return { data: await loader() };
++      return { data: await this.cached(name as PortalSection, loader) };
+     } catch (error) {
+-      // Keep student records out of logs and return a safe section-level error.
++      // Details stay in the server log; clients only get a generic message.
+       console.error(
+         `[Portal v2] ${name} unavailable:`,
+         error instanceof Error ? error.message : "LRMS request failed",
+       );
+-      return {
+-        data: null,
+-        error: error instanceof Error ? error.message : "LRMS request failed",
+-      };
++      return { data: null, error: SECTION_UNAVAILABLE_MESSAGE };
+     }
+   }
++
++  private async cached(name: PortalSection, loader: Loader): Promise<unknown> {
++    const { cacheScope, refresh } = this.options;
++    if (!cacheScope) return loader();
++
++    const key = `${cacheScope}:v2:${name}`;
++    if (refresh) erpResponseCache.delete(key);
++
++    const body = await erpResponseCache.readThrough(
++      key,
++      V2_SECTION_TTL_MS[name],
++      async () => ({ status: "success", data: await loader() }),
++    );
++
++    return body.data;
++  }
+ }
+diff --git a/backend/tests/memoized-requester.test.ts b/backend/tests/memoized-requester.test.ts
+new file mode 100644
+index 0000000..56fa4af
+--- /dev/null
++++ b/backend/tests/memoized-requester.test.ts
+@@ -0,0 +1,50 @@
++import { describe, expect, it, vi } from "vitest";
++import { memoizeRequester } from "../src/lib/memoized-requester.js";
++import type { LRMSRequester } from "../src/upstream/lrms.client.js";
++
++function fakeInner() {
++  const inner = {
++    get: vi.fn(async (url: string) => ({ data: `GET:${url}` })),
++    post: vi.fn(async (url: string, body?: unknown) => ({
++      data: `POST:${url}:${body instanceof URLSearchParams ? body.toString() : ""}`,
++    })),
++  };
++  return inner as typeof inner & LRMSRequester;
++}
++
++describe("memoizeRequester", () => {
++  it("shares one call between identical GETs, including parallel ones", async () => {
++    const inner = fakeInner();
++    const lrms = memoizeRequester(inner);
++
++    const [a, b] = await Promise.all([lrms.get("/profile"), lrms.get("/profile")]);
++    await lrms.get("/profile");
++
++    expect(a.data).toBe(b.data);
++    expect(inner.get).toHaveBeenCalledTimes(1);
++  });
++
++  it("keeps different URLs and different POST bodies separate", async () => {
++    const inner = fakeInner();
++    const lrms = memoizeRequester(inner);
++
++    await lrms.get("/a");
++    await lrms.get("/b");
++    await lrms.post("/p", new URLSearchParams({ id: "1" }));
++    await lrms.post("/p", new URLSearchParams({ id: "2" }));
++    await lrms.post("/p", new URLSearchParams({ id: "1" }));
++
++    expect(inner.get).toHaveBeenCalledTimes(2);
++    expect(inner.post).toHaveBeenCalledTimes(2);
++  });
++
++  it("does not remember failures, so a retry reaches the ERP", async () => {
++    const inner = fakeInner();
++    inner.get.mockRejectedValueOnce(new Error("boom"));
++    const lrms = memoizeRequester(inner);
++
++    await expect(lrms.get("/x")).rejects.toThrow("boom");
++    await expect(lrms.get("/x")).resolves.toEqual({ data: "GET:/x" });
++    expect(inner.get).toHaveBeenCalledTimes(2);
++  });
++});
+diff --git a/backend/tests/portal-v2.controller.test.ts b/backend/tests/portal-v2.controller.test.ts
+new file mode 100644
+index 0000000..87890f2
+--- /dev/null
++++ b/backend/tests/portal-v2.controller.test.ts
+@@ -0,0 +1,121 @@
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++
++// Saved items live in MongoDB; the controller test must not need a database.
++vi.mock("../src/services/platform.service.js", () => ({
++  PlatformService: class {
++    async list() {
++      return [{ id: "a1", title: "Saved assignment" }];
++    }
++  },
++}));
++
++import { portalV2Controller } from "../src/controllers/portal-v2.controller.js";
++import { erpResponseCache } from "../src/lib/erp-cache.js";
++
++interface FakeRes {
++  locals: Record<string, unknown>;
++  statusCode: number;
++  body?: Record<string, any>;
++  setHeader: () => void;
++  status: (code: number) => FakeRes;
++  json: (body: Record<string, any>) => FakeRes;
++}
++
++function makeRes(lrmsClient: unknown): FakeRes {
++  const res: FakeRes = {
++    locals: {
++      user: { id: "u1" },
++      userDocument: { _id: { toHexString: () => "u1" }, erpCredential: {} },
++      lrmsClient,
++    },
++    statusCode: 200,
++    setHeader: () => undefined,
++    status(code) {
++      res.statusCode = code;
++      return res;
++    },
++    json(body) {
++      res.body = body;
++      return res;
++    },
++  };
++  return res;
++}
++
++const call = (res: FakeRes, section: string, query: Record<string, string> = {}) =>
++  portalV2Controller.get({ params: { section }, query } as never, res as never);
++
++beforeEach(() => {
++  erpResponseCache.clear();
++  vi.spyOn(console, "error").mockImplementation(() => undefined);
++});
++afterEach(() => vi.restoreAllMocks());
++
++describe("PortalV2Controller.get", () => {
++  it("never writes a user's saved items into the shared cached dashboard", async () => {
++    const cached = { dashboard: { name: "Joe" }, attendance: { pct: 80 } };
++    erpResponseCache.set("u1:v2:dashboard", { status: "success", data: cached }, 60_000);
++    const erp = { get: vi.fn(), post: vi.fn() };
++
++    const res = makeRes(erp);
++    await call(res, "dashboard");
++
++    expect(res.statusCode).toBe(200);
++    expect(res.body?.data.assignments).toEqual([{ id: "a1", title: "Saved assignment" }]);
++    expect(res.body?.data.reflection).toBeDefined();
++    expect(erp.get).not.toHaveBeenCalled();
++    // The cached object must be untouched.
++    expect(cached).toEqual({ dashboard: { name: "Joe" }, attendance: { pct: 80 } });
++  });
++
++  it("returns 502 pointing to Settings when the ERP rejects everything", async () => {
++    const erp = {
++      get: vi.fn().mockRejectedValue(new Error("login rejected")),
++      post: vi.fn().mockRejectedValue(new Error("login rejected")),
++    };
++
++    const res = makeRes(erp);
++    await call(res, "all");
++
++    expect(res.statusCode).toBe(502);
++    expect(res.body?.status).toBe("error");
++    expect(res.body?.message).toMatch(/Settings/);
++  });
++
++  it("returns 502 for a single section that fails", async () => {
++    const erp = {
++      get: vi.fn().mockRejectedValue(new Error("down")),
++      post: vi.fn().mockRejectedValue(new Error("down")),
++    };
++
++    const res = makeRes(erp);
++    await call(res, "fees");
++
++    expect(res.statusCode).toBe(502);
++  });
++
++  it("keeps working with partial data when only some sections fail", async () => {
++    const erp = {
++      get: vi.fn(async () => ({ data: {} })),
++      post: vi.fn(async () => ({ data: {} })),
++    };
++    // Make the fees section fail on its own.
++    erp.get.mockImplementation(async (url: string) => {
++      if (url.includes("FeePaid") || url.includes("feePaid")) throw new Error("fees down");
++      return { data: {} };
++    });
++
++    const res = makeRes(erp);
++    await call(res, "all");
++
++    expect(res.statusCode).toBe(200);
++    expect(res.body?.data.registrations).toBeDefined();
++    expect(res.body?.unavailable.every((u: { message: string }) => !/LRMS endpoint/.test(u.message))).toBe(true);
++  });
++
++  it("rejects unknown sections", async () => {
++    const res = makeRes({ get: vi.fn(), post: vi.fn() });
++    await call(res, "secrets");
++    expect(res.statusCode).toBe(404);
++  });
++});
+diff --git a/backend/tests/portal-v2.service.test.ts b/backend/tests/portal-v2.service.test.ts
+new file mode 100644
+index 0000000..89ff64b
+--- /dev/null
++++ b/backend/tests/portal-v2.service.test.ts
+@@ -0,0 +1,97 @@
++import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
++import {
++  PortalV2Service,
++  SECTION_UNAVAILABLE_MESSAGE,
++} from "../src/services/portal-v2.service.js";
++import { erpResponseCache } from "../src/lib/erp-cache.js";
++
++function recordingErp() {
++  const calls: string[] = [];
++  const key = (method: string, url: string, body?: unknown) =>
++    `${method} ${url} ${body instanceof URLSearchParams ? body.toString() : ""}`.trim();
++
++  const erp = {
++    calls,
++    get: vi.fn(async (url: string) => {
++      calls.push(key("GET", url));
++      return { data: {} };
++    }),
++    post: vi.fn(async (url: string, body?: unknown) => {
++      calls.push(key("POST", url, body));
++      return { data: {} };
++    }),
++  };
++  return erp;
++}
++
++beforeEach(() => {
++  erpResponseCache.clear();
++  vi.spyOn(console, "error").mockImplementation(() => undefined);
++});
++afterEach(() => vi.restoreAllMocks());
++
++describe("PortalV2Service", () => {
++  it("never asks the ERP for the same thing twice in one request", async () => {
++    const erp = recordingErp();
++
++    await new PortalV2Service(erp).get("all");
++
++    // Before memoization the profile alone was fetched three times, the dashboard
++    // two or three times, and the attendance summary twice.
++    expect(erp.calls.length).toBeGreaterThan(0);
++    expect(new Set(erp.calls).size).toBe(erp.calls.length);
++  });
++
++  it("serves a section from cache on the next request and skips the ERP", async () => {
++    const first = recordingErp();
++    await new PortalV2Service(first, { cacheScope: "u1" }).get("registrations");
++    const callsAfterFirst = first.calls.length;
++    expect(callsAfterFirst).toBeGreaterThan(0);
++
++    const second = recordingErp();
++    const result = await new PortalV2Service(second, { cacheScope: "u1" }).get("registrations");
++
++    expect(second.calls).toHaveLength(0);
++    expect(result.unavailable).toEqual([]);
++  });
++
++  it("refresh bypasses the cache and stores the new value", async () => {
++    await new PortalV2Service(recordingErp(), { cacheScope: "u1" }).get("registrations");
++
++    const refreshed = recordingErp();
++    await new PortalV2Service(refreshed, { cacheScope: "u1", refresh: true }).get("registrations");
++    expect(refreshed.calls.length).toBeGreaterThan(0);
++
++    const after = recordingErp();
++    await new PortalV2Service(after, { cacheScope: "u1" }).get("registrations");
++    expect(after.calls).toHaveLength(0);
++  });
++
++  it("keeps each user's cached sections separate", async () => {
++    await new PortalV2Service(recordingErp(), { cacheScope: "u1" }).get("registrations");
++
++    const other = recordingErp();
++    await new PortalV2Service(other, { cacheScope: "u2" }).get("registrations");
++
++    expect(other.calls.length).toBeGreaterThan(0);
++  });
++
++  it("does not cache a failed section and hides upstream error text", async () => {
++    const failing = recordingErp();
++    failing.get.mockRejectedValue(
++      new Error('LRMS endpoint "/ajax/secret.jsp" returned HTML'),
++    );
++
++    const result = await new PortalV2Service(failing, { cacheScope: "u1" }).get("registrations");
++
++    expect(result.data.registrations).toBeNull();
++    expect(result.unavailable).toEqual([
++      { section: "registrations", message: SECTION_UNAVAILABLE_MESSAGE },
++    ]);
++    expect(JSON.stringify(result)).not.toContain("secret.jsp");
++
++    const recovered = recordingErp();
++    const again = await new PortalV2Service(recovered, { cacheScope: "u1" }).get("registrations");
++    expect(again.unavailable).toEqual([]);
++  });
++});
+diff --git a/docs/api-v2.md b/docs/api-v2.md
+index 846443b..59ab992 100644
+--- a/docs/api-v2.md
++++ b/docs/api-v2.md
+@@ -11,6 +11,14 @@ The v2 portal API reads data from the authenticated student's LRMS session. It d
+ - `POST /api/v2/portal/credentials` accepts `{ "password": "..." }` to verify and save a password already changed on the official LRMS site.
+ - `PUT /api/v2/portal/password` accepts `{ "currentPassword": "...", "newPassword": "..." }` and changes the LRMS password through its `changepassword.jsp` endpoint. The saved encrypted credential is replaced only after LRMS reports success.
+ 
++## Caching, refresh and errors
++
++- Each section is cached per user (`profile` 30 min, `registrations` 10 min, `dashboard` and `academics` and `fees` 5 min, `attendance` 2 min). Add `?refresh=1` to skip the cache and store fresh data.
++- Identical LRMS calls inside one request are made once. The student profile alone is needed by attendance, academics and fees.
++- If every requested section fails, the API returns `502` with a message that points the student to Settings, because the usual cause is a changed ERP password. Partial failures still return `200` with the failed sections listed in `unavailable`.
++- `unavailable[].message` is always a generic string. Details are only in the server log.
++- `/api/v2/portal/credentials` and `/api/v2/portal/password` are limited to 10 requests per minute per IP.
++
+ Successful read responses have `{ "status": "success", "data": { ... }, "unavailable": [] }`. In the all-sections response, an unavailable section is `null` and its safe error message is listed in `unavailable`; successful sections remain available.
+ 
+ ## Sections and LRMS sources
+diff --git a/mobile/android/gradle/wrapper/gradle-wrapper.properties b/mobile/android/gradle/wrapper/gradle-wrapper.properties
+index 2d428bf..a20f2c4 100644
+--- a/mobile/android/gradle/wrapper/gradle-wrapper.properties
++++ b/mobile/android/gradle/wrapper/gradle-wrapper.properties
+@@ -2,4 +2,4 @@ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-all.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-9.3.1-all.zip
+-- 
+2.43.0
+

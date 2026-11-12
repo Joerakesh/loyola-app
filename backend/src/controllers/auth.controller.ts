@@ -1,3 +1,4 @@
+import { invalidateUserCache } from "../lib/erp-cache.js";
 import { Request, Response } from "express";
 
 import { authService } from "../services/auth.service.js";
@@ -151,6 +152,8 @@ export class AuthController {
         passwordCiphertext,
         createdAt: new Date(),
       });
+      await lrmsBridgeService.invalidate(user._id.toHexString());
+      invalidateUserCache(user._id.toHexString());
 
       if (normalizedEmail && normalizedEmail !== user.email) {
         await userRepository.bindEmail(user._id, normalizedEmail);
@@ -228,11 +231,61 @@ export class AuthController {
     }
   }
 
+  async updateErpPassword(req: Request, res: Response) {
+    try {
+      const user = res.locals.userDocument;
+      const { password } = req.body;
+      const registrationNumber = user.erpCredential?.registrationNumber;
+
+      if (!registrationNumber) {
+        return res.status(400).json({
+          status: "error",
+          message: "Link your ERP account before changing its password",
+        });
+      }
+
+      if (typeof password !== "string" || !password.trim()) {
+        return res.status(400).json({
+          status: "error",
+          message: "A new ERP password is required",
+        });
+      }
+
+      // Verify the new password with LRMS before replacing the saved credential.
+      await lrmsBridgeService.createClient(registrationNumber, password);
+      await userRepository.bindErpCredentials(user._id, {
+        registrationNumber,
+        passwordCiphertext: credentialEncryptionService.encrypt(password),
+        createdAt: new Date(),
+      });
+      await lrmsBridgeService.invalidate(user._id.toHexString());
+      invalidateUserCache(user._id.toHexString());
+
+      const updated = await userRepository.findById(user._id.toHexString());
+      return res.json({
+        status: "success",
+        user: userRepository.toPublicUser(updated!),
+      });
+    } catch (error) {
+      console.error(
+        "Update ERP password error:",
+        error instanceof Error ? error.message : "Unknown error",
+      );
+
+      return res.status(400).json({
+        status: "error",
+        message: "Unable to update ERP password. Check the password and try again.",
+      });
+    }
+  }
+
   async unbindErp(req: Request, res: Response) {
     try {
       const user = res.locals.userDocument;
 
       await userRepository.clearErpCredentials(user._id);
+      await lrmsBridgeService.invalidate(user._id.toHexString());
+      invalidateUserCache(user._id.toHexString());
 
       const updated = await userRepository.findById(user._id.toHexString());
 

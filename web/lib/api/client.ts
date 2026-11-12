@@ -17,14 +17,29 @@ export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...options.headers,
-    },
-  });
+  const isV2 = endpoint.startsWith("/v2/");
+  const apiBase = isV2 ? API_URL.replace(/\/v\d+$/, "/v2") : API_URL;
+  const apiPath = isV2 ? endpoint.slice(3) : endpoint;
+  const url = `${apiBase}${apiPath}`;
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...options.headers,
+      },
+    });
+  } catch (error) {
+    console.error("[API] Network request failed", {
+      method: options.method ?? "GET",
+      url,
+      error,
+    });
+    throw error;
+  }
 
   let body: unknown;
 
@@ -42,6 +57,14 @@ export async function apiFetch<T>(
       typeof body.message === "string"
         ? body.message
         : "Request failed";
+
+    console.error("[API] Request returned an error", {
+      method: options.method ?? "GET",
+      url,
+      status: response.status,
+      statusText: response.statusText,
+      body,
+    });
 
     throw new ApiError(message, response.status);
   }

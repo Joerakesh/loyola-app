@@ -9,6 +9,10 @@ export class AuthService {
     const byGoogleId = await userRepository.findByGoogleId(profile.googleId);
 
     if (byGoogleId) {
+      if (profile.avatarUrl) {
+        await userRepository.updateAvatar(byGoogleId._id, profile.avatarUrl);
+        byGoogleId.avatarUrl = profile.avatarUrl;
+      }
       return userRepository.toPublicUser(byGoogleId);
     }
 
@@ -18,6 +22,9 @@ export class AuthService {
 
     if (byEmail) {
       await userRepository.linkGoogleId(byEmail._id, profile.googleId);
+      if (profile.avatarUrl) {
+        await userRepository.updateAvatar(byEmail._id, profile.avatarUrl);
+      }
 
       const linked = await userRepository.findByGoogleId(profile.googleId);
 

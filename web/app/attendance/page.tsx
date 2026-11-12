@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 import AppShell from "@/components/layout/app-shell"; // Adjust path if needed
-import { getAttendanceHourly } from "@/lib/api/erp";
+import { getPortalSection } from "@/lib/api/erp";
 
 type AttendanceStatus = "present" | "absent" | "not_scheduled";
 
@@ -36,10 +36,22 @@ type AttendanceResponse = {
   data: AttendanceDay[];
 };
 
+type SubjectAttendance = {
+  course_code?: string;
+  subject_description?: string;
+  semester?: number;
+  faculty?: string;
+  attendance_percentage?: string | number;
+  total_hours?: string | number;
+  present_hours?: string | number;
+};
+
 export default function AttendancePage() {
   const [days, setDays] = useState<AttendanceDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [summary, setSummary] = useState<{attendancePercentage:number;present:number;absent:number}|null>(null);
+  const [subjectDays, setSubjectDays] = useState<SubjectAttendance[]>([]);
 
   useEffect(() => {
     async function loadAttendance() {
@@ -47,13 +59,15 @@ export default function AttendancePage() {
         setLoading(true);
         setError("");
 
-        const response = (await getAttendanceHourly()) as AttendanceResponse;
+        const response = await getPortalSection<{summary: {attendancePercentage:number;present:number;absent:number}; hourly: AttendanceDay[]; subjectWise: {data?: SubjectAttendance[]} }>("attendance");
 
-        if (response.status !== "success") {
-          throw new Error("Unable to load attendance");
+        if (response.status !== "success" || !response.data) {
+          throw new Error(response.unavailable.find(item=>item.section==="attendance")?.message ?? "Unable to load attendance");
         }
 
-        setDays(response.data ?? []);
+        setDays(response.data.hourly ?? []);
+        setSummary(response.data.summary ?? null);
+        setSubjectDays(response.data.subjectWise?.data ?? []);
       } catch (error) {
         console.error(error);
 
@@ -87,22 +101,22 @@ export default function AttendancePage() {
     }
 
     const total = present + absent;
-    const percentage = total === 0 ? 0 : (present / total) * 100;
+    const percentage = summary?.attendancePercentage ?? (total === 0 ? 0 : (present / total) * 100);
 
     return {
-      present,
-      absent,
+      present: summary?.present ?? present,
+      absent: summary?.absent ?? absent,
       total,
       percentage,
     };
-  }, [days]);
+  }, [days, summary]);
 
   if (loading) {
     return (
       <AppShell>
         <div className="flex min-h-[60vh] items-center justify-center">
           <div className="flex items-center gap-3 text-slate-500">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-[#8b0000]" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-[var(--brand)]" />
             Loading attendance details...
           </div>
         </div>
@@ -128,7 +142,7 @@ export default function AttendancePage() {
         <section>
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <p className="text-sm font-medium text-[#8b0000]">
+              <p className="text-sm font-medium text-[var(--brand)]">
                 Academic overview
               </p>
 
@@ -151,7 +165,7 @@ export default function AttendancePage() {
         {/* Overview Section */}
         <section className="grid gap-6 lg:grid-cols-3">
           {/* Main Percentage Card */}
-          <div className="rounded-3xl bg-[#8b0000] p-7 text-white shadow-lg lg:col-span-1">
+          <div className="rounded-3xl bg-[var(--brand-deep)] p-7 text-white shadow-lg lg:col-span-1">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-2 text-sm text-white/70">
@@ -236,6 +250,14 @@ export default function AttendancePage() {
           </div>
 
           <AttendanceHistoryTable days={days} />
+        </section>
+
+        <section className="app-card overflow-hidden">
+          <div className="border-b border-[var(--line)] px-5 py-4 sm:px-6">
+            <h2 className="app-section-title">Attendance by subject</h2>
+            <p className="app-muted-text mt-1 text-sm">Subject totals and percentages returned by the ERP.</p>
+          </div>
+          {subjectDays.length === 0 ? <p className="app-muted-text p-5 text-sm">No subject attendance details were returned.</p> : <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="app-muted-text border-b border-[var(--line)] text-xs"><th className="px-5 py-3">Subject</th><th className="px-5 py-3">Semester</th><th className="px-5 py-3">Present / total</th><th className="px-5 py-3">Attendance</th></tr></thead><tbody className="divide-y divide-[var(--line)]">{subjectDays.map((subject, index) => <tr key={`${subject.course_code ?? "subject"}-${index}`}><td className="px-5 py-3"><span className="font-medium">{subject.subject_description ?? subject.course_code ?? "Subject"}</span>{subject.faculty && <span className="app-muted-text mt-1 block text-xs">{subject.faculty}</span>}</td><td className="px-5 py-3">{subject.semester ?? "—"}</td><td className="px-5 py-3">{subject.present_hours ?? "—"} / {subject.total_hours ?? "—"}</td><td className="px-5 py-3">{subject.attendance_percentage == null ? "—" : `${subject.attendance_percentage}%`}</td></tr>)}</tbody></table></div>}
         </section>
       </div>
     </AppShell>

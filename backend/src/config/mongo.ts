@@ -14,6 +14,10 @@ export function connectMongo(): Promise<MongoClient> {
   if (!connectionPromise) {
     const mongoClient = new MongoClient(mongoUri, {
       serverSelectionTimeoutMS: 10000,
+      // Serverless: many short-lived instances, so keep each pool small to stay
+      // well under Atlas connection limits.
+      maxPoolSize: Number(process.env.MONGODB_MAX_POOL_SIZE) || 5,
+      maxIdleTimeMS: 60_000,
     });
 
     mongoClient.on("error", (error) => {

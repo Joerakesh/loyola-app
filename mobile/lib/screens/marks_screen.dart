@@ -71,7 +71,7 @@ class _MarksScreenState extends State<MarksScreen> {
           backgroundColor: Colors.black45,
           // We move the AnimatedSwitcher to the root of the scroll view
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
+            duration: const Duration(milliseconds: 220),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
             child: _buildMainContent(),
