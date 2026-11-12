@@ -6,6 +6,8 @@ const router = Router();
 
 // Public institutional information; no student ERP session is required.
 router.get("/updates", collegeSiteController.updates.bind(collegeSiteController));
+
+// Public month-specific academic calendar.
 router.get("/calendar", academicCalendarController.month.bind(academicCalendarController));
 
 export default router;
