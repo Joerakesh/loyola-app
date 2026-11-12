@@ -64,7 +64,10 @@ function clean(value: string): string {
 
 function absoluteUrl(href: string): string {
   try {
-    return new URL(href, SITE_ORIGIN).toString();
+    const url = new URL(href, SITE_ORIGIN);
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? url.toString()
+      : SITE_ORIGIN;
   } catch {
     return SITE_ORIGIN;
   }
