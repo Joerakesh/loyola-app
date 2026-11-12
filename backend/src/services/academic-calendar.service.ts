@@ -36,7 +36,7 @@ const cache = new Map<string, { expiresAt: number; value: AcademicCalendarMonth 
 const inFlight = new Map<string, Promise<AcademicCalendarMonth>>();
 
 function clean(value: string): string {
-  return value.replace(/\\s+/g, " ").trim();
+  return value.replace(/\s+/g, " ").trim();
 }
 
 function getMarkup(payload: unknown): string {
@@ -56,7 +56,7 @@ function getMarkup(payload: unknown): string {
 }
 
 function normalizeDate(label: string, year: number, monthNumber: number): { date?: string; day?: string } {
-  const match = label.match(/(\\d{1,2})\\s+([A-Za-z]{3,})/);
+  const match = label.match(/(\d{1,2})\s+([A-Za-z]{3,})/);
   if (!match) return {};
   const dayNumber = Number(match[1]);
   const monthIndex = MONTH_INDEX[match[2].slice(0, 3).toLowerCase()];
@@ -79,7 +79,7 @@ function parseEntries(markup: string, year: number, monthNumber: number): Calend
     if (cells.length < 2 || /^date$/i.test(cells[0] ?? "")) return;
     const dateLabel = cells[0] ?? "";
     const event = cells[1] ?? "";
-    if (!/\\d/.test(dateLabel)) return;
+    if (!/\d/.test(dateLabel)) return;
     const dayOrderCell = cells[2] ?? "";
     const key = [dateLabel, event, dayOrderCell].join("|");
     if (seen.has(key)) return;
@@ -88,8 +88,8 @@ function parseEntries(markup: string, year: number, monthNumber: number): Calend
       dateLabel,
       event,
       ...normalizeDate(dateLabel, year, monthNumber),
-      ...(dayOrderCell && /day\\s*[- ]?\\d+/i.test(dayOrderCell)
-        ? { dayOrder: dayOrderCell.match(/day\\s*[- ]?\\d+/i)?.[0] }
+      ...(dayOrderCell && /day\s*[- ]?\d+/i.test(dayOrderCell)
+        ? { dayOrder: dayOrderCell.match(/day\s*[- ]?\d+/i)?.[0] }
         : {}),
     });
   });
