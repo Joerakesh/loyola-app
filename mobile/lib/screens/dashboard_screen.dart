@@ -148,7 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: RefreshIndicator(
         onRefresh: _refreshData,
         color: AppColors.white,
-        backgroundColor: Colors.black45,
+        backgroundColor: AppColors.glass,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
@@ -231,9 +231,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final dayOrder = record?.dayOrder ?? 0;
     final hours = record?.hours.take(5).toList() ?? [];
     final percentage = _getAttendancePercentage();
-    final progressColor = percentage >= 75
-        ? const Color(0xFF9D84FF)
-        : const Color(0xFFFF8484);
+    final progressColor = percentage >= 75 ? AppColors.crimson : AppColors.red;
     final compact = Responsive.isCompact(context);
     final ringSize = Responsive.dp(context, compact ? 70 : 85);
 
@@ -291,10 +289,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       value: (percentage / 100).clamp(0.0, 1.0),
                       strokeWidth: 8,
                       strokeCap: StrokeCap.round,
-                      backgroundColor:
-                          AppColors.white.withValues(alpha: 0.05),
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(progressColor),
+                      backgroundColor: AppColors.white.withValues(alpha: 0.05),
+                      valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                     ),
                     Center(
                       child: Text(
@@ -314,10 +310,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           if (hours.isNotEmpty) ...[
             const SizedBox(height: 22),
-            Container(
-              height: 1,
-              color: AppColors.white.withValues(alpha: 0.1),
-            ),
+            Container(height: 1, color: AppColors.white.withValues(alpha: 0.1)),
             const SizedBox(height: 16),
             Wrap(
               spacing: 18,
@@ -336,11 +329,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     switch (hour.status) {
       case AttendanceStatus.present:
-        color = const Color(0xFF5ED5A8);
+        color = AppColors.green;
         icon = Icons.task_alt_rounded;
         break;
       case AttendanceStatus.absent:
-        color = const Color(0xFFFF7A7A);
+        color = AppColors.red;
         icon = Icons.highlight_off_rounded;
         break;
       case AttendanceStatus.notScheduled:
@@ -448,11 +441,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 IconData icon;
                 switch (h.status) {
                   case AttendanceStatus.present:
-                    color = const Color(0xFF5ED5A8);
+                    color = AppColors.green;
                     icon = Icons.task_alt_rounded;
                     break;
                   case AttendanceStatus.absent:
-                    color = const Color(0xFFFF7A7A);
+                    color = AppColors.red;
                     icon = Icons.highlight_off_rounded;
                     break;
                   case AttendanceStatus.notScheduled:
@@ -488,9 +481,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (day == now.day &&
             month == now.month &&
             ((year != null && year == now.year) ||
-                (year != null &&
-                    year < 100 &&
-                    year + 2000 == now.year))) {
+                (year != null && year < 100 && year + 2000 == now.year))) {
           return record;
         }
       }
@@ -571,7 +562,11 @@ class GlassAvatar extends StatelessWidget {
   final String name;
   final String? imageDataUri;
 
-  Widget _buildPhotoOrInitial(String initial, double size) {
+  Widget _buildPhotoOrInitial(
+    BuildContext context,
+    String initial,
+    double size,
+  ) {
     final value = imageDataUri?.trim();
     if (value != null && value.startsWith('data:image/')) {
       try {
@@ -581,16 +576,16 @@ class GlassAvatar extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _initial(initial),
+          errorBuilder: (_, __, ___) => _initial(context, initial),
         );
       } on FormatException {
-        return _initial(initial);
+        return _initial(context, initial);
       }
     }
-    return _initial(initial);
+    return _initial(context, initial);
   }
 
-  Widget _initial(String initial) {
+  Widget _initial(BuildContext context, String initial) {
     return Center(
       child: Text(
         initial,
@@ -613,21 +608,21 @@ class GlassAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: const Color(0xFF9D84FF),
+        color: AppColors.crimson,
         border: Border.all(
           color: AppColors.white.withValues(alpha: 0.2),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF9D84FF).withValues(alpha: 0.3),
+            color: AppColors.crimson.withValues(alpha: 0.26),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: ClipOval(
-        child: _buildPhotoOrInitial(initial, size),
+        child: _buildPhotoOrInitial(context, initial, size),
       ),
     );
   }

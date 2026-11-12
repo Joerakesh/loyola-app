@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 
 import '../app/app_router.dart';
 import '../core/constants/app_colors.dart';
@@ -25,23 +24,19 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  static const Duration _minimumShowTime = Duration(milliseconds: 2600);
+  static const Duration _minimumShowTime = Duration(milliseconds: 650);
 
   late final AnimationController _entranceController;
   late final Animation<double> _logoScale;
   late final Animation<double> _textFade;
   late final Animation<Offset> _textSlide;
-
-  late final AnimationController _glowController;
-  late final Animation<double> _glowAnimation;
-
   @override
   void initState() {
     super.initState();
 
     _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 750),
     );
 
     _logoScale = CurvedAnimation(
@@ -62,15 +57,6 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         );
 
-    _glowController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
-
-    _glowAnimation = Tween<double>(begin: 0.25, end: 0.55).animate(
-      CurvedAnimation(parent: _glowController, curve: Curves.easeInOutSine),
-    );
-
     _entranceController.forward();
     _bootstrap();
   }
@@ -78,7 +64,6 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _entranceController.dispose();
-    _glowController.dispose();
     super.dispose();
   }
 
@@ -94,15 +79,11 @@ class _SplashScreenState extends State<SplashScreen>
     }
 
     if (loggedIn) {
-      try {
-        await widget.warmup
-            .prefetchAll()
-            .timeout(const Duration(seconds: 6));
-      } on TimeoutException catch (_) {
-        debugPrint('Cache warmup timed out, proceeding to app.');
-      } catch (e) {
-        debugPrint('Warmup error: $e');
-      }
+      unawaited(
+        widget.warmup.prefetchAll().catchError((error) {
+          debugPrint('Cache warmup error: $error');
+        }),
+      );
     }
 
     final elapsed = DateTime.now().difference(startedAt);
@@ -122,7 +103,11 @@ class _SplashScreenState extends State<SplashScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF120B10), Color(0xFF0C0A14), Color(0xFF0B0F12)],
+            colors: [
+              Color(0xFF111920),
+              AppColors.background,
+              Color(0xFF0B1014),
+            ],
           ),
         ),
         child: LayoutBuilder(
@@ -131,9 +116,9 @@ class _SplashScreenState extends State<SplashScreen>
             final h = constraints.maxHeight;
             final compact = w < 360 || h < 560;
             final orbSize = (w * 0.55).clamp(220.0, 420.0);
-            final logoSize = compact ? (w * 0.30).clamp(84.0, 130.0) : 130.0;
-            final spinnerSize = (w * 0.36).clamp(120.0, 160.0);
-            final glowRadius = logoSize / 2 + 40;
+            final logoSize = compact
+                ? (w * 0.30).clamp(84.0, 130.0)
+                : 130.0;
 
             return Stack(
               children: [
@@ -146,7 +131,7 @@ class _SplashScreenState extends State<SplashScreen>
                     height: orbSize,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0x1F8B0000),
+                      color: Color(0x1FB9F36B),
                     ),
                   ),
                 ),
@@ -158,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen>
                     height: orbSize * 1.2,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0x10007AFF),
+                      color: Color(0x1472E4D2),
                     ),
                   ),
                 ),
@@ -172,47 +157,37 @@ class _SplashScreenState extends State<SplashScreen>
                       children: [
                         ScaleTransition(
                           scale: _logoScale,
-                          child: AnimatedBuilder(
-                            animation: _glowController,
-                            builder: (context, child) => Container(
-                              width: logoSize,
-                              height: logoSize,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppColors.white.withValues(alpha: 0.15),
-                                    AppColors.white.withValues(alpha: 0.03),
-                                  ],
-                                ),
-                                border: Border.all(
-                                  color: AppColors.white.withValues(alpha: 0.25),
-                                  width: 1.5,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.crimson.withValues(
-                                      alpha: _glowAnimation.value,
-                                    ),
-                                    blurRadius: glowRadius * 0.5,
-                                    spreadRadius:
-                                        2 + (_glowAnimation.value * 8),
-                                  ),
-                                ],
+                          child: Container(
+                            width: logoSize,
+                            height: logoSize,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.glass,
+                              border: Border.all(
+                                color: AppColors.crimson,
+                                width: 2,
                               ),
-                              child: ClipOval(child: child),
-                            ),
-                            child: Image.asset(
-                              'assets/images/loyola_logo.png',
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Icon(
-                                    Icons.school_rounded,
-                                    size: logoSize * 0.43,
-                                    color: AppColors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.crimson.withValues(
+                                    alpha: 0.16,
                                   ),
+                                  blurRadius: 22,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/images/loyola_logo.png',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Icon(
+                                      Icons.school_rounded,
+                                      size: logoSize * 0.43,
+                                      color: AppColors.white,
+                                    ),
+                              ),
                             ),
                           ),
                         ),
@@ -239,7 +214,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   'C H E N N A I',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: const Color(0xFFFFB4A2),
+                                    color: AppColors.gold,
                                     fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 8,
@@ -264,20 +239,13 @@ class _SplashScreenState extends State<SplashScreen>
                         FadeTransition(
                           opacity: _textFade,
                           child: SizedBox(
-                            width: spinnerSize,
-                            height: spinnerSize,
-                            child: Lottie.asset(
-                              'assets/animations/loading.json',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const SizedBox.shrink(),
-                              delegates: LottieDelegates(
-                                values: [
-                                  ValueDelegate.color(
-                                    const ['**'],
-                                    value: AppColors.crimson,
-                                  ),
-                                ],
+                            width: 76,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: const LinearProgressIndicator(
+                                minHeight: 4,
+                                backgroundColor: AppColors.outline,
+                                color: AppColors.gold,
                               ),
                             ),
                           ),

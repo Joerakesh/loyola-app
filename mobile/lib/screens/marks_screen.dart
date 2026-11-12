@@ -19,8 +19,20 @@ class MarksScreen extends StatefulWidget {
 
 class _MarksScreenState extends State<MarksScreen> {
   List<CourseMarks> _marks = [];
+  int? _selectedSemester;
   bool _isLoading = true;
   String? _error;
+
+  List<int> get _semesters => _marks
+      .map((mark) => mark.semester)
+      .where((semester) => semester > 0)
+      .toSet()
+      .toList()
+    ..sort();
+
+  List<CourseMarks> get _visibleMarks => _selectedSemester == null
+      ? _marks
+      : _marks.where((mark) => mark.semester == _selectedSemester).toList();
 
   @override
   void initState() {
@@ -46,7 +58,13 @@ class _MarksScreenState extends State<MarksScreen> {
       final result = await widget.marksService.fetchMarks();
       if (!mounted) return;
       setState(() {
-        if (result.changed) _marks = result.data;
+        if (result.changed) {
+          _marks = result.data;
+          if (_selectedSemester != null &&
+              !_marks.any((mark) => mark.semester == _selectedSemester)) {
+            _selectedSemester = null;
+          }
+        }
         _isLoading = false;
         _error = null;
       });
@@ -68,7 +86,7 @@ class _MarksScreenState extends State<MarksScreen> {
         child: RefreshIndicator(
           onRefresh: _refreshData,
           color: AppColors.white,
-          backgroundColor: Colors.black45,
+          backgroundColor: AppColors.glass,
           // We move the AnimatedSwitcher to the root of the scroll view
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
@@ -103,6 +121,14 @@ class _MarksScreenState extends State<MarksScreen> {
       );
     }
 
+    final visibleMarks = _visibleMarks;
+    if (visibleMarks.isEmpty) {
+      return _buildStateLayout(
+        key: const ValueKey('empty-semester'),
+        child: _buildEmptyState(),
+      );
+    }
+
     // This is the populated, fully scrollable list state
     return CustomScrollView(
       key: const ValueKey('list'),
@@ -117,6 +143,17 @@ class _MarksScreenState extends State<MarksScreen> {
             bottomPadding: true,
           ),
         ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              Responsive.dp(context, 20),
+              8,
+              Responsive.dp(context, 20),
+              16,
+            ),
+            child: _buildSemesterFilter(),
+          ),
+        ),
         SliverPadding(
           padding: EdgeInsets.fromLTRB(
             Responsive.dp(context, 20),
@@ -125,12 +162,61 @@ class _MarksScreenState extends State<MarksScreen> {
             Responsive.dp(context, 130),
           ),
           sliver: SliverList.separated(
-            itemCount: _marks.length,
+            itemCount: visibleMarks.length,
             separatorBuilder: (_, _) => const SizedBox(height: 16),
-            itemBuilder: (context, index) => _buildCourseCard(_marks[index]),
+            itemBuilder: (context, index) =>
+                _buildCourseCard(visibleMarks[index]),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSemesterFilter() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          _semesterChip(label: 'All', semester: null),
+          for (final semester in _semesters) ...[
+            const SizedBox(width: 8),
+            _semesterChip(label: 'Semester $semester', semester: semester),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _semesterChip({required String label, required int? semester}) {
+    final selected = _selectedSemester == semester;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedSemester = semester),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.crimson : AppColors.backgroundSoft,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: selected ? AppColors.crimson : AppColors.outline,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? AppColors.background : AppColors.white70,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -263,16 +349,16 @@ class _MarksScreenState extends State<MarksScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9D84FF).withValues(alpha: 0.15),
+                    color: AppColors.crimson.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF9D84FF).withValues(alpha: 0.3),
+                      color: AppColors.crimson.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
                     '${course.totals?.outOf100.toStringAsFixed(1) ?? '--'} / 100',
                     style: const TextStyle(
-                      color: Color(0xFF9D84FF),
+                      color: AppColors.crimson,
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
                       letterSpacing: 0.5,

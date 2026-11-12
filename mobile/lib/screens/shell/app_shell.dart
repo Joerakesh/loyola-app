@@ -63,8 +63,8 @@ class AppShell extends StatelessWidget {
           vertical: 8,
         ),
         borderRadius: BorderRadius.circular(28),
-        blur: 14,
-        color: const Color(0xDD211B24),
+        color: AppColors.backgroundSoft,
+        borderColor: AppColors.outline,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -108,10 +108,8 @@ class AppShell extends StatelessWidget {
           curve: animCurve,
           padding: const EdgeInsets.symmetric(vertical: 6),
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.white.withValues(alpha: 0.13)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
+            color: isSelected ? AppColors.crimson : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -122,7 +120,7 @@ class AppShell extends StatelessWidget {
                 child: Icon(
                   isSelected ? selectedIcon : icon,
                   color: isSelected
-                      ? const Color(0xFFFFCAD3)
+                      ? AppColors.background
                       : AppColors.white54,
                   size: iconSize,
                 ),
@@ -133,7 +131,7 @@ class AppShell extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.clip,
                 style: TextStyle(
-                  color: isSelected ? AppColors.white : AppColors.white54,
+                  color: isSelected ? AppColors.background : AppColors.white54,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   fontSize: Responsive.sp(context, compact ? 9 : 10),
                 ),

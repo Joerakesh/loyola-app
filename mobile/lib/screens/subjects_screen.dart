@@ -23,6 +23,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   List<Subject> _subjects = [];
   bool _isLoading = true;
   String? _error;
+  int? _selectedSemester;
 
   @override
   void initState() {
@@ -48,7 +49,13 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
       final result = await widget.subjectService.fetchSubjects();
       if (!mounted) return;
       setState(() {
-        if (result.changed) _subjects = result.data;
+        if (result.changed) {
+          _subjects = result.data;
+          if (_selectedSemester != null &&
+              !_subjects.any((subject) => subject.semester == _selectedSemester)) {
+            _selectedSemester = null;
+          }
+        }
         _isLoading = false;
         _error = null;
       });
@@ -63,21 +70,31 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     }
   }
 
-  int get _totalCredits =>
-      _subjects.fold(0, (sum, subject) => sum + subject.credits);
+  List<int> get _semesters => _subjects
+      .map((subject) => subject.semester)
+      .where((semester) => semester > 0)
+      .toSet()
+      .toList()
+    ..sort();
+
+  List<Subject> get _visibleSubjects => _selectedSemester == null
+      ? _subjects
+      : _subjects
+          .where((subject) => subject.semester == _selectedSemester)
+          .toList();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: GlassBackground(
         glows: const [
-          GlassGlow(top: -100, right: -50, size: 300, color: Color(0x33AF52DE)),
-          GlassGlow(bottom: 0, left: -100, size: 250, color: Color(0x338B0000)),
+          GlassGlow(top: -100, right: -50, size: 300, color: Color(0x18B9F36B)),
+          GlassGlow(bottom: 0, left: -100, size: 250, color: Color(0x1472E4D2)),
         ],
         child: RefreshIndicator(
           onRefresh: _refreshData,
           color: AppColors.white,
-          backgroundColor: Colors.black45,
+          backgroundColor: AppColors.glass,
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
@@ -91,16 +108,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                 ),
               ),
 
-              // Animated Content Transition
-              SliverFillRemaining(
-                hasScrollBody: true,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 220),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  child: _buildMainContent(),
-                ),
-              ),
+              ..._buildContentSlivers(),
             ],
           ),
         ),
@@ -108,57 +116,77 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
     );
   }
 
-  Widget _buildMainContent() {
+  List<Widget> _buildContentSlivers() {
     if (_isLoading) {
-      return const LoadingView(key: ValueKey('loading'));
+      return const [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: LoadingView(),
+        ),
+      ];
     }
 
     if (_error != null) {
-      return ErrorView(
-        key: const ValueKey('error'),
-        message: _error!,
-        onRetry: _refreshData,
-      );
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: ErrorView(message: _error!, onRetry: _refreshData),
+        ),
+      ];
     }
 
-    if (_subjects.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return CustomScrollView(
-      key: const ValueKey('content'),
-      physics: const NeverScrollableScrollPhysics(),
-      slivers: [
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(
-            Responsive.dp(context, 20),
-            8,
-            Responsive.dp(context, 20),
-            Responsive.dp(context, 130),
-          ),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _buildSummaryCard(),
-              const SizedBox(height: 32),
-              SectionHeader(
-                title: 'Curriculum',
-                subtitle: '${_subjects.length} subjects this semester',
-              ),
-              const SizedBox(height: 16),
-              ..._subjects.map(
-                (subject) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: _buildSubjectCard(subject),
-                ),
-              ),
-            ]),
+    final visibleSubjects = _visibleSubjects;
+    if (visibleSubjects.isEmpty) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: _buildEmptyState(
+            _selectedSemester == null
+                ? 'No subjects found'
+                : 'No subjects found for Semester $_selectedSemester',
           ),
         ),
-      ],
-    );
+      ];
+    }
+
+    return [
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(
+          Responsive.dp(context, 20),
+          8,
+          Responsive.dp(context, 20),
+          Responsive.dp(context, 130),
+        ),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index == 0) return _buildSummaryCard(visibleSubjects);
+              if (index == 1) return const SizedBox(height: 32);
+              if (index == 2) {
+                return SectionHeader(
+                  title: 'Curriculum',
+                  subtitle: _selectedSemester == null
+                      ? '${visibleSubjects.length} subjects across semesters'
+                      : '${visibleSubjects.length} subjects · Semester $_selectedSemester',
+                );
+              }
+              if (index == 3) return _buildSemesterFilter();
+              if (index == 4) return const SizedBox(height: 16);
+
+              final subject = visibleSubjects[index - 5];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _buildSubjectCard(subject),
+              );
+            },
+            childCount: visibleSubjects.length + 5,
+          ),
+        ),
+      ),
+    ];
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(String message) {
     return Center(
       key: const ValueKey('empty'),
       child: Column(
@@ -171,7 +199,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No subjects found',
+            message,
             style: TextStyle(
               color: AppColors.white.withValues(alpha: 0.5),
               fontSize: 16,
@@ -185,27 +213,88 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
   // ---------------------------------------------------------------------------
   // SUMMARY CARDS
   // ---------------------------------------------------------------------------
-  Widget _buildSummaryCard() {
+  Widget _buildSummaryCard(List<Subject> subjects) {
+    final totalCredits = subjects.fold<int>(
+      0,
+      (sum, subject) => sum + subject.credits,
+    );
+
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             title: 'Total Courses',
-            value: '${_subjects.length}',
+            value: '${subjects.length}',
             icon: Icons.library_books_rounded,
-            accentColor: const Color(0xFF9D84FF), // Theme Purple
+            accentColor: AppColors.crimson,
           ),
         ),
         const SizedBox(width: 14),
         Expanded(
           child: _buildStatCard(
             title: 'Total Credits',
-            value: '$_totalCredits',
+            value: '$totalCredits',
             icon: Icons.stars_rounded,
-            accentColor: const Color(0xFFFFCA7A), // Theme Gold
+            accentColor: AppColors.gold,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSemesterFilter() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 18),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: [
+            _semesterChip(label: 'All', semester: null),
+            for (final semester in _semesters) ...[
+              const SizedBox(width: 8),
+              _semesterChip(
+                label: 'Semester $semester',
+                semester: semester,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _semesterChip({required String label, required int? semester}) {
+    final selected = _selectedSemester == semester;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedSemester = semester),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.crimson
+                : AppColors.backgroundSoft,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: selected ? AppColors.crimson : AppColors.outline,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? AppColors.background : AppColors.white70,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

@@ -75,18 +75,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       body: GlassBackground(
         glows: const [
-          GlassGlow(top: -80, right: -40, size: 280, color: Color(0x3366D397)),
+          GlassGlow(top: -80, right: -40, size: 280, color: Color(0x1972E4D2)),
           GlassGlow(
             bottom: -60,
             left: -40,
             size: 300,
-            color: Color(0x338B0000),
+            color: Color(0x18B9F36B),
           ),
         ],
         child: RefreshIndicator(
           onRefresh: _refreshData,
           color: AppColors.white,
-          backgroundColor: Colors.black45,
+          backgroundColor: AppColors.glass,
           // AnimatedSwitcher moved to the root to fix scrolling
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
@@ -189,14 +189,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 64,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF9D84FF),
+              color: AppColors.crimson,
               border: Border.all(
                 color: AppColors.white.withValues(alpha: 0.25),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF9D84FF).withValues(alpha: 0.3),
+                  color: AppColors.crimson.withValues(alpha: 0.25),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -238,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Text(
         profile.name.isNotEmpty ? profile.name[0].toUpperCase() : 'S',
         style: const TextStyle(
-          color: AppColors.white,
+          color: AppColors.background,
           fontSize: 24,
           fontWeight: FontWeight.bold,
         ),
@@ -421,12 +421,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFFFF7A7A),
+          foregroundColor: AppColors.red,
           side: const BorderSide(
-            color: Color(0xFFFF7A7A),
+            color: AppColors.red,
             width: 1.2,
           ), // Thinner border
-          backgroundColor: const Color(0xFFFF7A7A).withValues(alpha: 0.1),
+          backgroundColor: AppColors.red.withValues(alpha: 0.1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12), // Tighter radius
           ),

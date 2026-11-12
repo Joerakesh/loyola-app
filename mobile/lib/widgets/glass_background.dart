@@ -29,13 +29,13 @@ class GlassBackground extends StatelessWidget {
         top: -80,
         left: -40,
         size: 280,
-        color: Color(0x558B0000),
+        color: Color(0x1FB9F36B),
       ),
       GlassGlow(
         bottom: -60,
         right: -40,
         size: 300,
-        color: Color(0x44007AFF),
+        color: Color(0x1872E4D2),
       ),
     ],
   });
@@ -50,7 +50,7 @@ class GlassBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF171119), AppColors.background, Color(0xFF0D1116)],
+          colors: [Color(0xFF111920), AppColors.background, Color(0xFF0B1014)],
           stops: [0, .52, 1],
         ),
       ),
@@ -74,7 +74,7 @@ class GlassBackground extends StatelessWidget {
                 ),
               ),
             ),
-          // Keep ambient lighting cheap; localized glass cards apply blur.
+          // Keep ambient lighting simple so scrolling stays lightweight.
           Positioned.fill(child: child),
         ],
       ),

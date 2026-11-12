@@ -67,8 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 440),
                 child: GlassContainer(
-                  padding: EdgeInsets.all(Responsive.dp(context, 26)),
-                  blur: 12,
+                  padding: EdgeInsets.all(Responsive.dp(context, 24)),
+                  color: AppColors.backgroundSoft,
+                  borderColor: AppColors.outline,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,
@@ -113,6 +114,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 6),
+                      Text(
+                        'CAMPUS ACCESS',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.crimson,
+                          fontSize: Responsive.sp(context, 10),
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.4,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       const Text(
                         'Student Portal',
                         textAlign: TextAlign.center,
@@ -185,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
           : ElevatedButton.icon(
               onPressed: _loginWithGoogle,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.white,
+                backgroundColor: AppColors.crimson,
                 foregroundColor: AppColors.background,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -213,7 +225,7 @@ class _GoogleIcon extends StatelessWidget {
     return const Icon(
       Icons.g_mobiledata_rounded,
       size: 28,
-      color: Color(0xFF4285F4),
+      color: Color(0xFF1B4B77),
     );
   }
 }

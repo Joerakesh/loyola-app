@@ -6,15 +6,16 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData dark() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.crimson,
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: const Color(0xFFE79AAA),
-      secondary: AppColors.gold,
-      surface: AppColors.backgroundSoft,
-      error: const Color(0xFFFF8585),
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.crimson,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: AppColors.crimson,
+          secondary: AppColors.gold,
+          surface: AppColors.glass,
+          error: AppColors.red,
+        );
 
     return ThemeData(
       useMaterial3: true,
@@ -26,25 +27,25 @@ class AppTheme {
         bodyColor: AppColors.white,
         displayColor: AppColors.white,
       ),
-      visualDensity: VisualDensity.standard,
-      splashFactory: InkSparkle.splashFactory,
+      visualDensity: VisualDensity.compact,
+      splashFactory: InkRipple.splashFactory,
       dividerTheme: DividerThemeData(
-        color: AppColors.white.withValues(alpha: 0.08),
+        color: AppColors.outline,
         thickness: 1,
         space: 1,
       ),
       cardTheme: CardThemeData(
-        color: AppColors.white.withValues(alpha: 0.055),
+        color: AppColors.glass,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: ZoomPageTransitionsBuilder(),
-          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
-          TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
-          TargetPlatform.windows: ZoomPageTransitionsBuilder(),
-          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          // TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          // TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
         },
       ),
       appBarTheme: const AppBarTheme(
@@ -61,8 +62,20 @@ class AppTheme {
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
       ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.crimson,
+          foregroundColor: AppColors.background,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          minimumSize: const Size(48, 50),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+      ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppColors.white,
+        color: AppColors.crimson,
         circularTrackColor: Color(0x33FFFFFF),
       ),
     );

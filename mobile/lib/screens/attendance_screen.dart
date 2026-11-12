@@ -132,15 +132,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final isGoodStanding = displayPercentage >= 75.0;
 
     final statusColor = isGoodStanding
-        ? const Color(0xFF5ED5A8)
-        : const Color(0xFFFF7A7A);
+        ? AppColors.green
+        : AppColors.red;
 
     return Scaffold(
       body: GlassBackground(
         child: RefreshIndicator(
           onRefresh: _refreshData,
           color: AppColors.white,
-          backgroundColor: Colors.black45,
+          backgroundColor: AppColors.glass,
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
@@ -256,7 +256,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Widget _buildFilterChip(String label, AttendanceFilter filter) {
     final isSelected = _selectedFilter == filter;
-    final accentColor = const Color(0xFF9D84FF); // Theme Purple
+    const accentColor = AppColors.crimson;
 
     return GestureDetector(
       onTap: () {
@@ -383,11 +383,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     switch (hour.status) {
       case AttendanceStatus.present:
-        color = const Color(0xFF5ED5A8);
+        color = AppColors.green;
         icon = Icons.task_alt_rounded;
         break;
       case AttendanceStatus.absent:
-        color = const Color(0xFFFF7A7A);
+        color = AppColors.red;
         icon = Icons.highlight_off_rounded;
         break;
       case AttendanceStatus.notScheduled:

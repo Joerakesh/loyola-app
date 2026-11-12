@@ -5,6 +5,7 @@ class CourseMarks {
     required this.faculty,
     required this.marksAvailable,
     required this.components,
+    required this.semester,
     this.totals,
   });
 
@@ -13,6 +14,7 @@ class CourseMarks {
   final String faculty;
   final bool marksAvailable;
   final List<MarkComponent> components;
+  final int semester;
   final MarksTotal? totals;
 
   factory CourseMarks.fromJson(Map<String, dynamic> json) {
@@ -21,6 +23,7 @@ class CourseMarks {
       courseName: json['courseName']?.toString() ?? '',
       faculty: json['faculty']?.toString() ?? '',
       marksAvailable: json['marksAvailable'] as bool? ?? false,
+      semester: (json['semester'] as num?)?.toInt() ?? 0,
       components: (json['components'] as List<dynamic>? ?? [])
           .map((c) => MarkComponent.fromJson(c as Map<String, dynamic>))
           .toList(),

@@ -27,7 +27,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
         bottom: false,
         child: Padding(
           padding: EdgeInsets.only(
-            top: 8,
+          top: 6,
             left: showBackButton ? 8 : 20,
             right: 8,
             bottom: bottomPadding ? 8 : 0,
@@ -43,9 +43,9 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
                   title,
                   style: const TextStyle(
                     color: AppColors.white,
-                    fontSize: 21,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
+                    fontSize: 23,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.7,
                   ),
                 ),
               ),
