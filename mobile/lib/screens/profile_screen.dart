@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -32,6 +33,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _loadCached();
     _refreshData();
+
+    // Retry the ERP photo when Profile is opened. This also handles users who
+    // linked their ERP account after the initial Google sign-in.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(context.read<AuthProvider>().refreshStudentPhoto());
+      }
+    });
   }
 
   Future<void> _loadCached() async {
@@ -87,7 +96,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onRefresh: _refreshData,
           color: AppColors.white,
           backgroundColor: AppColors.glass,
-          // AnimatedSwitcher moved to the root to fix scrolling
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
             switchInCurve: Curves.easeOutCubic,
@@ -117,7 +125,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    // Scrollable List State
     return CustomScrollView(
       key: const ValueKey('content'),
       physics: const BouncingScrollPhysics(
@@ -142,11 +149,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             delegate: SliverChildListDelegate([
               _buildHeader(
                 _profile!,
-                context.watch<AuthProvider>().studentPhotoDataUri,
+                context.watch<AuthProvider>().profileAvatarUrl,
               ),
-              const SizedBox(height: 16), // Tighter spacing
+              const SizedBox(height: 16),
               _buildDetailsCard(_profile!),
-              const SizedBox(height: 16), // Tighter spacing
+              const SizedBox(height: 16),
               _buildLogoutButton(),
             ]),
           ),
@@ -155,7 +162,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper method to keep AppBar visible during loading/error states
   Widget _buildStateLayout({required Key key, required Widget child}) {
     return CustomScrollView(
       key: key,
@@ -180,12 +186,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ---------------------------------------------------------------------------
   Widget _buildHeader(StudentProfile profile, String? avatarUrl) {
     return GlassContainer(
-      // Reduced padding
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       child: Column(
         children: [
           Container(
-            width: 64, // Smaller avatar
+            width: 64,
             height: 64,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -210,7 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: AppColors.white,
-              fontSize: 18, // Smaller font
+              fontSize: 18,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.3,
             ),
@@ -220,7 +225,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             profile.registerNumber,
             style: const TextStyle(
               color: AppColors.white54,
-              fontSize: 12, // Smaller font
+              fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -272,13 +277,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final chips = [if (profile.program.isNotEmpty) profile.program];
 
     return Wrap(
-      spacing: 6, // Tighter wrap spacing
+      spacing: 6,
       runSpacing: 6,
       alignment: WrapAlignment.center,
       children: chips
           .map(
             (chip) => Container(
-              // Tighter chip padding
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: AppColors.white.withValues(alpha: 0.08),
@@ -291,7 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 chip.toUpperCase(),
                 style: const TextStyle(
                   color: AppColors.white70,
-                  fontSize: 10, // Smaller font
+                  fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
                 ),
@@ -319,7 +323,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final validDetails = details.where((d) => d.$2.isNotEmpty).toList();
 
     return GlassContainer(
-      padding: const EdgeInsets.all(16), // Reduced outer padding
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -327,12 +331,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'Personal Information',
             style: TextStyle(
               color: AppColors.white,
-              fontSize: 14, // Smaller font
+              fontSize: 14,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.3,
             ),
           ),
-          const SizedBox(height: 16), // Tighter spacing
+          const SizedBox(height: 16),
           for (var i = 0; i < validDetails.length; i++)
             Column(
               children: [
@@ -343,7 +347,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 if (i < validDetails.length - 1)
                   Padding(
-                    // Tighter divider padding
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Divider(
                       color: AppColors.white.withValues(alpha: 0.05),
@@ -365,13 +368,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       children: [
         Container(
-          // Tighter icon container
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: AppColors.white.withValues(alpha: 0.05),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: AppColors.white54, size: 16), // Smaller icon
+          child: Icon(icon, color: AppColors.white54, size: 16),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -382,7 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title,
                 style: const TextStyle(
                   color: AppColors.white54,
-                  fontSize: 11, // Smaller title
+                  fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -391,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 value,
                 style: const TextStyle(
                   color: AppColors.white,
-                  fontSize: 14, // Smaller value
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -407,15 +409,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ---------------------------------------------------------------------------
   Widget _buildLogoutButton() {
     return SizedBox(
-      height: 44, // Shorter button
+      height: 44,
       width: double.infinity,
       child: OutlinedButton.icon(
         onPressed: _logout,
-        icon: const Icon(Icons.logout_rounded, size: 18), // Smaller icon
+        icon: const Icon(Icons.logout_rounded, size: 18),
         label: const Text(
           'Logout',
           style: TextStyle(
-            fontSize: 14, // Smaller label
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
           ),
@@ -425,10 +427,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           side: const BorderSide(
             color: AppColors.red,
             width: 1.2,
-          ), // Thinner border
+          ),
           backgroundColor: AppColors.red.withValues(alpha: 0.1),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12), // Tighter radius
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
