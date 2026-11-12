@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Award, BookOpenCheck, ChartNoAxesColumn, RefreshCw } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
-import { getInternalMarks, type InternalMarkRecord } from "@/lib/api/erp";
+import { getPortalSection, type InternalMarkRecord } from "@/lib/api/erp";
 
 export default function MarksPage() {
   const [marks, setMarks] = useState<InternalMarkRecord[]>([]);
@@ -12,7 +12,7 @@ export default function MarksPage() {
   const [semester, setSemester] = useState("all");
 
   const load = useCallback(async () => {
-    try { setLoading(true); setError(""); const response = await getInternalMarks(); setMarks(response.data ?? []); }
+    try { setLoading(true); setError(""); const response = await getPortalSection<{subjects:unknown[];marks:InternalMarkRecord[]}>("academics"); if(!response.data) throw new Error(response.unavailable.find(item=>item.section==="academics")?.message ?? "No marks data returned by the v2 API."); setMarks(response.data.marks ?? []); }
     catch (e) { setError(e instanceof Error ? e.message : "Unable to load internal marks."); }
     finally { setLoading(false); }
   }, []);

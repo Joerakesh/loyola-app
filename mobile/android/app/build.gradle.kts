@@ -4,11 +4,24 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Firebase google-services plugin is applied only when the config file is
-// present (download it from Firebase Console → Project → Add Android app:
-// com.joerakesh.loyolaerp, then drop google-services.json into android/app/).
-if (file("google-services.json").exists()) {
+// Keep the public Android client config in the repository root so all apps can
+// share it. Never point this at firebase-service-account.json: that file is a
+// private Admin SDK credential and must remain on the backend.
+val rootGoogleServices = rootProject.file("../../google-services.json")
+val appGoogleServices = file("google-services.json")
+val syncRootGoogleServices = tasks.register<Copy>("syncRootGoogleServices") {
+    from(rootGoogleServices)
+    into(layout.projectDirectory)
+    onlyIf { rootGoogleServices.isFile }
+}
+
+if (rootGoogleServices.isFile || appGoogleServices.isFile) {
     apply(plugin = "com.google.gms.google-services")
+    tasks.configureEach {
+        if (name.startsWith("process") && name.endsWith("GoogleServices")) {
+            dependsOn(syncRootGoogleServices)
+        }
+    }
 }
 
 android {

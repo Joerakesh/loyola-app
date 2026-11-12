@@ -103,6 +103,16 @@ export async function bindErp(
   return response.user;
 }
 
+export async function updateErpPassword(password: string): Promise<User> {
+  const response = await apiFetch<BindErpResponse>("/auth/erp-password", {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify({ password }),
+  });
+
+  return response.user;
+}
+
 export async function bindEmail(email: string): Promise<User> {
   const response = await apiFetch<BindErpResponse>("/auth/bind-email", {
     method: "POST",

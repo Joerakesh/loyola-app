@@ -13,6 +13,7 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import homeRoutes from "./routes/home.routes.js";
 import reflectionsRoutes from "./routes/reflections.routes.js";
+import v2Routes from "./routes/v2.routes.js";
 import { createPlatformRouter } from "./routes/platform.routes.js";
 import { platformControllers } from "./controllers/platform.controllers.js";
 
@@ -24,6 +25,22 @@ const app = express();
 app.set("trust proxy", 1);
 
 app.use(helmet());
+
+// Log every request with its final status and duration. Query strings, headers,
+// and bodies are intentionally omitted because they can contain student data
+// or credentials.
+app.use((req, res, next) => {
+  const startedAt = process.hrtime.bigint();
+
+  res.on("finish", () => {
+    const durationMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+    console.log(
+      `[HTTP] ${req.method} ${req.originalUrl.split("?", 1)[0]} ${res.statusCode} ${durationMs.toFixed(1)}ms`,
+    );
+  });
+
+  next();
+});
 
 // CORS_ORIGINS="https://your-web-app.vercel.app,http://localhost:3000"
 // Left unset it stays open, which is what the native mobile app needs anyway
@@ -71,6 +88,7 @@ app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/home", homeRoutes);
 app.use("/api/v1/reflections", reflectionsRoutes);
+app.use("/api/v2", v2Routes);
 
 app.use(
   "/api/v1/schedules",

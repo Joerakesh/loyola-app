@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, BookOpen, CalendarDays, CircleUserRound, CreditCard, GraduationCap, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from "lucide-react";
+import { BarChart3, BookOpen, CalendarDays, CircleUserRound, CreditCard, GraduationCap, KeyRound, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from "lucide-react";
 import IhsMark from "@/components/brand/ihs-mark";
 import { BRAND } from "@/lib/brand";
 import { useEffect, useState } from "react";
@@ -16,6 +16,7 @@ const navigation = [
   { label: "Timetable", href: "/timetable", icon: CalendarDays },
   { label: "Fees", href: "/fees", icon: CreditCard },
   { label: "Profile", href: "/profile", icon: CircleUserRound },
+  { label: "Settings", href: "/settings", icon: KeyRound },
 ];
 
 export default function AppShell({ children }: AppShellProps) {
@@ -97,7 +98,7 @@ export default function AppShell({ children }: AppShellProps) {
       <main className="app-main min-h-[calc(100vh-4.5rem)] px-4 pb-28 pt-6 sm:px-6 sm:pt-8 lg:px-10 lg:pb-10"><div className="mx-auto w-full max-w-[1440px]">{children}</div></main>
     </div>
     <nav className="app-mobile-nav fixed inset-x-0 bottom-0 z-40 lg:hidden" aria-label="Mobile navigation">
-      {navigation.filter(item => ["/dashboard", "/attendance", "/subjects", "/marks", "/profile"].includes(item.href)).map(item => {
+      {navigation.filter(item => ["/dashboard", "/attendance", "/subjects", "/marks", "/profile", "/settings"].includes(item.href)).map(item => {
         const Icon = item.icon; const active = pathname === item.href || pathname.startsWith(item.href + "/");
         return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={["app-mobile-nav-item", active ? "app-mobile-nav-active" : ""].join(" ")}>
           <span className="app-mobile-icon"><Icon size={20} strokeWidth={active ? 2.4 : 1.8}/></span><span>{item.label}</span>

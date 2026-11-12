@@ -6,7 +6,8 @@ import {
   cert,
 } from "firebase-admin/app";
 import { getAuth, Auth } from "firebase-admin/auth";
-import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 const projectId = process.env.FIREBASE_PROJECT_ID ?? "loyola-app-803a6";
 
@@ -28,9 +29,7 @@ function loadServiceAccount() {
 
   if (file) {
     try {
-      const require = createRequire(import.meta.url);
-
-      return JSON.parse(require(file));
+      return JSON.parse(readFileSync(resolve(process.cwd(), file), "utf8"));
     } catch {
       // Fall through to applicationDefault below.
     }

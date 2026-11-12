@@ -19,6 +19,15 @@ describe("public API surface", () => {
     expect(res.body.status).toBe("ok");
   });
 
+  it("reports the v2 API index", async () => {
+    const res = await request(app).get("/api/v2");
+
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe("ok");
+    expect(res.body.version).toBe("v2");
+    expect(res.body.portalSections).toContain("fees");
+  });
+
   it.each([
     "/api/v1/home",
     "/api/v1/dashboard",
@@ -28,11 +37,31 @@ describe("public API surface", () => {
     "/api/v1/marks/internal",
     "/api/v1/reflections/today",
     "/api/v1/assignments",
+    "/api/v2/portal",
+    "/api/v2/portal/profile",
+    "/api/v2/portal/dashboard",
+    "/api/v2/portal/attendance",
+    "/api/v2/portal/academics",
+    "/api/v2/portal/fees",
+    "/api/v2/portal/registrations",
+    "/api/v2/platform/schedules",
   ])("requires authentication for %s", async (path) => {
     const res = await request(app).get(path);
 
     expect(res.status).toBe(401);
     expect(res.body.status).toBe("error");
+  });
+
+  it("requires authentication to sync or change an ERP password", async () => {
+    const sync = await request(app)
+      .post("/api/v2/portal/credentials")
+      .send({ password: "test" });
+    const change = await request(app)
+      .put("/api/v2/portal/password")
+      .send({ currentPassword: "test", newPassword: "test" });
+
+    expect(sync.status).toBe(401);
+    expect(change.status).toBe(401);
   });
 
   it("sets security headers", async () => {

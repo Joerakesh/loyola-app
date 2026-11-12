@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 constraints: const BoxConstraints(maxWidth: 440),
                 child: GlassContainer(
                   padding: EdgeInsets.all(Responsive.dp(context, 26)),
-                  blur: 18,
+                  blur: 12,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisSize: MainAxisSize.min,

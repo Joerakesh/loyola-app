@@ -9,7 +9,7 @@ class GlassContainer extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(20),
     this.borderRadius,
-    this.blur = 12,
+    this.blur = 9,
     this.color,
     this.borderColor,
     this.onTap,
@@ -29,23 +29,41 @@ class GlassContainer extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: r,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: Container(
-          decoration: BoxDecoration(
-            color: color ?? AppColors.white.withValues(alpha: 0.07),
-            borderRadius: r,
-            border: Border.all(
-              color: borderColor ?? AppColors.white.withValues(alpha: 0.12),
-              width: 1.5,
-            ),
-          ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: InkWell(
-              onTap: onTap,
+      child: RepaintBoundary(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              gradient: color == null
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.white.withValues(alpha: 0.09),
+                        AppColors.white.withValues(alpha: 0.035),
+                      ],
+                    )
+                  : null,
               borderRadius: r,
-              child: Padding(padding: padding, child: child),
+              border: Border.all(
+                color: borderColor ?? AppColors.white.withValues(alpha: 0.14),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.16),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: r,
+                child: Padding(padding: padding, child: child),
+              ),
             ),
           ),
         ),

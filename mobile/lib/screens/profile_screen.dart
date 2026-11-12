@@ -87,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           backgroundColor: Colors.black45,
           // AnimatedSwitcher moved to the root to fix scrolling
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
+            duration: const Duration(milliseconds: 220),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
             child: _buildMainContent(),

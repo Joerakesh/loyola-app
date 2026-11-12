@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Activity, ArrowUpRight, Bell, BookOpen, CalendarDays, CheckCircle2, Clock3, CreditCard, GraduationCap, Megaphone, RefreshCw, TrendingUp, UserRound, ClipboardList } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
-import { getHome, type PlatformRecord, type Reflection } from "@/lib/api/erp";
+import { getHome, getPortalSection, type PlatformRecord, type Reflection } from "@/lib/api/erp";
 import IhsMark from "@/components/brand/ihs-mark";
 import { BRAND } from "@/lib/brand";
 import type { AttendanceSummary, DashboardData } from "@/types/api";
@@ -22,6 +22,7 @@ export default function DashboardPage() {
   const [loading,setLoading]=useState(true);
   const [refreshing,setRefreshing]=useState(false);
   const [error,setError]=useState("");
+  const [registrationStatus,setRegistrationStatus]=useState<Record<string,unknown>|null>(null);
 
   // One request instead of seven; sections that fail arrive as null so the rest
   // of the dashboard still renders.
@@ -31,6 +32,9 @@ export default function DashboardPage() {
 
     try {
       const { data, failed: failedSections } = await getHome({ refresh });
+      void getPortalSection<Record<string,unknown>>("registrations")
+        .then((result) => setRegistrationStatus(result.data))
+        .catch((statusError) => console.error("[Dashboard] Registration status unavailable", statusError));
 
       setDashboard(data.dashboard);
       setAttendance(data.attendance);
@@ -42,6 +46,7 @@ export default function DashboardPage() {
       setReflection(data.reflection);
       setFailed(failedSections ?? []);
     } catch (loadError) {
+      console.error("[Dashboard] Failed to load student data", loadError);
       setError(
         loadError instanceof Error
           ? loadError.message
@@ -63,6 +68,7 @@ export default function DashboardPage() {
   return <AppShell><div className="space-y-7">
     <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="app-muted-text text-sm">{new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"})}</p><h1 className="app-page-title mt-1">Welcome back{student?.name ? ", "+student.name.split(" ")[0] : ""}.</h1></div><div className="flex items-center gap-2"><span className="app-pill"><span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]"/>Connected to ERP</span><button onClick={()=>void load(true)} disabled={refreshing} className="app-icon-button" aria-label="Refresh dashboard" title="Refresh dashboard"><RefreshCw size={17} className={refreshing?"animate-spin":""}/></button></div></header>
     {failed.length>0&&<div role="status" className="app-card flex flex-col gap-3 border-[var(--warning)]/40 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-semibold">Some sections could not load</p><p className="app-muted-text mt-1 text-sm">Showing everything else. Missing: {failed.join(", ")}.</p></div><button onClick={()=>void load(true)} className="app-button-primary min-h-10 px-4 text-sm">Try again</button></div>}
+    {registrationStatus&&<section className="app-card p-5"><h2 className="app-section-title">College registration status</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[["Semester registration",registrationStatus.semester],["Course registration",registrationStatus.course],["Assessment",registrationStatus.assessment],["Hall ticket",registrationStatus.hallTicket],["Club registration",registrationStatus.club],["Student club",registrationStatus.studentClub]].map(([label,value])=>{const record=value&&typeof value==="object"?value as Record<string,unknown>:{};const detail=record.message??record.examMonthYear??record.monthName??(typeof record.isOpen==="boolean"?null:record.status)??(typeof record.open==="boolean"?null:"Not returned");const isOpen=typeof record.isOpen==="boolean"?record.isOpen:typeof record.open==="boolean"?record.open:null;return <div key={String(label)} className="rounded-xl bg-[var(--surface-soft)] p-4"><p className="app-muted-text text-xs">{String(label)}</p><p className="mt-1 text-sm font-semibold">{detail==null?(isOpen===null?"Not returned":isOpen?"Open":"Closed"):String(detail)}</p>{isOpen!==null&&detail!=null&&<span className="app-pill mt-2">{isOpen?"Open":"Closed"}</span>}</div>})}</div></section>}
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Metric icon={<Activity size={19}/>} label="Attendance" value={loading?"—":attendance?String(attendance.attendancePercentage)+"%":"—"} note="Overall recorded attendance" href="/attendance"/>
       <Metric icon={<CheckCircle2 size={19}/>} label="Classes attended" value={loading?"—":attendance?String(attendance.present):"—"} note="Present sessions" href="/attendance"/>

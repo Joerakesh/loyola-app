@@ -95,7 +95,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               SliverFillRemaining(
                 hasScrollBody: true,
                 child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 400),
+                  duration: const Duration(milliseconds: 220),
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeInCubic,
                   child: _buildMainContent(),

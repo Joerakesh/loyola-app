@@ -9,6 +9,11 @@ class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.crimson,
       brightness: Brightness.dark,
+    ).copyWith(
+      primary: const Color(0xFFE79AAA),
+      secondary: AppColors.gold,
+      surface: AppColors.backgroundSoft,
+      error: const Color(0xFFFF8585),
     );
 
     return ThemeData(
@@ -17,13 +22,29 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: scheme,
+      textTheme: ThemeData.dark().textTheme.apply(
+        bodyColor: AppColors.white,
+        displayColor: AppColors.white,
+      ),
+      visualDensity: VisualDensity.standard,
+      splashFactory: InkSparkle.splashFactory,
+      dividerTheme: DividerThemeData(
+        color: AppColors.white.withValues(alpha: 0.08),
+        thickness: 1,
+        space: 1,
+      ),
+      cardTheme: CardThemeData(
+        color: AppColors.white.withValues(alpha: 0.055),
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
-          TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
-          TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(),
-          TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
-          TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+          TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
+          TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
         },
       ),
       appBarTheme: const AppBarTheme(
@@ -42,6 +63,7 @@ class AppTheme {
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.white,
+        circularTrackColor: Color(0x33FFFFFF),
       ),
     );
   }

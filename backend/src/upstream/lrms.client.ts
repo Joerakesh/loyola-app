@@ -103,6 +103,7 @@ export class LRMSClient implements LRMSRequester {
   private parseJsonResponse<T>(
     response: AxiosResponse<unknown>,
     endpoint: string,
+    method: "GET" | "POST",
   ): T {
     let data = response.data;
 
@@ -112,12 +113,15 @@ export class LRMSClient implements LRMSRequester {
       try {
         data = JSON.parse(text) as unknown;
       } catch {
+        this.logResponse(method, endpoint, response, text);
         const kind = /^\s*</.test(text) ? "HTML" : "non-JSON content";
         throw new SessionExpiredError(
           `LRMS endpoint "${endpoint}" returned ${kind} (HTTP ${response.status}). The ERP may have redirected the request to its login page or the endpoint may be unavailable.`,
         );
       }
     }
+
+    this.logResponse(method, endpoint, response, data);
 
     if (data === null || typeof data !== "object") {
       throw new Error(
@@ -188,7 +192,7 @@ export class LRMSClient implements LRMSRequester {
     return this.parseJsonResponse<{
       status?: string;
       message?: string;
-    }>(response, LRMS_CONFIG.endpoints.login);
+    }>(response, LRMS_CONFIG.endpoints.login, "POST");
   }
 
   async get<T = unknown>(url: string) {
@@ -200,7 +204,7 @@ export class LRMSClient implements LRMSRequester {
 
     return {
       ...response,
-      data: this.parseJsonResponse<T>(response, url),
+      data: this.parseJsonResponse<T>(response, url, "GET"),
     };
   }
 
@@ -213,8 +217,78 @@ export class LRMSClient implements LRMSRequester {
 
     return {
       ...response,
-      data: this.parseJsonResponse<T>(response, url),
+      data: this.parseJsonResponse<T>(response, url, "POST"),
     };
+  }
+
+  private logResponse(
+    method: "GET" | "POST",
+    endpoint: string,
+    response: AxiosResponse<unknown>,
+    body: unknown,
+  ) {
+    const debugShapes = process.env.LRMS_DEBUG_RESPONSES === "true";
+    const logRawBody =
+      process.env.NODE_ENV !== "production" &&
+      (debugShapes || process.env.LRMS_LOG_RAW_RESPONSES === "true");
+    if (!debugShapes && !logRawBody) return;
+
+    const keysOf = (value: unknown): string[] =>
+      value !== null && typeof value === "object" && !Array.isArray(value)
+        ? Object.keys(value as Record<string, unknown>).slice(0, 40)
+        : [];
+    const shapeOf = (value: unknown): unknown => {
+      if (Array.isArray(value)) {
+        return {
+          type: "array",
+          length: value.length,
+          itemKeys: value.length ? keysOf(value[0]) : [],
+        };
+      }
+      if (value !== null && typeof value === "object") {
+        const record = value as Record<string, unknown>;
+        const fields = Object.fromEntries(
+          Object.entries(record).slice(0, 40).map(([key, child]) => {
+            if (Array.isArray(child)) {
+              return [key, { type: "array", length: child.length, itemKeys: child.length ? keysOf(child[0]) : [] }];
+            }
+            if (child !== null && typeof child === "object") {
+              return [key, { type: "object", keys: keysOf(child) }];
+            }
+            return [key, child === null ? "null" : typeof child];
+          }),
+        );
+        return {
+          type: "object",
+          keys: keysOf(record),
+          ...(typeof record.status === "string" ? { status: record.status } : {}),
+          ...(typeof record.success === "boolean" ? { success: record.success } : {}),
+          fields,
+        };
+      }
+      return { type: body === null ? "null" : typeof body, length: typeof body === "string" ? body.length : undefined };
+    };
+
+    const metadata = {
+      method,
+      endpoint: endpoint.split("?", 1)[0],
+      httpStatus: response.status,
+      contentType: response.headers["content-type"] ?? "unknown",
+    };
+
+    if (debugShapes) {
+      console.info("[LRMS response shape]", {
+        ...metadata,
+        body: shapeOf(body),
+      });
+    }
+
+    if (logRawBody) {
+      console.info(
+        "[LRMS raw response]\n" +
+          JSON.stringify({ ...metadata, body }, null, 2),
+      );
+    }
   }
 
   async exportSession(registrationNumber: string): Promise<LRMSSessionState> {

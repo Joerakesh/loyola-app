@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BookOpen, Search, Users, Layers3, RefreshCw } from "lucide-react";
 import AppShell from "@/components/layout/app-shell";
-import { getSubjects, type SubjectRecord } from "@/lib/api/erp";
+import { getPortalSection, type SubjectRecord } from "@/lib/api/erp";
 
 export default function SubjectsPage() {
   const [subjects, setSubjects] = useState<SubjectRecord[]>([]);
@@ -12,7 +12,7 @@ export default function SubjectsPage() {
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
-    try { setLoading(true); setError(""); const response = await getSubjects(); setSubjects(response.data ?? []); }
+    try { setLoading(true); setError(""); const response = await getPortalSection<{subjects:SubjectRecord[];marks:unknown[]}>("academics"); if(!response.data) throw new Error(response.unavailable.find(item=>item.section==="academics")?.message ?? "No academic data returned by the v2 API."); setSubjects(response.data.subjects ?? []); }
     catch (e) { setError(e instanceof Error ? e.message : "Unable to load subjects."); }
     finally { setLoading(false); }
   }, []);
