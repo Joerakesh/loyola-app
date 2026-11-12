@@ -142,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             delegate: SliverChildListDelegate([
               _buildHeader(
                 _profile!,
-                context.watch<AuthProvider>().user?.avatarUrl,
+                context.watch<AuthProvider>().studentPhotoDataUri,
               ),
               const SizedBox(height: 16), // Tighter spacing
               _buildDetailsCard(_profile!),
