@@ -25,6 +25,7 @@ export class SessionExpiredError extends Error {
 export interface LRMSRequester {
   get<T = unknown>(url: string): Promise<{ data: T }>;
   post<T = unknown>(url: string, data?: unknown): Promise<{ data: T }>;
+  getHtml(url: string): Promise<{ data: string }>;
 }
 
 export class LRMSClient implements LRMSRequester {
@@ -206,6 +207,30 @@ export class LRMSClient implements LRMSRequester {
       ...response,
       data: this.parseJsonResponse<T>(response, url, "GET"),
     };
+  }
+
+  async getHtml(url: string): Promise<{ data: string }> {
+    const response = await this.client.get<string>(url, {
+      headers: {
+        ...this.getCookieHeaders(),
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        Origin: this.origin,
+        Referer: this.dashboardReferer,
+      },
+      responseType: "text",
+    });
+
+    this.updateCookies(response);
+
+    const html = String(response.data ?? "");
+    if (
+      /captcha__text|validateLogin\\.jsp/i.test(html) &&
+      /type=["']password["']/i.test(html)
+    ) {
+      throw new SessionExpiredError("LRMS dashboard returned the login page.");
+    }
+
+    return { data: html };
   }
 
   async post<T = unknown>(url: string, data?: unknown) {
