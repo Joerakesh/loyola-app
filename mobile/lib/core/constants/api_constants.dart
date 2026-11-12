@@ -37,4 +37,5 @@ class ApiConstants {
 
   static const String attendanceHourly = '/attendance/hourly';
   static const String attendanceSummary = '/attendance/summary';
+  static const String collegeUpdates = '/college/updates';
 }
