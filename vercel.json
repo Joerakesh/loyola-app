@@ -5,9 +5,7 @@
   "functions": {
     "api/**/*.ts": {
       "maxDuration": 30,
-      "includeFiles": [
-        "backend/src/docs/**"
-      ]
+      "includeFiles": "backend/src/docs/**"
     }
   }
 }
