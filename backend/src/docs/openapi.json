@@ -35,6 +35,10 @@
     },
     {
       "name": "Personal collections"
+    },
+    {
+      "name": "Administration",
+      "description": "Restricted administrative endpoints"
     }
   ],
   "components": {
@@ -836,6 +840,44 @@
         "responses": {
           "200": {
             "description": "Deleted"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/overview": {
+      "get": {
+        "tags": [
+          "Administration"
+        ],
+        "summary": "Get the authenticated administrator overview",
+        "description": "Requires a valid app session and an email included in the server-side ADMIN_EMAILS allowlist. Access is denied when the allowlist is empty.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrator overview"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Account is not authorized as an administrator"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/console": {
+      "get": {
+        "tags": [
+          "Administration"
+        ],
+        "summary": "Open the administrator console",
+        "responses": {
+          "200": {
+            "description": "Admin console HTML"
           }
         }
       }
