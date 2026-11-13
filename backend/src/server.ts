@@ -4,7 +4,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 import attendanceRoutes from "./routes/attendance.routes.js";
 import marksRoutes from "./routes/marks.routes.js";
@@ -127,9 +127,12 @@ app.use(
 );
 
 // Interactive Swagger UI and its machine-readable OpenAPI document.
-const apiDocsHtml = readFileSync(new URL("./docs/api-docs.html", import.meta.url), "utf8");
+const docsDirectory = existsSync(new URL("./docs/", import.meta.url))
+  ? new URL("./docs/", import.meta.url)
+  : new URL("../src/docs/", import.meta.url);
+const apiDocsHtml = readFileSync(new URL("api-docs.html", docsDirectory), "utf8");
 const openApiDocument = JSON.parse(
-  readFileSync(new URL("./docs/openapi.json", import.meta.url), "utf8"),
+  readFileSync(new URL("openapi.json", docsDirectory), "utf8"),
 );
 app.get("/api/docs", (_req, res) => res.type("html").send(apiDocsHtml));
 app.get("/api/openapi.json", (_req, res) => res.json(openApiDocument));
