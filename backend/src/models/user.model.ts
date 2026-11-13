@@ -8,8 +8,8 @@ export interface ErpCredential {
 
 export interface UserDocument extends Document {
   _id: ObjectId;
-  googleId: string;
-  email: string;
+  googleId?: string;
+  email?: string;
   name: string;
   avatarUrl?: string;
   linkedEmails?: string[];
@@ -19,16 +19,17 @@ export interface UserDocument extends Document {
 }
 
 export interface NewUser {
-  googleId: string;
-  email: string;
+  googleId?: string;
+  email?: string;
   name: string;
   avatarUrl?: string;
+  erpCredential?: ErpCredential;
 }
 
 export interface PublicUser {
   id: string;
-  googleId: string;
-  email: string;
+  googleId?: string;
+  email?: string;
   name: string;
   avatarUrl?: string;
   linkedEmails: string[];
