@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { readFileSync } from "node:fs";
 
 import attendanceRoutes from "./routes/attendance.routes.js";
 import marksRoutes from "./routes/marks.routes.js";
@@ -25,7 +26,19 @@ const app = express();
 // the client IP used by express-rate-limit.
 app.set("trust proxy", 1);
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+      },
+    },
+  }),
+);
 
 // Log every request with its final status and duration. Query strings, headers,
 // and bodies are intentionally omitted because they can contain student data
@@ -112,6 +125,14 @@ app.use(
   "/api/v1/notifications",
   createPlatformRouter(platformControllers.notifications),
 );
+
+// Interactive Swagger UI and its machine-readable OpenAPI document.
+const apiDocsHtml = readFileSync(new URL("./docs/api-docs.html", import.meta.url), "utf8");
+const openApiDocument = JSON.parse(
+  readFileSync(new URL("./docs/openapi.json", import.meta.url), "utf8"),
+);
+app.get("/api/docs", (_req, res) => res.type("html").send(apiDocsHtml));
+app.get("/api/openapi.json", (_req, res) => res.json(openApiDocument));
 
 app.get("/api/health", (_req, res) => {
   res.json({
