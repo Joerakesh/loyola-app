@@ -1,0 +1,844 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Loyola Student API",
+    "version": "1.0.0",
+    "description": "Interactive API reference for the Loyola student app backend. Authenticated endpoints require a bearer token returned by login."
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Current deployment"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Authentication"
+    },
+    {
+      "name": "Dashboard"
+    },
+    {
+      "name": "Academics"
+    },
+    {
+      "name": "Student"
+    },
+    {
+      "name": "Portal v2"
+    },
+    {
+      "name": "Campus"
+    },
+    {
+      "name": "Personal collections"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Paste the access token returned by /v1/auth/google or /v1/auth/erp."
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginGoogle": {
+        "type": "object",
+        "required": [
+          "idToken"
+        ],
+        "properties": {
+          "idToken": {
+            "type": "string",
+            "description": "Firebase Google ID token"
+          }
+        }
+      },
+      "LoginErp": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "ERP username or registration number"
+          },
+          "registrationNumber": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        }
+      },
+      "BindGoogle": {
+        "type": "object",
+        "required": [
+          "idToken"
+        ],
+        "properties": {
+          "idToken": {
+            "type": "string",
+            "description": "Fresh Firebase Google ID token"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service status"
+          }
+        }
+      }
+    },
+    "/v1/auth/google": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Sign in with Google",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginGoogle"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated session"
+          },
+          "401": {
+            "description": "Invalid Google token"
+          }
+        }
+      }
+    },
+    "/v1/auth/erp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Sign in with college ERP credentials",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginErp"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated session"
+          },
+          "401": {
+            "description": "Invalid ERP credentials"
+          }
+        }
+      }
+    },
+    "/v1/auth/google/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get current signed-in user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user"
+          },
+          "401": {
+            "description": "Missing or invalid token"
+          }
+        }
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Refresh session",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Refreshed session"
+          }
+        }
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Log out",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logged out"
+          }
+        }
+      }
+    },
+    "/v1/auth/bind-erp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Link ERP account to current user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERP identity linked"
+          }
+        }
+      }
+    },
+    "/v1/auth/bind-google": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Link Google identity to current ERP account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BindGoogle"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Google identity linked"
+          },
+          "409": {
+            "description": "Identity already belongs to another account"
+          }
+        }
+      }
+    },
+    "/v1/auth/erp-password": {
+      "put": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Update saved ERP password",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password updated"
+          }
+        }
+      }
+    },
+    "/v1/auth/bind-email": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Bind email address",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email linked"
+          }
+        }
+      }
+    },
+    "/v1/auth/unbind-erp": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Unlink ERP identity",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ERP identity unlinked"
+          }
+        }
+      }
+    },
+    "/v1/dashboard": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Get dashboard data",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard payload"
+          }
+        }
+      }
+    },
+    "/v1/attendance/summary": {
+      "get": {
+        "tags": [
+          "Academics"
+        ],
+        "summary": "Attendance summary",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attendance totals and percentage"
+          }
+        }
+      }
+    },
+    "/v1/attendance/hourly": {
+      "get": {
+        "tags": [
+          "Academics"
+        ],
+        "summary": "Hourly attendance records",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hourly attendance"
+          }
+        }
+      }
+    },
+    "/v1/marks/internal": {
+      "get": {
+        "tags": [
+          "Academics"
+        ],
+        "summary": "Internal assessment marks",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Internal marks"
+          }
+        }
+      }
+    },
+    "/v1/subjects": {
+      "get": {
+        "tags": [
+          "Academics"
+        ],
+        "summary": "List enrolled subjects",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subjects"
+          }
+        }
+      }
+    },
+    "/v1/student/profile": {
+      "get": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Student profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile"
+          }
+        }
+      }
+    },
+    "/v1/student/photo": {
+      "get": {
+        "tags": [
+          "Student"
+        ],
+        "summary": "Student profile photo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Photo"
+          }
+        }
+      }
+    },
+    "/v1/home": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "Home screen data",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Home data"
+          }
+        }
+      }
+    },
+    "/v1/reflections/today": {
+      "get": {
+        "tags": [
+          "Campus"
+        ],
+        "summary": "Today's reflection",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reflection"
+          }
+        }
+      }
+    },
+    "/v1/college/updates": {
+      "get": {
+        "tags": [
+          "Campus"
+        ],
+        "summary": "College announcements and updates",
+        "responses": {
+          "200": {
+            "description": "College updates"
+          }
+        }
+      }
+    },
+    "/v1/college/calendar": {
+      "get": {
+        "tags": [
+          "Campus"
+        ],
+        "summary": "Academic calendar",
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2026-11"
+            },
+            "description": "Calendar month (YYYY-MM)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Calendar entries"
+          }
+        }
+      }
+    },
+    "/v2": {
+      "get": {
+        "tags": [
+          "Portal v2"
+        ],
+        "summary": "API v2 capabilities",
+        "responses": {
+          "200": {
+            "description": "Version and available sections"
+          }
+        }
+      }
+    },
+    "/v2/portal": {
+      "get": {
+        "tags": [
+          "Portal v2"
+        ],
+        "summary": "Get complete portal data",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Portal data"
+          }
+        }
+      }
+    },
+    "/v2/portal/{section}": {
+      "get": {
+        "tags": [
+          "Portal v2"
+        ],
+        "summary": "Get a portal section",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "section",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "profile",
+                "dashboard",
+                "attendance",
+                "academics",
+                "fees",
+                "registrations"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Section data"
+          }
+        }
+      }
+    },
+    "/v2/portal/credentials": {
+      "post": {
+        "tags": [
+          "Portal v2"
+        ],
+        "summary": "Sync portal credentials",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credentials synced"
+          }
+        }
+      }
+    },
+    "/v2/portal/password": {
+      "put": {
+        "tags": [
+          "Portal v2"
+        ],
+        "summary": "Change ERP password",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password changed"
+          }
+        }
+      }
+    },
+    "/v2/platform/{collection}": {
+      "get": {
+        "tags": [
+          "Portal v2"
+        ],
+        "summary": "List personal platform collection",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "assignments",
+                "announcements",
+                "schedules",
+                "reminders",
+                "notifications"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Collection items"
+          }
+        }
+      }
+    },
+    "/v1/{collection}": {
+      "get": {
+        "tags": [
+          "Personal collections"
+        ],
+        "summary": "List personal collection items",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "schedules",
+                "announcements",
+                "assignments",
+                "reminders",
+                "notifications"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Items"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Personal collections"
+        ],
+        "summary": "Create personal item",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "schedules",
+                "announcements",
+                "assignments",
+                "reminders",
+                "notifications"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/v1/{collection}/{id}": {
+      "get": {
+        "tags": [
+          "Personal collections"
+        ],
+        "summary": "Get personal item",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Personal collections"
+        ],
+        "summary": "Update personal item",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Personal collections"
+        ],
+        "summary": "Delete personal item",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "collection",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted"
+          }
+        }
+      }
+    }
+  }
+}
