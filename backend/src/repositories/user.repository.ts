@@ -95,6 +95,15 @@ export class UserRepository {
 
   async ensureIndexes(): Promise<void> {
     const collection = await this.collection();
+    // Replace legacy non-sparse unique indexes: ERP-only accounts intentionally
+    // have no Google ID or email, so those optional fields must be partial indexes.
+    const existing = await collection.indexes();
+    for (const name of ["googleId_1", "email_1"]) {
+      const index = existing.find((item) => item.name === name);
+      if (index && !index.partialFilterExpression) {
+        await collection.dropIndex(name);
+      }
+    }
     await collection.createIndex(
       { googleId: 1 },
       { unique: true, partialFilterExpression: { googleId: { $type: "string" } } },
