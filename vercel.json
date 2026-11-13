@@ -1,8 +1,13 @@
 {
-  "regions": ["bom1"],
+  "regions": [
+    "bom1"
+  ],
   "functions": {
     "api/**/*.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "includeFiles": [
+        "backend/src/docs/**"
+      ]
     }
   }
 }
