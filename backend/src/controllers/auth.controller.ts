@@ -42,6 +42,41 @@ export class AuthController {
     }
   }
 
+  async erpLogin(req: Request, res: Response) {
+    try {
+      const { registrationNumber, username, password } = req.body ?? {};
+      const identifier = registrationNumber ?? username;
+
+      if (typeof identifier !== "string" || !identifier.trim() ||
+          typeof password !== "string" || !password) {
+        return res.status(400).json({
+          status: "error",
+          message: "username (or registrationNumber) and password are required",
+        });
+      }
+
+      const user = await authService.loginWithErp(identifier, password);
+      const session = await appSessionService.createSession(user);
+
+      return res.json({
+        status: "success",
+        user,
+        authentication: {
+          token: session.token,
+          tokenType: "Bearer",
+          expiresAt: session.expiresAt,
+        },
+      });
+    } catch (error) {
+      // Do not expose whether a registration number exists or why LRMS rejected it.
+      console.error("ERP authentication error:", error instanceof Error ? error.message : "Unknown error");
+      return res.status(401).json({
+        status: "error",
+        message: "ERP login failed. Check your username and password and try again.",
+      });
+    }
+  }
+
   async me(req: Request, res: Response) {
     try {
       const user = res.locals.user as PublicUser;
