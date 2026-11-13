@@ -5,6 +5,7 @@ import { requireAuth } from "../middleware/auth.middleware.js";
 const router = Router();
 
 router.post("/google", (req, res) => authController.googleLogin(req, res));
+router.post("/erp", (req, res) => authController.erpLogin(req, res));
 router.get("/google/me", requireAuth, (req, res) => authController.me(req, res));
 router.post("/refresh", requireAuth, (req, res) =>
   authController.refresh(req, res),
