@@ -67,14 +67,6 @@ class AppRouter {
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.updates,
-        builder: (context, state) => CollegeUpdatesScreen(service: collegeUpdatesService),
-      ),
-      GoRoute(
-        path: AppRoutes.calendar,
-        builder: (context, state) => AcademicCalendarScreen(service: collegeUpdatesService),
-      ),
       // Four primary destinations. Detailed academic and campus pages live
       // beneath their respective hubs to keep the main navigation focused.
       StatefulShellRoute.indexedStack(
@@ -170,12 +162,14 @@ class AppRoutes {
   static const String splash = '/splash';
   static const String login = '/login';
   static const String home = '/home';
-  static const String attendance = '/attendance';
-  static const String subjects = '/subjects';
-  static const String marks = '/marks';
+  static const String academics = '/academics';
+  static const String attendance = '/academics/attendance';
+  static const String subjects = '/academics/subjects';
+  static const String marks = '/academics/marks';
+  static const String campus = '/campus';
   static const String profile = '/profile';
-  static const String updates = '/updates';
-  static const String calendar = '/calendar';
+  static const String updates = '/campus/updates';
+  static const String calendar = '/campus/calendar';
 }
 
 class _NotFoundScreen extends StatelessWidget {
