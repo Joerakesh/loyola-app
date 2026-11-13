@@ -3,68 +3,51 @@
 The v2 portal API reads data from the authenticated student's LRMS session. It does not use HAR-captured response values, cookies, or credentials. All routes below require the app's bearer session and a linked ERP account, except password sync, which verifies the supplied new password by logging in to LRMS.
 
 ## Routes
-
 - `GET /api/v2` returns a public version and section index.
 - `GET /api/v2/portal` returns all portal sections, keyed by section name under `data`.
-- `GET /api/v2/portal/:section` returns one of `profile`, `dashboard`, `attendance`, `academics`, `fees`, or `registrations` directly under `data` (without an extra section-name wrapper).
+- `GET /api/v2/portal/:section` returns one of `profile`, `dashboard`, `attendance`, `academics`, `fees`, or `registrations` directly under `data`.
 - `GET /api/v2/platform/:collection` returns saved `assignments`, `announcements`, `schedules`, `reminders`, or `notifications` for the authenticated user.
-- `POST /api/v2/portal/credentials` accepts `{ "password": "..." }` to verify and save a password already changed on the official LRMS site.
-- `PUT /api/v2/portal/password` accepts `{ "currentPassword": "...", "newPassword": "..." }` and changes the LRMS password through its `changepassword.jsp` endpoint. The saved encrypted credential is replaced only after LRMS reports success.
+- `POST /api/v2/portal/credentials` accepts `{ "password": "..." }` to verify and save a password already changed on LRMS.
+- `PUT /api/v2/portal/password` accepts `{ "currentPassword": "...", "newPassword": "..." }` and changes the LRMS password.
 
-Successful read responses have `{ "status": "success", "data": { ... }, "unavailable": [] }`. In the all-sections response, an unavailable section is `null` and its safe error message is listed in `unavailable`; successful sections remain available.
-
-## Sections and LRMS sources
-
-- `profile`: full student profile and sidebar identity.
-- `dashboard`: student dashboard and attendance summary.
-- `attendance`: attendance summary, hour-by-hour records, and subject-wise totals.
+## Sections
+- `profile`: student profile and sidebar identity.
+- `dashboard`: dashboard and attendance summary.
+- `attendance`: summary, hourly records and subject-wise totals.
 - `academics`: subjects and internal assessment marks.
-- `fees`: payment rows, due rows, challan configurations, fee notices, department, registration-fee status, and condonation status.
-- `registrations`: semester, course, hall-ticket, assessment, and club registration statuses.
-
-The implementation follows the request methods and form field names observed in `lrms.loyolacollege.edu.har`, including `studentid`, `registerno`, `currentPassword`, and `newPassword`. It does not include values from that capture.
+- `fees`: payments, dues, challans, fee notices and registration/condonation status.
+- `registrations`: semester, course, hall-ticket, assessment and club statuses.
 
 ## Authentication
-
-The app supports two independent initial sign-in methods. Students may use Google or their Loyola LRMS credentials; Google is not required for ERP sign-in.
+Google and ERP are independent initial sign-in methods.
 
 ### Google sign-in
-
 - `POST /api/v1/auth/google`
 - Body: `{ "idToken": "<Firebase Google ID token>" }`
-- Verifies the Google identity and returns the Loyola app bearer session.
 
 ### Standalone ERP sign-in
-
 - `POST /api/v1/auth/erp`
-- Body: `{ "username": "<ERP registration number>", "password": "<LRMS password>" }`
-- `registrationNumber` may be used instead of `username`.
-- The backend opens the LRMS login page, obtains its current CAPTCHA value, and verifies the supplied credentials directly against LRMS.
-- On successful verification, the backend finds the existing app account by ERP registration number or creates an ERP-only app account. It encrypts and stores the ERP password using `ERP_CREDENTIALS_ENCRYPTION_KEY`, then returns the same seven-day bearer-session format used by Google sign-in.
-- Invalid credentials return HTTP 401 with a generic message. Credentials are never returned in the response.
-- The endpoint is covered by the existing `/api/v1/auth` rate limit (30 requests per minute per client IP).
+- Body: `{ "username": "<ERP registration number>", "password": "<LRMS password>" }` (`registrationNumber` may replace `username`).
+- The backend verifies credentials against LRMS, finds the account by registration number or creates an ERP-only account, encrypts the password with `ERP_CREDENTIALS_ENCRYPTION_KEY`, and issues the app bearer session.
+- Invalid credentials return generic HTTP 401. Existing auth rate limit: 30 requests/minute/client IP.
 
-Example success response:
+### Link ERP to a Google-first account
+- `POST /api/v1/auth/bind-erp` (authenticated)
+- Body: `{ "registrationNumber": "...", "password": "..." }`
+- Verifies ERP credentials before linking to the authenticated Google account.
 
-```json
-{
-  "status": "success",
-  "user": {
-    "id": "<app-user-id>",
-    "name": "<registration-number>",
-    "linkedEmails": [],
-    "erpLinked": true
-  },
-  "authentication": {
-    "token": "<bearer-session>",
-    "tokenType": "Bearer",
-    "expiresAt": 0
-  }
-}
-```
+### Link Google to an ERP-first account
+- `POST /api/v1/auth/bind-google` (authenticated with the ERP-first app bearer token)
+- Body: `{ "idToken": "<fresh Firebase Google ID token>" }`
+- Verifies the Firebase token and links its Google UID and email to the current ERP-backed user.
+- Requires an existing ERP credential on the authenticated account.
+- Returns HTTP 409 if the Google UID or email belongs to another app account. No automatic account merge is performed.
+- On success, returns the updated public user. The current bearer token remains valid.
 
-Use the returned token as `Authorization: Bearer <token>` for protected routes, including Portal API v2. ERP-only users have no Google ID or email until they explicitly link a Google identity/email through a supported account-linking flow. Do not assume a Google account is present.
+Use `Authorization: Bearer <token>` for protected routes. ERP credentials are encrypted at rest (AES-256-GCM). Configure `ERP_CREDENTIALS_ENCRYPTION_KEY` and `SESSION_SECRET` in backend environment variables. Never log request bodies, passwords, tokens or decrypted credentials.
 
-ERP credentials are verified before account creation/update and stored encrypted at rest (AES-256-GCM). Configure `ERP_CREDENTIALS_ENCRYPTION_KEY` and `SESSION_SECRET` in the backend environment. Never log request bodies, passwords, or decrypted credentials.
-
-Existing Google sign-in and authenticated `POST /api/v1/auth/bind-erp` account-linking flows remain supported.
+## Account and data ownership
+- The app user ID is derived from the verified bearer token, never from a client-supplied student ID.
+- Google UID, primary email and ERP registration number must each belong to at most one app user.
+- Conflicts return HTTP 409; accounts are never silently merged based only on matching email text.
+- Portal routes use the authenticated user's linked ERP credentials and LRMS session. Never expose raw credentials, cookies or session state.
