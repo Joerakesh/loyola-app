@@ -28,12 +28,14 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: _background,
-      systemNavigationBarIconBrightness: Brightness.light,
-    ));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: _background,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+    );
   }
 
   @override
@@ -66,11 +68,13 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showError(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF9F3D42),
-      ));
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF9F3D42),
+        ),
+      );
   }
 
   InputDecoration _decoration(String hint, IconData icon) {
@@ -127,8 +131,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             fit: BoxFit.cover,
                             errorBuilder: (_, _, _) => const ColoredBox(
                               color: Color(0xFF26394A),
-                              child: Icon(Icons.account_balance_rounded,
-                                  size: 54, color: Color(0xFFB6C7A5)),
+                              child: Icon(
+                                Icons.account_balance_rounded,
+                                size: 54,
+                                color: Color(0xFFB6C7A5),
+                              ),
                             ),
                           ),
                           const DecoratedBox(
@@ -228,15 +235,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: _usernameController,
                           autocorrect: false,
                           textInputAction: TextInputAction.next,
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                           decoration: _decoration(
                             'Enter your username',
                             Icons.person_outline_rounded,
                           ),
                           validator: (value) =>
                               value == null || value.trim().isEmpty
-                                  ? 'Enter your ERP username'
-                                  : null,
+                              ? 'Enter your ERP username'
+                              : null,
                         ),
                         const SizedBox(height: 18),
                         const Text(
@@ -254,28 +264,31 @@ class _LoginScreenState extends State<LoginScreen> {
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _loginWithErp(),
-                          style: const TextStyle(color: Colors.white, fontSize: 14),
-                          decoration: _decoration(
-                            'Enter your password',
-                            Icons.lock_outline_rounded,
-                          ).copyWith(
-                            suffixIcon: IconButton(
-                              onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                color: _muted,
-                                size: 19,
-                              ),
-                            ),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
                           ),
-                          validator: (value) =>
-                              value == null || value.isEmpty
-                                  ? 'Enter your password'
-                                  : null,
+                          decoration:
+                              _decoration(
+                                'Enter your password',
+                                Icons.lock_outline_rounded,
+                              ).copyWith(
+                                suffixIcon: IconButton(
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    color: _muted,
+                                    size: 19,
+                                  ),
+                                ),
+                              ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Enter your password'
+                              : null,
                         ),
                         const SizedBox(height: 22),
                         SizedBox(
