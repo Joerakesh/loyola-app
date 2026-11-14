@@ -95,6 +95,25 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Signs in directly with the student's Loyola ERP credentials.
+  Future<void> loginWithErp({required String username, required String password}) async {
+    _setLoading(true);
+    _error = null;
+    try {
+      final user = await _authService.loginWithErp(username: username, password: password);
+      _user = user;
+      _isAuthenticated = true;
+      await _loadCachedStudentPhoto();
+      if (user.erpLinked) unawaited(_refreshStudentPhoto());
+    } catch (error) {
+      debugPrint('ERP LOGIN ERROR: $error');
+      _error = error.toString().replaceFirst('Exception: ', '');
+      _isAuthenticated = false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<void> logout() async {
     await _authService.logout();
     await _googleAuthService.signOut();
