@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../core/network/api_client.dart';
 import '../screens/attendance_screen.dart';
+import '../screens/academics_hub_screen.dart';
+import '../screens/campus_hub_screen.dart';
 import '../screens/academic_calendar_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/college_updates_screen.dart';
@@ -65,15 +67,8 @@ class AppRouter {
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.updates,
-        builder: (context, state) => CollegeUpdatesScreen(service: collegeUpdatesService),
-      ),
-      GoRoute(
-        path: AppRoutes.calendar,
-        builder: (context, state) => AcademicCalendarScreen(service: collegeUpdatesService),
-      ),
-      // AppShell containing the 5 main navigation tabs
+      // Four primary destinations. Detailed academic and campus pages live
+      // beneath their respective hubs to keep the main navigation focused.
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
@@ -93,27 +88,44 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.attendance,
-                builder: (context, state) =>
-                    AttendanceScreen(attendanceService: attendanceService),
+                path: AppRoutes.academics,
+                builder: (context, state) => AcademicsHubScreen(
+                  attendanceService: attendanceService,
+                  subjectService: subjectService,
+                  marksService: marksService,
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'attendance',
+                    builder: (context, state) => AttendanceScreen(attendanceService: attendanceService),
+                  ),
+                  GoRoute(
+                    path: 'subjects',
+                    builder: (context, state) => SubjectsScreen(subjectService: subjectService),
+                  ),
+                  GoRoute(
+                    path: 'marks',
+                    builder: (context, state) => MarksScreen(marksService: marksService),
+                  ),
+                ],
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.subjects,
-                builder: (context, state) =>
-                    SubjectsScreen(subjectService: subjectService),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.marks,
-                builder: (context, state) =>
-                    MarksScreen(marksService: marksService),
+                path: AppRoutes.campus,
+                builder: (context, state) => CampusHubScreen(service: collegeUpdatesService),
+                routes: [
+                  GoRoute(
+                    path: 'updates',
+                    builder: (context, state) => CollegeUpdatesScreen(service: collegeUpdatesService),
+                  ),
+                  GoRoute(
+                    path: 'calendar',
+                    builder: (context, state) => AcademicCalendarScreen(service: collegeUpdatesService),
+                  ),
+                ],
               ),
             ],
           ),
@@ -121,8 +133,7 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: AppRoutes.profile,
-                builder: (context, state) =>
-                    ProfileScreen(profileService: profileService),
+                builder: (context, state) => ProfileScreen(profileService: profileService),
               ),
             ],
           ),
@@ -155,12 +166,14 @@ class AppRoutes {
   static const String splash = '/splash';
   static const String login = '/login';
   static const String home = '/home';
-  static const String attendance = '/attendance';
-  static const String subjects = '/subjects';
-  static const String marks = '/marks';
+  static const String academics = '/academics';
+  static const String attendance = '/academics/attendance';
+  static const String subjects = '/academics/subjects';
+  static const String marks = '/academics/marks';
+  static const String campus = '/campus';
   static const String profile = '/profile';
-  static const String updates = '/updates';
-  static const String calendar = '/calendar';
+  static const String updates = '/campus/updates';
+  static const String calendar = '/campus/calendar';
 }
 
 class _NotFoundScreen extends StatelessWidget {

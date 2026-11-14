@@ -22,32 +22,10 @@ class AppShell extends StatelessWidget {
 
   Widget _buildGlassNavbar(BuildContext context) {
     final navItems = <({IconData icon, IconData selectedIcon, String label})>[
-      (
-        icon: Icons.grid_view_rounded,
-        selectedIcon: Icons.grid_view_rounded,
-        label: 'Home',
-      ),
-      (
-        icon: Icons.calendar_month_outlined,
-        selectedIcon: Icons.calendar_month_rounded,
-        label: 'Attendance',
-      ),
-
-      (
-        icon: Icons.menu_book_outlined,
-        selectedIcon: Icons.menu_book_rounded,
-        label: 'Subjects',
-      ),
-      (
-        icon: Icons.leaderboard_outlined,
-        selectedIcon: Icons.leaderboard_rounded,
-        label: 'Marks',
-      ),
-      (
-        icon: Icons.person_outline_rounded,
-        selectedIcon: Icons.person_rounded,
-        label: 'Profile',
-      ),
+      (icon: Icons.home_outlined, selectedIcon: Icons.home_rounded, label: 'Home'),
+      (icon: Icons.school_outlined, selectedIcon: Icons.school_rounded, label: 'Academics'),
+      (icon: Icons.explore_outlined, selectedIcon: Icons.explore_rounded, label: 'Campus'),
+      (icon: Icons.person_outline_rounded, selectedIcon: Icons.person_rounded, label: 'Profile'),
     ];
 
     return SafeArea(
@@ -102,7 +80,7 @@ class AppShell extends StatelessWidget {
       },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: compact ? 54 : 62,
+        width: compact ? 66 : 76,
         child: AnimatedContainer(
           duration: animDuration,
           curve: animCurve,

@@ -209,6 +209,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildAcademicOverview(todayRecord),
+                  const SizedBox(height: 18),
+                  _buildQuickAccess(),
                   const SizedBox(height: 26),
                   _buildAnnouncementsSection(),
                   const SizedBox(height: 24),
@@ -363,9 +365,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final hours = record?.hours.take(5).toList() ?? [];
     final percentage = _getAttendancePercentage();
     final progressColor = percentage >= 75 ? AppColors.crimson : AppColors.red;
-    final scheduledHours = hours
-        .where((hour) => hour.status != AttendanceStatus.notScheduled)
-        .length;
+    final presentHours = hours.where((hour) => hour.status == AttendanceStatus.present).length;
+    final absentHours = hours.where((hour) => hour.status == AttendanceStatus.absent).length;
+    final scheduledHours = presentHours + absentHours;
+    final todayLabel = record == null
+        ? '—'
+        : scheduledHours == 0
+            ? 'No class'
+            : presentHours > 0 && absentHours > 0
+                ? 'Mixed'
+                : presentHours > 0
+                    ? 'Present'
+                    : 'Absent';
+    final todayCaption = record == null
+        ? 'No record for today'
+        : '$scheduledHours recorded sessions';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,10 +406,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Expanded(
               child: _buildMetricCard(
                 label: 'Today',
-                value: (record?.dayOrder ?? 0) > 0
-                    ? 'Day ${record!.dayOrder}'
-                    : 'No class',
-                caption: '$scheduledHours scheduled sessions',
+                value: todayLabel,
+                caption: todayCaption,
                 icon: Icons.calendar_month_rounded,
                 accent: AppColors.gold,
               ),
@@ -414,6 +426,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ],
+    );
+  }
+
+
+  Widget _buildQuickAccess() {
+    return Row(
+      children: [
+        Expanded(
+          child: _quickAccessTile(
+            icon: Icons.school_rounded,
+            title: 'Academics',
+            subtitle: 'Marks & attendance',
+            onTap: () => context.go(AppRoutes.academics),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _quickAccessTile(
+            icon: Icons.explore_rounded,
+            title: 'Campus',
+            subtitle: 'Notices & calendar',
+            onTap: () => context.go(AppRoutes.campus),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _quickAccessTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: AppColors.backgroundSoft,
+      borderRadius: BorderRadius.circular(17),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(17),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(17),
+            border: Border.all(color: AppColors.outline),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: AppColors.crimson, size: 21),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(color: AppColors.white, fontSize: 12, fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 3),
+                    Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.white54, fontSize: 10)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -639,7 +715,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       }
     }
-    return _attendance.isNotEmpty ? _attendance.first : null;
+    return null;
   }
 
   String _formatTodayDate() {

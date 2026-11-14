@@ -18,6 +18,7 @@ import v2Routes from "./routes/v2.routes.js";
 import collegeRoutes from "./routes/college.routes.js";
 import { createPlatformRouter } from "./routes/platform.routes.js";
 import { platformControllers } from "./controllers/platform.controllers.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 const app = express();
 
@@ -100,6 +101,7 @@ app.use("/api/v1/subjects", subjectsRoutes);
 app.use("/api/v1/student", studentRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/home", homeRoutes);
 app.use("/api/v1/reflections", reflectionsRoutes);
 app.use("/api/v2", v2Routes);
@@ -136,6 +138,8 @@ const openApiDocument = JSON.parse(
 );
 app.get("/api/docs", (_req, res) => res.type("html").send(apiDocsHtml));
 app.get("/api/openapi.json", (_req, res) => res.json(openApiDocument));
+
+app.get("/admin", (_req, res) => res.redirect("/api/v1/admin/console"));
 
 app.get("/api/health", (_req, res) => {
   res.json({
