@@ -36,7 +36,7 @@ if (rootGoogleServices.isFile || appGoogleServices.isFile) {
 
 android {
     namespace = "com.joerakesh.loyolaerp"
-    compileSdk = 37
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
