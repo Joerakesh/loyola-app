@@ -155,43 +155,42 @@ export class AcademicCalendarService {
   }
 
   private async fetchMonth(year: number, monthNumber: number): Promise<AcademicCalendarMonth> {
-    // Loyola's endpoint appears to use a zero-based month in some responses.
-    // Try that first, then the one-based form for compatibility. Every response
-    // is checked against the requested month before it can be returned or cached.
-    const upstreamMonths = [...new Set([monthNumber - 1, monthNumber])];
-    const failures: string[] = [];
+    // Loyola navigates from the currently displayed month: list_next's month
+    // is the month before the requested one, while list_prev's month is the
+    // month after it. The page returns 403 for list_next requests into the past.
+    const now = new Date();
+    const requestedMonth = new Date(Date.UTC(year, monthNumber - 1, 1));
+    const currentMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const direction = requestedMonth < currentMonth ? -1 : 1;
+    const action = direction < 0 ? "list_prev" : "list_next";
+    const referenceMonth = new Date(Date.UTC(year, monthNumber - 1 - direction, 1));
+    const upstreamMonth = referenceMonth.getUTCMonth() + 1;
+    const sourceUrl = `${CALENDAR_URL}?action=${action}&month=${upstreamMonth}&year=${referenceMonth.getUTCFullYear()}`;
 
-    for (const upstreamMonth of upstreamMonths) {
-      const sourceUrl = `${CALENDAR_URL}?action=list_next&month=${upstreamMonth}&year=${year}`;
+    try {
+      const response = await http.get(sourceUrl, {
+        responseType: "text",
+        transformResponse: [(data) => data],
+      });
 
-      try {
-        const response = await http.get(sourceUrl, {
-          responseType: "text",
-          transformResponse: [(data) => data],
-        });
-
-        const entries = parseEntries(parsePayload(response.data), year, monthNumber);
-        if (entries.length === 0) {
-          failures.push(`month=${upstreamMonth}: response contained no rows for ${MONTHS[monthNumber - 1]} ${year}`);
-          continue;
-        }
-
-        return {
-          year,
-          monthNumber,
-          month: MONTHS[monthNumber - 1],
-          entries,
-          sourceUrl,
-          fetchedAt: new Date().toISOString(),
-        };
-      } catch (error) {
-        failures.push(`month=${upstreamMonth}: ${getErrorMessage(error)}`);
+      const entries = parseEntries(parsePayload(response.data), year, monthNumber);
+      if (entries.length === 0) {
+        throw new Error(`response contained no rows for ${MONTHS[monthNumber - 1]} ${year}`);
       }
-    }
 
-    throw new Error(
-      `Could not retrieve ${MONTHS[monthNumber - 1]} ${year} from Loyola College calendar. ${failures.join("; ")}`,
-    );
+      return {
+        year,
+        monthNumber,
+        month: MONTHS[monthNumber - 1],
+        entries,
+        sourceUrl,
+        fetchedAt: new Date().toISOString(),
+      };
+    } catch (error) {
+      throw new Error(
+        `Could not retrieve ${MONTHS[monthNumber - 1]} ${year} from Loyola College calendar. ${getErrorMessage(error)}`,
+      );
+    }
   }
 }
 
