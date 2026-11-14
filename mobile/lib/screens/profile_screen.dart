@@ -358,18 +358,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // ---------------------------------------------------------------------------
   // DETAIL SECTIONS
   // ---------------------------------------------------------------------------
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required List<_Field> fields,
-  }) {
-    if (fields.isEmpty) return const SizedBox.shrink();
-    final hasSensitive = fields.any((f) => f.sensitive);
-    final allShown =
-        hasSensitive &&
-        fields
-            .where((f) => f.sensitive)
-            .every((f) => _revealed.contains(f.key));
+  Widget _buildDetailsCard(StudentProfile profile) {
+    final validDetails = StudentProfile.displayOrder
+        .map(
+          (key) => (
+            StudentProfile.labels[key] ?? key,
+            profile.displayValue(key),
+            _profileIcon(key),
+          ),
+        )
+        .where((detail) => detail.$2.isNotEmpty)
+        .toList();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -432,64 +431,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildDetailRow(_Field f) {
-    final shown = _isShown(f);
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onLongPress: () => _copy(f),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.05),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(f.icon, color: AppColors.white54, size: 16),
+  IconData _profileIcon(String key) {
+    if (key.toLowerCase().contains('email')) return Icons.email_outlined;
+    if (key.toLowerCase().contains('mobile') || key == 'mobile') {
+      return Icons.phone_rounded;
+    }
+    if (key.toLowerCase().contains('date') || key == 'createdAt') {
+      return Icons.calendar_month_rounded;
+    }
+    if (key.toLowerCase().contains('name')) return Icons.person_outline_rounded;
+    if (key.toLowerCase().contains('address') ||
+        key == 'district' ||
+        key == 'state') {
+      return Icons.location_on_outlined;
+    }
+    if (key.toLowerCase().contains('parent') ||
+        key == 'fatherName' ||
+        key == 'motherName') {
+      return Icons.family_restroom_rounded;
+    }
+    if (key == 'program' ||
+        key == 'course' ||
+        key == 'section' ||
+        key == 'academicYear') {
+      return Icons.school_rounded;
+    }
+    return Icons.info_outline_rounded;
+  }
+
+  Widget _buildDetailRow({
+    required String title,
+    required String value,
+    required IconData icon,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.white.withValues(alpha: 0.05),
+            shape: BoxShape.circle,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  f.label,
-                  style: const TextStyle(
-                    color: AppColors.white54,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                  ),
+          child: Icon(icon, color: AppColors.white54, size: 16),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.white54,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(height: 2),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 180),
-                  child: Text(
-                    shown ? f.value : _mask(f.value),
-                    key: ValueKey(shown),
-                    style: TextStyle(
-                      color: AppColors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: shown ? 0 : 1.2,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (f.sensitive)
-            IconButton(
-              onPressed: () => _toggle(f.key),
-              tooltip: shown ? 'Hide' : 'Reveal',
-              visualDensity: VisualDensity.compact,
-              icon: Icon(
-                shown ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                size: 18,
-                color: AppColors.white54,
               ),
-            ),
-        ],
-      ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
