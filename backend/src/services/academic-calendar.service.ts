@@ -2,6 +2,7 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 
 const ORIGIN = "https://www.loyolacollege.edu";
+const CALENDAR_URL = `${ORIGIN}/acnew`;
 const TTL = 5 * 60_000;
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const MONTH_INDEX: Record<string, number> = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
@@ -161,7 +162,7 @@ export class AcademicCalendarService {
     const failures: string[] = [];
 
     for (const upstreamMonth of upstreamMonths) {
-      const sourceUrl = `${ORIGIN}/acnew.php?action=list_next&year=${year}&month=${upstreamMonth}`;
+      const sourceUrl = `${CALENDAR_URL}?action=list_next&month=${upstreamMonth}&year=${year}`;
 
       try {
         const response = await http.get(sourceUrl, {
