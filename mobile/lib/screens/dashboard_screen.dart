@@ -435,19 +435,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Expanded(
           child: _quickAccessTile(
-            icon: Icons.school_rounded,
-            title: 'Academics',
-            subtitle: 'Marks & attendance',
-            onTap: () => context.go(AppRoutes.academics),
+            icon: Icons.fact_check_rounded,
+            title: 'Attendance',
+            subtitle: 'Track your presence',
+            onTap: () => context.go(AppRoutes.attendance),
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: _quickAccessTile(
-            icon: Icons.explore_rounded,
-            title: 'Campus',
-            subtitle: 'Notices & calendar',
-            onTap: () => context.go(AppRoutes.campus),
+            icon: Icons.calendar_month_rounded,
+            title: 'Academic calendar',
+            subtitle: 'Important college dates',
+            onTap: () => context.go(AppRoutes.calendar),
           ),
         ),
       ],
