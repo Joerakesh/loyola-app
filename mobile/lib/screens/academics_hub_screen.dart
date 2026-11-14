@@ -203,9 +203,9 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
         ClipRRect(borderRadius: BorderRadius.circular(10), child: LinearProgressIndicator(value: percent == null ? 0 : (percent / 100).clamp(0, 1).toDouble(), minHeight: 7, backgroundColor: Colors.white12, color: color)),
         const SizedBox(height: 13),
         Row(children: [
-          _legend('$_present present'.replaceFirst(r'$', ''), AppColors.crimson),
+          _legend('$_present present', AppColors.crimson),
           const SizedBox(width: 18),
-          _legend('$_absent absent'.replaceFirst(r'$', ''), AppColors.orange),
+          _legend('$_absent absent', AppColors.orange),
           const Spacer(),
           TextButton(onPressed: () => context.push(AppRoutes.attendance), child: const Text('Details')),
         ]),
