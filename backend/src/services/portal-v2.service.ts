@@ -75,7 +75,8 @@ export class PortalV2Service {
       new AttendanceService(this.lrms).getHourly(),
       new StudentService(this.lrms).getProfile(),
     ]);
-    const form = new URLSearchParams({ studentid: profile.studentId });
+    const studentId = String(profile.studentId ?? "");
+    const form = new URLSearchParams({ studentid: studentId });
     const subjectWise = await this.lrms.post<unknown>(
       LRMS_CONFIG.endpoints.subjectAttendance,
       form,
@@ -88,13 +89,16 @@ export class PortalV2Service {
       new SubjectsService(this.lrms).getSubjects(),
       new StudentService(this.lrms).getProfile(),
     ]);
-    const marks = await new MarksService(this.lrms).getInternalMarks(profile.studentId);
+    const marks = await new MarksService(this.lrms).getInternalMarks(
+      String(profile.studentId ?? ""),
+    );
     return { subjects, marks };
   }
 
   private async fees() {
     const profile = await new StudentService(this.lrms).getProfile();
-    const form = new URLSearchParams({ registerno: profile.registerNumber });
+    const registerNumber = String(profile.registerNumber ?? "");
+    const form = new URLSearchParams({ registerno: registerNumber });
     const [dashboard, payments, due, notification, activeChallans, registrationPayments,
       condonationPayments, department] = await Promise.all([
       new DashboardService(this.lrms).getDashboard().catch(() => null),
