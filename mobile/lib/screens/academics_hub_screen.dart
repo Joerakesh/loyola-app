@@ -91,6 +91,23 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     });
   }
 
+  int? get _currentSemester {
+    final semesters = _subjects
+        .map((subject) => subject.semester)
+        .where((semester) => semester > 0);
+    if (semesters.isEmpty) return null;
+    return semesters.reduce((highest, semester) =>
+        semester > highest ? semester : highest);
+  }
+
+  List<Subject> get _currentSemesterSubjects {
+    final semester = _currentSemester;
+    if (semester == null) return _subjects;
+    return _subjects
+        .where((subject) => subject.semester == semester)
+        .toList();
+  }
+
   int get _present => _attendance.fold(0, (sum, day) => sum + day.presentCount);
   int get _absent => _attendance.fold(0, (sum, day) => sum + day.absentCount);
   double? get _attendancePercent {
@@ -153,14 +170,29 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 onTap: () => context.push(AppRoutes.marks),
               ),
               const SizedBox(height: 24),
-              _sectionTitle('Your subjects', 'From your ERP records'),
+              _sectionTitle(
+                _currentSemester == null
+                    ? 'Your subjects'
+                    : 'Semester $_currentSemester subjects',
+                _currentSemester == null
+                    ? 'From your ERP records'
+                    : 'Your latest semester · ${_currentSemesterSubjects.length} subjects',
+              ),
               const SizedBox(height: 12),
               if (_subjects.isEmpty)
-                _notice(_loading ? 'Loading your subjects…' : 'No subject records are available yet.', Icons.menu_book_outlined)
+                _notice(
+                  _loading
+                      ? 'Loading your subjects…'
+                      : 'No subject records are available yet.',
+                  Icons.menu_book_outlined,
+                )
               else
-                ..._subjects.take(5).map(_subjectTile),
-              if (_subjects.length > 5)
-                TextButton(onPressed: () => context.push(AppRoutes.subjects), child: const Text('View all subjects')),
+                ..._currentSemesterSubjects.take(5).map(_subjectTile),
+              if (_currentSemesterSubjects.length > 5)
+                TextButton(
+                  onPressed: () => context.push(AppRoutes.subjects),
+                  child: const Text('View all subjects'),
+                ),
               const SizedBox(height: 24),
               _sectionTitle('Quick insight', 'Calculated from the records currently loaded'),
               const SizedBox(height: 12),
