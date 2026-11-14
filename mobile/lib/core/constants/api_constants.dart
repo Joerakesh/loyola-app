@@ -25,6 +25,7 @@ class ApiConstants {
   }
 
   static const String googleLogin = '/auth/google';
+  static const String erpLogin = '/auth/erp';
   static const String refresh = '/auth/refresh';
   static const String logout = '/auth/logout';
   static const String me = '/auth/google/me';
