@@ -310,17 +310,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // DETAILS CARD
   // ---------------------------------------------------------------------------
   Widget _buildDetailsCard(StudentProfile profile) {
-    final details = [
-      ('Register Number', profile.registerNumber, Icons.badge_rounded),
-      ('Program', profile.program, Icons.school_rounded),
-      ('Course', profile.course, Icons.menu_book_rounded),
-      ('Section', profile.section, Icons.grid_view_rounded),
-      ('Academic Year', profile.academicYear, Icons.calendar_month_rounded),
-      ('Mobile', profile.mobile, Icons.phone_rounded),
-      ('Student ID', profile.studentId, Icons.tag_rounded),
-    ];
-
-    final validDetails = details.where((d) => d.$2.isNotEmpty).toList();
+    final validDetails = StudentProfile.displayOrder
+        .map((key) => (
+              StudentProfile.labels[key] ?? key,
+              profile.displayValue(key),
+              _profileIcon(key),
+            ))
+        .where((detail) => detail.$2.isNotEmpty)
+        .toList();
 
     return GlassContainer(
       padding: const EdgeInsets.all(16),
@@ -358,6 +355,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  IconData _profileIcon(String key) {
+    if (key.toLowerCase().contains('email')) return Icons.email_outlined;
+    if (key.toLowerCase().contains('mobile') || key == 'mobile') {
+      return Icons.phone_rounded;
+    }
+    if (key.toLowerCase().contains('date') || key == 'createdAt') {
+      return Icons.calendar_month_rounded;
+    }
+    if (key.toLowerCase().contains('name')) return Icons.person_outline_rounded;
+    if (key.toLowerCase().contains('address') ||
+        key == 'district' || key == 'state') {
+      return Icons.location_on_outlined;
+    }
+    if (key.toLowerCase().contains('parent') ||
+        key == 'fatherName' || key == 'motherName') {
+      return Icons.family_restroom_rounded;
+    }
+    if (key == 'program' || key == 'course' || key == 'section' ||
+        key == 'academicYear') {
+      return Icons.school_rounded;
+    }
+    return Icons.info_outline_rounded;
   }
 
   Widget _buildDetailRow({
