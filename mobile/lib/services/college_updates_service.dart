@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../core/constants/api_constants.dart';
 import '../core/network/api_client.dart';
 import '../models/college_announcement.dart';
@@ -5,7 +10,10 @@ import '../models/college_announcement.dart';
 class CollegeUpdatesService {
   CollegeUpdatesService(this._apiClient);
 
+  static const _calendarCacheTtl = Duration(minutes: 30);
+
   final ApiClient _apiClient;
+  final Map<String, Timer> _calendarExpiryTimers = {};
 
   Future<Map<String, dynamic>> fetchUpdates({bool refresh = false}) async {
     final response = await _apiClient.dio.get(
@@ -47,6 +55,32 @@ class CollegeUpdatesService {
     required int month,
     bool refresh = false,
   }) async {
+    final cacheKey =
+        'cache.college_calendar.$year-${month.toString().padLeft(2, '0')}';
+    final preferences = await SharedPreferences.getInstance();
+
+    if (!refresh) {
+      final rawCache = preferences.getString(cacheKey);
+      if (rawCache != null) {
+        try {
+          final cached = jsonDecode(rawCache);
+          final expiresAt = cached is Map
+              ? int.tryParse(cached['expiresAt']?.toString() ?? '')
+              : null;
+          final data = cached is Map ? cached['data'] : null;
+          if (expiresAt != null &&
+              expiresAt > DateTime.now().millisecondsSinceEpoch &&
+              data is Map) {
+            return data.cast<String, dynamic>();
+          }
+        } catch (_) {
+          // Discard malformed or expired cache and fetch a fresh response.
+        }
+        _calendarExpiryTimers.remove(cacheKey)?.cancel();
+        await preferences.remove(cacheKey);
+      }
+    }
+
     final response = await _apiClient.dio.get(
       ApiConstants.collegeCalendar,
       queryParameters: {
@@ -70,6 +104,27 @@ class CollegeUpdatesService {
       throw Exception('The academic calendar API returned an invalid response');
     }
 
-    return data.cast<String, dynamic>();
+    final calendar = data.cast<String, dynamic>();
+    final expiresAt = DateTime.now().add(_calendarCacheTtl);
+    final encodedCache = jsonEncode({
+      'expiresAt': expiresAt.millisecondsSinceEpoch,
+      'data': calendar,
+    });
+    await preferences.setString(cacheKey, encodedCache);
+
+    _calendarExpiryTimers.remove(cacheKey)?.cancel();
+    _calendarExpiryTimers[cacheKey] = Timer(_calendarCacheTtl, () {
+      unawaited(_removeCalendarCache(cacheKey, encodedCache));
+    });
+
+    return calendar;
+  }
+
+  Future<void> _removeCalendarCache(String key, String expectedValue) async {
+    final preferences = await SharedPreferences.getInstance();
+    if (preferences.getString(key) == expectedValue) {
+      await preferences.remove(key);
+    }
+    _calendarExpiryTimers.remove(key);
   }
 }

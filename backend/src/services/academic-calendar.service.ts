@@ -29,7 +29,8 @@ const http = axios.create({
   maxRedirects: 5,
   headers: {
     "User-Agent": "LoyolaStudentApp/1.0 (+https://github.com/Joerakesh/loyola-app)",
-    Accept: "application/json, text/html, */*",
+    Accept: "text/html,application/xhtml+xml",
+    Referer: CALENDAR_URL,
   },
 });
 

@@ -20,13 +20,16 @@ class AuthUser {
 
   factory AuthUser.fromJson(Map<String, dynamic> json) {
     final linked = json['linkedEmails'];
+
     return AuthUser(
-      id: json['id'] as String,
-      googleId: json['googleId'] as String,
+      id: json['id'] as String? ?? '',
+      googleId: json['googleId'] as String? ?? '',
       email: json['email'] as String? ?? '',
       name: json['name'] as String? ?? '',
       avatarUrl: json['avatarUrl'] as String?,
-      linkedEmails: linked is List ? linked.whereType<String>().toList() : const [],
+      linkedEmails: linked is List
+          ? linked.whereType<String>().toList()
+          : const [],
       erpLinked: json['erpLinked'] as bool? ?? false,
     );
   }
