@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../app/app_router.dart';
 import '../core/constants/app_colors.dart';
+import '../core/cache/data_cache.dart';
 import '../models/attendance_model.dart';
 import '../models/marks_model.dart';
 import '../models/subject_model.dart';
@@ -199,7 +200,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
           const Padding(padding: EdgeInsets.only(bottom: 7), child: Text('from loaded history', style: TextStyle(color: AppColors.white54, fontSize: 11))),
         ]),
         const SizedBox(height: 12),
-        ClipRRect(borderRadius: BorderRadius.circular(10), child: LinearProgressIndicator(value: percent == null ? 0 : (percent / 100).clamp(0, 1), minHeight: 7, backgroundColor: Colors.white12, color: color)),
+        ClipRRect(borderRadius: BorderRadius.circular(10), child: LinearProgressIndicator(value: percent == null ? 0 : (percent / 100).clamp(0, 1).toDouble(), minHeight: 7, backgroundColor: Colors.white12, color: color)),
         const SizedBox(height: 13),
         Row(children: [
           _legend('$_present present'.replaceFirst(r'$', ''), AppColors.crimson),
