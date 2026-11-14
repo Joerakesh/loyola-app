@@ -65,6 +65,36 @@ class AuthService {
     }
   }
 
+  /// Exchanges Loyola ERP credentials for a backend session (JWT).
+  Future<AuthUser> loginWithErp({required String username, required String password}) async {
+    try {
+      final response = await _apiClient.dio.post(
+        ApiConstants.erpLogin,
+        data: {'username': username.trim(), 'password': password},
+      );
+      final data = response.data;
+      if (data['status'] != 'success') {
+        throw Exception(data['message'] ?? 'ERP login failed');
+      }
+      final authentication = data['authentication'];
+      if (authentication == null || authentication['token'] == null) {
+        throw Exception('Authentication token missing from response');
+      }
+      await _storage.saveToken(authentication['token']);
+      final expiresAt = authentication['expiresAt'];
+      if (expiresAt != null) await _storage.saveExpiresAt(expiresAt);
+      final user = AuthUser.fromJson(data['user'] as Map<String, dynamic>);
+      await _storage.saveUser(user);
+      return user;
+    } on DioException catch (error) {
+      final responseData = error.response?.data;
+      if (responseData is Map && responseData['message'] != null) {
+        throw Exception(responseData['message']);
+      }
+      throw Exception('Unable to connect to Loyola servers');
+    }
+  }
+
   /// Fetches the student's ERP photo using the authenticated backend session.
   Future<String?> fetchStudentPhoto() async {
     final response = await _apiClient.dio.get(ApiConstants.studentPhoto);
