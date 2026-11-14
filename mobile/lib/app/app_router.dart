@@ -111,7 +111,7 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: AppRoutes.campus,
-                builder: (context, state) => const CampusHubScreen(),
+                builder: (context, state) => CampusHubScreen(service: collegeUpdatesService),
                 routes: [
                   GoRoute(
                     path: 'updates',
