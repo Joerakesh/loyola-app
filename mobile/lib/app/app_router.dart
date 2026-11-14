@@ -89,7 +89,11 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: AppRoutes.academics,
-                builder: (context, state) => AcademicsHubScreen(\n                  attendanceService: attendanceService,\n                  subjectService: subjectService,\n                  marksService: marksService,\n                ),
+                builder: (context, state) => AcademicsHubScreen(
+                  attendanceService: attendanceService,
+                  subjectService: subjectService,
+                  marksService: marksService,
+                ),
                 routes: [
                   GoRoute(
                     path: 'attendance',
