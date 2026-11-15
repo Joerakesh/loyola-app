@@ -300,91 +300,72 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
             ? AppTheme.crimson
             : AppTheme.orange;
 
-    return PressableScale(
-      scale: 0.985,
+    return AppTicketCard(
       onTap: () => context.push(AppRoutes.attendance),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color.withValues(alpha: 0.16),
-              AppTheme.glass,
-              AppTheme.backgroundSoft,
-            ],
-            stops: const [0, 0.55, 1],
+      semanticLabel: 'Attendance summary',
+      top: Row(
+        children: [
+          ProgressRing(
+            value: percent == null ? 0 : percent / 100,
+            color: color,
+            size: Responsive.dp(context, 112),
+            stroke: 11,
+            child: Text(
+              percent == null ? '—' : '\${percent.toStringAsFixed(0)}%',
+              style: TextStyle(
+                color: AppTheme.white,
+                fontSize: Responsive.sp(context, 25),
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.8,
+              ),
+            ),
           ),
-          border: Border.all(color: color.withValues(alpha: 0.22)),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.10),
-              blurRadius: 30,
-              offset: const Offset(0, 14),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            ProgressRing(
-              value: percent == null ? 0 : percent / 100,
-              color: color,
-              size: Responsive.dp(context, 112),
-              stroke: 11,
-              child: Text(
-                percent == null ? '—' : '${percent.toStringAsFixed(0)}%',
-                style: TextStyle(
-                  color: AppTheme.white,
-                  fontSize: Responsive.sp(context, 25),
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Attendance',
+                  style: TextStyle(
+                    color: AppTheme.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 3),
+                const Text(
+                  'From loaded history',
+                  style: TextStyle(color: AppTheme.white54, fontSize: 12),
+                ),
+              ],
             ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Attendance',
-                    style: TextStyle(
-                      color: AppTheme.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  const Text(
-                    'From loaded history',
-                    style: TextStyle(color: AppTheme.white54, fontSize: 12),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _countPill('$_present', 'present', AppTheme.green),
-                      const SizedBox(width: 8),
-                      _countPill('$_absent', 'absent', AppTheme.orange),
-                    ],
-                  ),
-                  if (percent != null) ...[
-                    const SizedBox(height: 10),
-                    StatusChip(
-                      label: percent >= 75 ? 'On track' : 'Below 75%',
-                      color: color,
-                      icon: percent >= 75
-                          ? Icons.trending_up_rounded
-                          : Icons.warning_amber_rounded,
-                    ),
-                  ],
-                ],
-              ),
+          ),
+        ],
+      ),
+      bottom: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _countPill('\$_present', 'present', AppTheme.green),
+              _countPill('\$_absent', 'absent', AppTheme.orange),
+            ],
+          ),
+          if (percent != null) ...[
+            const SizedBox(height: 10),
+            StatusChip(
+              label: percent >= 75 ? 'On track' : 'Below 75%',
+              color: color,
+              icon: percent >= 75
+                  ? Icons.trending_up_rounded
+                  : Icons.warning_amber_rounded,
             ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -419,85 +400,38 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
   // TOOL TILES (bento row)
   // ---------------------------------------------------------------------------
   Widget _toolTiles(double? percent) {
-    final tiles = <({IconData icon, Color color, String value, String label, String route})>[
+    final tiles = <({IconData icon, String value, String label, String route})>[
       (
         icon: Icons.fact_check_rounded,
-        color: AppTheme.crimson,
-        value: percent == null ? 'Open' : '${percent.toStringAsFixed(0)}%',
+        value: percent == null ? 'Open' : '\${percent.toStringAsFixed(0)}%',
         label: 'Attendance',
         route: AppRoutes.attendance,
       ),
       (
         icon: Icons.menu_book_rounded,
-        color: AppTheme.blue,
-        value: '${_subjects.length}',
+        value: '\${_subjects.length}',
         label: 'Subjects',
         route: AppRoutes.subjects,
       ),
       (
         icon: Icons.insights_rounded,
-        color: AppTheme.purple,
-        value: '${_marks.length}',
+        value: '\${_marks.length}',
         label: 'Marks',
         route: AppRoutes.marks,
       ),
     ];
 
-    return Row(
+    return AppListGroup(
+      dividerIndent: 68,
       children: [
-        for (var i = 0; i < tiles.length; i++) ...[
-          if (i > 0) const SizedBox(width: 10),
-          Expanded(
-            child: PressableScale(
-              onTap: () => context.push(tiles[i].route),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                decoration: BoxDecoration(
-                  color: AppTheme.backgroundSoft,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: AppTheme.outline),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: tiles[i].color.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(tiles[i].icon,
-                          color: tiles[i].color, size: 19),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      tiles[i].value,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppTheme.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.6,
-                        height: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      tiles[i].label,
-                      style: const TextStyle(
-                        color: AppTheme.white54,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        for (final tile in tiles)
+          AppListTile(
+            icon: tile.icon,
+            iconColor: AppTheme.white70,
+            title: tile.label,
+            value: tile.value,
+            onTap: () => context.push(tile.route),
           ),
-        ],
       ],
     );
   }
