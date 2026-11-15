@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/app_router.dart';
-import '../core/theme/app_theme.dart';
 import '../core/cache/data_cache.dart';
+import '../core/theme/app_theme.dart';
+import '../core/theme/responsive.dart';
 import '../models/attendance_model.dart';
 import '../models/marks_model.dart';
 import '../models/subject_model.dart';
 import '../services/attendance_service.dart';
 import '../services/marks_service.dart';
 import '../services/subject_service.dart';
+import '../widgets/glass_background.dart';
+import '../widgets/app_card.dart';
+import '../widgets/section_header.dart';
+import '../widgets/ui_kit.dart';
 
 class AcademicsHubScreen extends StatefulWidget {
   const AcademicsHubScreen({
@@ -42,6 +47,9 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     _refresh();
   }
 
+  // ---------------------------------------------------------------------------
+  // DATA (unchanged behaviour)
+  // ---------------------------------------------------------------------------
   Future<void> _loadCache() async {
     try {
       final values = await Future.wait([
@@ -92,10 +100,8 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
       if (results[2] is FetchResult<List<CourseMarks>>) {
         _marks = (results[2] as FetchResult<List<CourseMarks>>).data;
       }
-      final failures = results
-          .whereType<Object>()
-          .where((v) => v is! FetchResult)
-          .length;
+      final failures =
+          results.whereType<Object>().where((v) => v is! FetchResult).length;
       _error = failures == 3
           ? 'Academic records could not be reached. Pull down to retry.'
           : null;
@@ -127,476 +133,559 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     return total == 0 ? null : _present / total * 100;
   }
 
+  // ---------------------------------------------------------------------------
+  // BUILD
+  // ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     final percent = _attendancePercent;
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          onRefresh: _refresh,
-          color: AppTheme.crimson,
-          backgroundColor: AppTheme.glass,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 120),
-            children: [
-              _topBar(),
-              const SizedBox(height: 24),
-              const Text(
-                'Your academic workspace',
-                style: TextStyle(
-                  color: AppTheme.white,
-                  fontSize: 27,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.8,
-                ),
-              ),
-              const SizedBox(height: 7),
-              const Text(
-                'Everything you need to stay on top of the semester.',
-                style: TextStyle(
-                  color: AppTheme.white54,
-                  fontSize: 13,
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: 22),
-              if (_loading) const LinearProgressIndicator(minHeight: 2),
-              if (_error != null) _notice(_error!, Icons.cloud_off_rounded),
-              _attendanceCard(percent),
+    final side = Responsive.dp(context, 20);
+    final noData = _loading &&
+        _attendance.isEmpty &&
+        _subjects.isEmpty &&
+        _marks.isEmpty;
 
-              const SizedBox(height: 24),
-              _sectionTitle(
-                'Your study tools',
-                'Jump straight to what matters',
+    return Scaffold(
+      body: GlassBackground(
+        child: SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
+            onRefresh: _refresh,
+            color: AppTheme.crimson,
+            backgroundColor: AppTheme.glass,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-              const SizedBox(height: 12),
-              _actionTile(
-                icon: Icons.fact_check_rounded,
-                title: 'Attendance',
-                subtitle: 'Daily records, subject-wise status and history',
-                trailing: percent == null
-                    ? 'Open'
-                    : '${percent.toStringAsFixed(1)}%',
-                onTap: () => context.push(AppRoutes.attendance),
+              padding: EdgeInsets.fromLTRB(
+                side,
+                Responsive.dp(context, 18),
+                side,
+                Responsive.dp(context, 130),
               ),
-              _actionTile(
-                icon: Icons.menu_book_rounded,
-                title: 'Subjects',
-                subtitle: 'Courses, credits and faculty information',
-                trailing: '${_subjects.length}',
-                onTap: () => context.push(AppRoutes.subjects),
-              ),
-              _actionTile(
-                icon: Icons.insights_rounded,
-                title: 'Internal marks',
-                subtitle: 'CIA components and published totals',
-                trailing: '${_marks.length}',
-                onTap: () => context.push(AppRoutes.marks),
-              ),
-              const SizedBox(height: 24),
-              _sectionTitle(
-                _currentSemester == null
-                    ? 'Your subjects'
-                    : 'Semester $_currentSemester subjects',
-                _currentSemester == null
-                    ? 'From your ERP records'
-                    : 'Your latest semester · ${_currentSemesterSubjects.length} subjects',
-              ),
-              const SizedBox(height: 12),
-              if (_subjects.isEmpty)
-                _notice(
-                  _loading
-                      ? 'Loading your subjects…'
-                      : 'No subject records are available yet.',
-                  Icons.menu_book_outlined,
-                )
-              else
-                ..._currentSemesterSubjects.take(5).map(_subjectTile),
-              if (_currentSemesterSubjects.length > 5)
-                TextButton(
-                  onPressed: () => context.push(AppRoutes.subjects),
-                  child: const Text('View all subjects'),
-                ),
-              const SizedBox(height: 24),
-              _sectionTitle(
-                'Quick insight',
-                'Calculated from the records currently loaded',
-              ),
-              const SizedBox(height: 12),
-              _calculatorCard(),
-              const SizedBox(height: 8),
-              Text(
-                'Attendance totals above use the available hourly history. They may not represent the complete semester total if the ERP returns only a partial history.',
-                style: TextStyle(
-                  color: AppTheme.white38,
-                  fontSize: 11,
-                  height: 1.4,
-                ),
-              ),
-            ],
+              children: [
+                FadeSlideIn(child: _header()),
+                const SizedBox(height: 22),
+                if (_error != null) ...[
+                  _notice(_error!, Icons.cloud_off_rounded),
+                ],
+                if (noData) ...const [
+                  SkeletonBox(height: 200, radius: 28),
+                  SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(child: SkeletonBox(height: 110, radius: 22)),
+                      SizedBox(width: 10),
+                      Expanded(child: SkeletonBox(height: 110, radius: 22)),
+                      SizedBox(width: 10),
+                      Expanded(child: SkeletonBox(height: 110, radius: 22)),
+                    ],
+                  ),
+                  SizedBox(height: 26),
+                  SkeletonBox(height: 70, radius: 20),
+                  SizedBox(height: 10),
+                  SkeletonBox(height: 70, radius: 20),
+                ] else ...[
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 80),
+                    child: _attendanceHero(percent),
+                  ),
+                  const SizedBox(height: 14),
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 140),
+                    child: _toolTiles(percent),
+                  ),
+                  const SizedBox(height: 30),
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 200),
+                    child: _subjectsSection(),
+                  ),
+                  const SizedBox(height: 28),
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 260),
+                    child: _calculatorCard(),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Totals use the hourly history currently loaded. They may not represent the full semester if the ERP returns only partial history.',
+                    style: TextStyle(
+                      color: AppTheme.white38,
+                      fontSize: 11,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _topBar() => Row(
-    children: [
-      Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: AppTheme.crimson,
-          borderRadius: BorderRadius.circular(13),
-        ),
-        child: const Icon(
-          Icons.school_rounded,
-          color: AppTheme.background,
-          size: 21,
-        ),
-      ),
-      const SizedBox(width: 11),
-      const Expanded(
-        child: Text(
-          'ACADEMICS',
-          style: TextStyle(
-            color: AppTheme.white70,
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.8,
+  // ---------------------------------------------------------------------------
+  // HEADER
+  // ---------------------------------------------------------------------------
+  Widget _header() {
+    final sem = _currentSemester;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'ACADEMICS',
+                style: TextStyle(
+                  color: AppTheme.white54,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.6,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                sem == null ? 'Your semester' : 'Semester $sem',
+                style: TextStyle(
+                  color: AppTheme.white,
+                  fontSize: Responsive.sp(context, 30),
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.9,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Attendance, subjects and marks at a glance.',
+                style: TextStyle(color: AppTheme.white54, fontSize: 12.5),
+              ),
+            ],
           ),
         ),
-      ),
-      IconButton(
-        onPressed: _refreshing ? null : _refresh,
-        tooltip: 'Refresh records',
-        icon: Icon(
-          Icons.refresh_rounded,
-          color: _refreshing ? AppTheme.white38 : AppTheme.white70,
+        const SizedBox(width: 10),
+        PressableScale(
+          onTap: _refreshing ? null : _refresh,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.backgroundSoft,
+              border: Border.all(color: AppTheme.outline),
+            ),
+            child: _refreshing
+                ? const Padding(
+                    padding: EdgeInsets.all(13),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppTheme.crimson,
+                    ),
+                  )
+                : const Icon(Icons.refresh_rounded,
+                    color: AppTheme.white70, size: 20),
+          ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 
-  Widget _attendanceCard(double? percent) {
-    final value = percent == null ? '—' : '${percent.toStringAsFixed(1)}%';
+  // ---------------------------------------------------------------------------
+  // ATTENDANCE HERO
+  // ---------------------------------------------------------------------------
+  Widget _attendanceHero(double? percent) {
     final color = percent == null
         ? AppTheme.white54
         : percent >= 75
-        ? AppTheme.crimson
-        : AppTheme.orange;
-    return Container(
-      padding: const EdgeInsets.all(19),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF263A32), Color(0xFF17251F)],
-        ),
-        borderRadius: BorderRadius.circular(23),
-        border: Border.all(color: AppTheme.crimson.withValues(alpha: .18)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'ATTENDANCE SNAPSHOT',
-                  style: TextStyle(
-                    color: AppTheme.white70,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.3,
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.north_east_rounded,
-                color: AppTheme.crimson,
-                size: 18,
-              ),
+            ? AppTheme.crimson
+            : AppTheme.orange;
+
+    return PressableScale(
+      scale: 0.985,
+      onTap: () => context.push(AppRoutes.attendance),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              color.withValues(alpha: 0.16),
+              AppTheme.glass,
+              AppTheme.backgroundSoft,
             ],
+            stops: const [0, 0.55, 1],
           ),
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 38,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1.5,
-                ),
-              ),
-              const SizedBox(width: 9),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 7),
-                child: Text(
-                  'from loaded history',
-                  style: TextStyle(color: AppTheme.white54, fontSize: 11),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: percent == null
-                  ? 0
-                  : (percent / 100).clamp(0, 1).toDouble(),
-              minHeight: 7,
-              backgroundColor: Colors.white12,
-              color: color,
+          border: Border.all(color: color.withValues(alpha: 0.22)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.10),
+              blurRadius: 30,
+              offset: const Offset(0, 14),
             ),
-          ),
-          const SizedBox(height: 13),
-          Row(
-            children: [
-              _legend('$_present present', AppTheme.crimson),
-              const SizedBox(width: 18),
-              _legend('$_absent absent', AppTheme.orange),
-              const Spacer(),
-              TextButton(
-                onPressed: () => context.push(AppRoutes.attendance),
-                child: const Text('Details'),
+          ],
+        ),
+        child: Row(
+          children: [
+            ProgressRing(
+              value: percent == null ? 0 : percent / 100,
+              color: color,
+              size: Responsive.dp(context, 112),
+              stroke: 11,
+              child: Text(
+                percent == null ? '—' : '${percent.toStringAsFixed(0)}%',
+                style: TextStyle(
+                  color: AppTheme.white,
+                  fontSize: Responsive.sp(context, 25),
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
+                ),
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(width: 18),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Attendance',
+                    style: TextStyle(
+                      color: AppTheme.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'From loaded history',
+                    style: TextStyle(color: AppTheme.white54, fontSize: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _countPill('$_present', 'present', AppTheme.green),
+                      const SizedBox(width: 8),
+                      _countPill('$_absent', 'absent', AppTheme.orange),
+                    ],
+                  ),
+                  if (percent != null) ...[
+                    const SizedBox(height: 10),
+                    StatusChip(
+                      label: percent >= 75 ? 'On track' : 'Below 75%',
+                      color: color,
+                      icon: percent >= 75
+                          ? Icons.trending_up_rounded
+                          : Icons.warning_amber_rounded,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _legend(String label, Color color) => Row(
-    children: [
-      Container(
-        width: 7,
-        height: 7,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-      ),
-      const SizedBox(width: 6),
-      Text(
-        label,
-        style: const TextStyle(color: AppTheme.white70, fontSize: 11),
-      ),
-    ],
-  );
+  Widget _countPill(String value, String label, Color color) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: const TextStyle(color: AppTheme.white54, fontSize: 10.5),
+            ),
+          ],
+        ),
+      );
 
-  Widget _statCard(String label, String value, IconData icon) => Container(
-    padding: const EdgeInsets.all(15),
-    decoration: BoxDecoration(
-      color: AppTheme.backgroundSoft,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: AppTheme.outline),
-    ),
-    child: Row(
+  // ---------------------------------------------------------------------------
+  // TOOL TILES (bento row)
+  // ---------------------------------------------------------------------------
+  Widget _toolTiles(double? percent) {
+    final tiles = <({IconData icon, Color color, String value, String label, String route})>[
+      (
+        icon: Icons.fact_check_rounded,
+        color: AppTheme.crimson,
+        value: percent == null ? 'Open' : '${percent.toStringAsFixed(0)}%',
+        label: 'Attendance',
+        route: AppRoutes.attendance,
+      ),
+      (
+        icon: Icons.menu_book_rounded,
+        color: AppTheme.blue,
+        value: '${_subjects.length}',
+        label: 'Subjects',
+        route: AppRoutes.subjects,
+      ),
+      (
+        icon: Icons.insights_rounded,
+        color: AppTheme.purple,
+        value: '${_marks.length}',
+        label: 'Marks',
+        route: AppRoutes.marks,
+      ),
+    ];
+
+    return Row(
       children: [
-        Icon(icon, color: AppTheme.crimson, size: 19),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  color: AppTheme.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
+        for (var i = 0; i < tiles.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(
+            child: PressableScale(
+              onTap: () => context.push(tiles[i].route),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                decoration: BoxDecoration(
+                  color: AppTheme.backgroundSoft,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: AppTheme.outline),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: tiles[i].color.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(tiles[i].icon,
+                          color: tiles[i].color, size: 19),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      tiles[i].value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppTheme.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.6,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      tiles[i].label,
+                      style: const TextStyle(
+                        color: AppTheme.white54,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                label,
-                style: const TextStyle(color: AppTheme.white54, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-
-  Widget _sectionTitle(String title, String subtitle) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        title,
-        style: const TextStyle(
-          color: AppTheme.white,
-          fontSize: 17,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-      const SizedBox(height: 3),
-      Text(
-        subtitle,
-        style: const TextStyle(color: AppTheme.white54, fontSize: 11),
-      ),
-    ],
-  );
-
-  Widget _actionTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required String trailing,
-    required VoidCallback onTap,
-  }) => Container(
-    margin: const EdgeInsets.only(bottom: 9),
-    decoration: BoxDecoration(
-      color: AppTheme.backgroundSoft,
-      borderRadius: BorderRadius.circular(17),
-      border: Border.all(color: AppTheme.outline),
-    ),
-    child: ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-      leading: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: AppTheme.crimson.withValues(alpha: .11),
-          borderRadius: BorderRadius.circular(13),
-        ),
-        child: Icon(icon, color: AppTheme.crimson, size: 20),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: AppTheme.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(
-          subtitle,
-          style: const TextStyle(color: AppTheme.white54, fontSize: 11),
-        ),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            trailing,
-            style: const TextStyle(
-              color: AppTheme.crimson,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(width: 5),
-          const Icon(Icons.chevron_right_rounded, color: AppTheme.white38),
         ],
-      ),
-    ),
-  );
+      ],
+    );
+  }
 
-  Widget _subjectTile(Subject subject) => Container(
-    margin: const EdgeInsets.only(bottom: 8),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: AppTheme.backgroundSoft,
-      borderRadius: BorderRadius.circular(15),
-      border: Border.all(color: AppTheme.outline),
-    ),
-    child: Row(
+  // ---------------------------------------------------------------------------
+  // SUBJECTS
+  // ---------------------------------------------------------------------------
+  Widget _subjectsSection() {
+    final subjects = _currentSemesterSubjects;
+    final sem = _currentSemester;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: AppTheme.blue.withValues(alpha: .12),
-            borderRadius: BorderRadius.circular(11),
-          ),
-          child: const Icon(
-            Icons.book_outlined,
-            color: AppTheme.blue,
-            size: 18,
-          ),
+        SectionHeader(
+          title: sem == null ? 'Your subjects' : 'This semester',
+          subtitle: sem == null
+              ? 'From your ERP records'
+              : 'Semester $sem · ${subjects.length} subjects',
+          trailing: subjects.length > 5
+              ? TextButton(
+                  onPressed: () => context.push(AppRoutes.subjects),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppTheme.crimson,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: const Text('See all'),
+                )
+              : null,
         ),
-        const SizedBox(width: 11),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                subject.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: AppTheme.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
+        const SizedBox(height: 14),
+        if (_subjects.isEmpty)
+          _notice(
+            _loading
+                ? 'Loading your subjects…'
+                : 'No subject records are available yet.',
+            Icons.menu_book_outlined,
+          )
+        else
+          for (var i = 0; i < subjects.take(5).length; i++)
+            _subjectTile(subjects[i], i),
+      ],
+    );
+  }
+
+  Widget _subjectTile(Subject s, int index) {
+    const palette = [
+      AppTheme.blue,
+      AppTheme.purple,
+      AppTheme.orange,
+      AppTheme.green,
+      AppTheme.crimson,
+    ];
+    final color = palette[index % palette.length];
+    final initial = s.title.isNotEmpty ? s.title[0].toUpperCase() : '?';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: AppCard(
+        onTap: () => context.push(AppRoutes.subjects),
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                initial,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 3),
-              Text(
-                '${subject.courseCode}  •  ${subject.credits} credits',
-                style: const TextStyle(color: AppTheme.white54, fontSize: 10),
-              ),
-            ],
-          ),
-        ),
-        Text(
-          'Sem ${subject.semester}',
-          style: const TextStyle(color: AppTheme.white38, fontSize: 10),
-        ),
-      ],
-    ),
-  );
-
-  Widget _calculatorCard() {
-    return InkWell(
-      onTap: _showCalculator,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppTheme.glass,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppTheme.outline),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.calculate_rounded, color: AppTheme.crimson, size: 25),
-            SizedBox(width: 13),
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Attendance target calculator',
-                    style: TextStyle(
+                    s.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
                       color: AppTheme.white,
-                      fontSize: 13,
+                      fontSize: 13.5,
                       fontWeight: FontWeight.w700,
+                      height: 1.25,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    'Estimate classes needed to reach your target',
-                    style: TextStyle(color: AppTheme.white54, fontSize: 11),
+                    s.faculty.isNotEmpty
+                        ? '${s.courseCode}  ·  ${s.faculty}'
+                        : s.courseCode,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppTheme.white54,
+                      fontSize: 11,
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              color: AppTheme.white38,
-              size: 14,
+            const SizedBox(width: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+              decoration: BoxDecoration(
+                color: AppTheme.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${s.credits} cr',
+                style: const TextStyle(
+                  color: AppTheme.white70,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // CALCULATOR
+  // ---------------------------------------------------------------------------
+  Widget _calculatorCard() {
+    return PressableScale(
+      scale: 0.985,
+      onTap: _showCalculator,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppTheme.purple.withValues(alpha: 0.16),
+              AppTheme.glass,
+            ],
+          ),
+          border: Border.all(color: AppTheme.purple.withValues(alpha: 0.22)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: AppTheme.purple.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Icon(Icons.calculate_rounded,
+                  color: AppTheme.purple, size: 24),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Target calculator',
+                    style: TextStyle(
+                      color: AppTheme.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'How many sessions to reach your goal?',
+                    style: TextStyle(color: AppTheme.white54, fontSize: 11.5),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: AppTheme.white38),
           ],
         ),
       ),
@@ -607,115 +696,191 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     final present = _present;
     final absent = _absent;
     final total = present + absent;
-    final controller = TextEditingController(text: '75');
+    final current = total == 0 ? null : present / total * 100;
+    var target = 75.0;
+
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppTheme.backgroundSoft,
+      showDragHandle: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, setSheetState) {
-          final target = double.tryParse(controller.text) ?? 75;
-          final current = total == 0 ? null : present / total * 100;
-          final needed =
-              target <= 0 || target >= 100 || total == 0 || current! >= target
+          final reached = current != null && current >= target;
+          final needed = (total == 0 || reached)
               ? 0
               : ((target * total - 100 * present) / (100 - target))
-                    .ceil()
-                    .clamp(0, 100000);
+                  .ceil()
+                  .clamp(0, 100000);
+
           return Padding(
             padding: EdgeInsets.fromLTRB(
-              22,
-              22,
-              22,
-              MediaQuery.of(context).viewInsets.bottom + 28,
+              24,
+              4,
+              24,
+              MediaQuery.of(context).viewInsets.bottom + 30,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Attendance calculator',
+                  'Target calculator',
                   style: TextStyle(
                     color: AppTheme.white,
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
-                  'Based on $present present and $absent absent sessions in loaded history.',
+                  total == 0
+                      ? 'Not enough history yet.'
+                      : 'Now at ${current!.toStringAsFixed(1)}% · $present present, $absent absent',
                   style: const TextStyle(
                     color: AppTheme.white54,
-                    fontSize: 12,
+                    fontSize: 12.5,
                   ),
                 ),
-                const SizedBox(height: 18),
-                TextField(
-                  controller: controller,
-                  keyboardType: TextInputType.number,
-                  onChanged: (_) => setSheetState(() {}),
-                  decoration: const InputDecoration(
-                    labelText: 'Target attendance (%)',
-                    suffixText: '%',
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    const Text(
+                      'TARGET',
+                      style: TextStyle(
+                        color: AppTheme.white54,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${target.round()}%',
+                      style: const TextStyle(
+                        color: AppTheme.crimson,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    activeTrackColor: AppTheme.crimson,
+                    inactiveTrackColor: Colors.white12,
+                    thumbColor: AppTheme.crimson,
+                    overlayColor: AppTheme.crimson.withValues(alpha: 0.15),
+                    trackHeight: 5,
+                  ),
+                  child: Slider(
+                    min: 50,
+                    max: 99,
+                    divisions: 49,
+                    value: target,
+                    onChanged: (v) => setSheetState(() => target = v),
                   ),
                 ),
-                const SizedBox(height: 16),
-                if (total == 0)
-                  const Text(
-                    'Not enough attendance history to calculate a result.',
-                    style: TextStyle(color: AppTheme.orange),
-                  )
-                else if (target <= 0 || target >= 100)
-                  const Text(
-                    'Enter a target greater than 0 and below 100.',
-                    style: TextStyle(color: AppTheme.orange),
-                  )
-                else
-                  Text(
-                    current! >= target
-                        ? 'You have already reached your target.'
-                        : 'Attend the next $needed consecutive sessions to reach ${target.toStringAsFixed(0)}%.',
-                    style: const TextStyle(
-                      color: AppTheme.crimson,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: AppTheme.crimson.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppTheme.crimson.withValues(alpha: 0.22),
                     ),
                   ),
-                const SizedBox(height: 8),
+                  child: total == 0
+                      ? const Text(
+                          'Not enough attendance history to calculate a result.',
+                          style: TextStyle(color: AppTheme.orange),
+                        )
+                      : reached
+                          ? const Row(
+                              children: [
+                                Icon(Icons.check_circle_rounded,
+                                    color: AppTheme.crimson),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'You have already reached this target.',
+                                    style: TextStyle(
+                                      color: AppTheme.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '$needed',
+                                  style: const TextStyle(
+                                    color: AppTheme.crimson,
+                                    fontSize: 44,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -1.5,
+                                    height: 1,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                const Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(bottom: 4),
+                                    child: Text(
+                                      'consecutive sessions to attend to reach your target',
+                                      style: TextStyle(
+                                        color: AppTheme.white70,
+                                        fontSize: 12.5,
+                                        height: 1.35,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                ),
+                const SizedBox(height: 10),
                 const Text(
-                  'Assumes every future scheduled session is attended and no additional absences occur.',
-                  style: TextStyle(color: AppTheme.white38, fontSize: 10),
+                  'Assumes every future scheduled session is attended.',
+                  style: TextStyle(color: AppTheme.white38, fontSize: 10.5),
                 ),
               ],
             ),
           );
         },
       ),
-    ).whenComplete(controller.dispose);
+    );
   }
 
-  Widget _notice(String message, IconData icon) => Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: AppTheme.glass,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: AppTheme.outline),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: AppTheme.white54, size: 18),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            message,
-            style: const TextStyle(color: AppTheme.white54, fontSize: 12),
+  Widget _notice(String message, IconData icon) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: AppCard(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Icon(icon, color: AppTheme.white54, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: AppTheme.white54,
+                    fontSize: 12.5,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ],
-    ),
-  );
+      );
 }
