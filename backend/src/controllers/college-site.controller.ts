@@ -48,6 +48,13 @@ export class CollegeSiteController {
 
   async scrapeAndStore(_req: Request, res: Response) {
     try {
+      const acquired = await collegeUpdatesRepository.acquireScrapeSlot();
+      if (!acquired) {
+        return res.status(429).json({
+          status: "error",
+          message: "A college updates refresh was recently started. Try again in a few minutes.",
+        });
+      }
       const snapshot = await collegeSiteService.scrapeForArchive();
       const result = await collegeUpdatesRepository.archive(snapshot);
       return res.json({
