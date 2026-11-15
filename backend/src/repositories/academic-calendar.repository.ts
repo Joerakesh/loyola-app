@@ -23,12 +23,12 @@ function hashMonth(month: AcademicCalendarMonth): string {
 
 export class AcademicCalendarRepository {
   private async collections(): Promise<{
-    latest: Collection<StoredMonth>;
-    versions: Collection<StoredMonth>;
+    latest: Collection<Document>;
+    versions: Collection<Document>;
   }> {
     const db = await getDb();
-    const latest = db.collection<StoredMonth>("academic_calendar_months");
-    const versions = db.collection<StoredMonth>("academic_calendar_versions");
+    const latest = db.collection("academic_calendar_months");
+    const versions = db.collection("academic_calendar_versions");
     await Promise.all([
       latest.createIndex({ year: 1, monthNumber: 1 }, { unique: true }),
       versions.createIndex({ year: 1, monthNumber: 1, version: 1 }, { unique: true }),
@@ -41,7 +41,8 @@ export class AcademicCalendarRepository {
     const { latest } = await this.collections();
     const doc = await latest.findOne({ year, monthNumber });
     if (!doc) return null;
-    const { _id: _ignored, contentHash: _hash, version: _version, archivedAt: _archived, ...data } = doc;
+    const stored = doc as unknown as StoredMonth;
+    const { _id: _ignored, contentHash: _hash, version: _version, archivedAt: _archived, ...data } = stored;
     return data;
   }
 
@@ -52,10 +53,11 @@ export class AcademicCalendarRepository {
   }> {
     const { latest, versions } = await this.collections();
     const contentHash = hashMonth(month);
-    const previous = await latest.findOne({
+    const previousDoc = await latest.findOne({
       year: month.year,
       monthNumber: month.monthNumber,
     });
+    const previous = previousDoc as unknown as StoredMonth | null;
 
     if (previous?.contentHash === contentHash) {
       // Refresh only fetch metadata; content and version remain untouched.
@@ -75,10 +77,10 @@ export class AcademicCalendarRepository {
       archivedAt,
     };
 
-    await versions.insertOne(snapshot as Document & StoredMonth);
+    await versions.insertOne(snapshot as unknown as Document);
     await latest.replaceOne(
       { year: month.year, monthNumber: month.monthNumber },
-      snapshot,
+      snapshot as unknown as Document,
       { upsert: true },
     );
 
