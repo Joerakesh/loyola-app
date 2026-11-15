@@ -58,7 +58,206 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _refreshAnnouncements();
   }
 
-  // ---------------------------------------------------------------------------
+  void _showAccountSheet() {
+    final authProvider = context.read<AuthProvider>();
+    final dashboard = _dashboard!;
+    final student = dashboard.student;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+          decoration: BoxDecoration(
+            color: AppTheme.backgroundSoft,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(color: AppTheme.outline),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.white30,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Student identity
+                Row(
+                  children: [
+                    GlassAvatar(
+                      name: student.name,
+                      imageDataUri: authProvider.studentPhotoDataUri,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            student.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppTheme.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            student.department.isNotEmpty
+                                ? student.department
+                                : 'Student Account',
+                            style: const TextStyle(
+                              color: AppTheme.white54,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.verified_user_rounded,
+                      color: AppTheme.green,
+                      size: 21,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+                Divider(color: AppTheme.outline),
+                const SizedBox(height: 8),
+
+                // Account options
+                _accountTile(
+                  icon: Icons.person_outline_rounded,
+                  title: 'My Profile',
+                  subtitle: 'Personal information and details',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    context.go(AppRoutes.profile);
+                  },
+                ),
+
+                _accountTile(
+                  icon: Icons.school_outlined,
+                  title: 'Academic Details',
+                  subtitle: 'Course, department and semester',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    context.go(AppRoutes.academics);
+                  },
+                ),
+
+                _accountTile(
+                  icon: Icons.notifications_none_rounded,
+                  title: 'Notifications',
+                  subtitle: 'Manage your notification preferences',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    // Add your notification settings navigation here.
+                  },
+                ),
+
+                _accountTile(
+                  icon: Icons.settings_outlined,
+                  title: 'Settings',
+                  subtitle: 'App preferences and appearance',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    // Add your settings navigation here.
+                  },
+                ),
+
+                _accountTile(
+                  icon: Icons.help_outline_rounded,
+                  title: 'Help & Support',
+                  subtitle: 'Get assistance with the app',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    // Add your support navigation here.
+                  },
+                ),
+
+                const SizedBox(height: 12),
+                Divider(color: AppTheme.outline),
+                const SizedBox(height: 8),
+
+                // Logout
+                _accountTile(
+                  icon: Icons.logout_rounded,
+                  title: 'Logout',
+                  subtitle: 'Sign out from your account',
+                  color: AppTheme.red,
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+
+                    await authProvider.logout();
+
+                    if (!mounted) return;
+                    context.go(AppRoutes.login);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  } // ---------------------------------------------------------------------------
+
+  Widget _accountTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    final itemColor = color ?? AppTheme.white;
+
+    return ListTile(
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      leading: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: itemColor.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Icon(icon, color: itemColor, size: 21),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: itemColor,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(color: AppTheme.white54, fontSize: 11),
+      ),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        color: AppTheme.white38,
+        size: 20,
+      ),
+    );
+  }
+
   // DATA (unchanged behaviour)
   // ---------------------------------------------------------------------------
   double _getAttendancePercentage() {
@@ -350,43 +549,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-        PopupMenuButton<String>(
-          tooltip: 'Account options',
-          offset: const Offset(0, 58),
-          color: AppTheme.backgroundSoft,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: AppTheme.outline),
-          ),
-          onSelected: (value) async {
-            if (value == 'logout') {
-              final authProvider = context.read<AuthProvider>();
-
-              await authProvider.logout();
-
-              if (!context.mounted) return;
-
-              context.go(AppRoutes.login);
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem<String>(
-              value: 'logout',
-              child: Row(
-                children: [
-                  Icon(Icons.logout_rounded, color: AppTheme.red, size: 20),
-                  SizedBox(width: 12),
-                  Text(
-                    'Logout',
-                    style: TextStyle(
-                      color: AppTheme.red,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        GestureDetector(
+          onTap: _showAccountSheet,
           child: GlassAvatar(
             name: student.name,
             imageDataUri: context.watch<AuthProvider>().studentPhotoDataUri,
@@ -480,8 +644,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.today_rounded,
-                  size: 15, color: AppTheme.white54),
+              const Icon(
+                Icons.today_rounded,
+                size: 15,
+                color: AppTheme.white54,
+              ),
               const SizedBox(width: 7),
               const Text(
                 'TODAY',
