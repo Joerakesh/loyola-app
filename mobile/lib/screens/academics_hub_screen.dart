@@ -639,8 +639,12 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: AppTheme.backgroundSoft,
       showDragHandle: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.95,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
@@ -653,12 +657,12 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                     .ceil()
                     .clamp(0, 100000);
 
-          return Padding(
+          return SingleChildScrollView(
             padding: EdgeInsets.fromLTRB(
               24,
               4,
               24,
-              MediaQuery.of(context).viewInsets.bottom + 30,
+              MediaQuery.of(context).viewInsets.bottom + 110,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
