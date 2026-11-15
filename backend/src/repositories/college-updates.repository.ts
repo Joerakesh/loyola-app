@@ -19,6 +19,12 @@ interface StoredSnapshot extends CollegeUpdatesSnapshot {
   archivedAt: Date;
 }
 
+interface ScrapeLock {
+  _id: string;
+  nextAllowedAt: Date;
+  lastStartedAt?: Date;
+}
+
 function contentHash(snapshot: CollegeUpdatesSnapshot): string {
   // Sort copies by stable ID so harmless source ordering changes do not
   // create a new archive version.
@@ -57,7 +63,10 @@ export class CollegeUpdatesRepository {
 
   async acquireScrapeSlot(cooldownMs = 5 * 60_000): Promise<boolean> {
     const db = await getDb();
-    const locks = db.collection("college_updates_scrape_locks");
+    // This collection uses a string _id, unlike MongoDB's default ObjectId.
+    const locks: Collection<ScrapeLock> = db.collection<ScrapeLock>(
+      "college_updates_scrape_locks",
+    );
     const now = new Date();
     await locks.updateOne(
       { _id: "loyola-homepage" },
