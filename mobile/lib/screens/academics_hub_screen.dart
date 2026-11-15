@@ -311,7 +311,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
             size: Responsive.dp(context, 112),
             stroke: 11,
             child: Text(
-              percent == null ? '—' : '\${percent.toStringAsFixed(0)}%',
+              percent == null ? '—' : '${percent.toStringAsFixed(0)}%',
               style: TextStyle(
                 color: AppTheme.white,
                 fontSize: Responsive.sp(context, 25),
@@ -403,19 +403,19 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     final tiles = <({IconData icon, String value, String label, String route})>[
       (
         icon: Icons.fact_check_rounded,
-        value: percent == null ? 'Open' : '\${percent.toStringAsFixed(0)}%',
+        value: percent == null ? 'Open' : '${percent.toStringAsFixed(0)}%',
         label: 'Attendance',
         route: AppRoutes.attendance,
       ),
       (
         icon: Icons.menu_book_rounded,
-        value: '\${_subjects.length}',
+        value: '${_subjects.length}',
         label: 'Subjects',
         route: AppRoutes.subjects,
       ),
       (
         icon: Icons.insights_rounded,
-        value: '\${_marks.length}',
+        value: '${_marks.length}',
         label: 'Marks',
         route: AppRoutes.marks,
       ),
