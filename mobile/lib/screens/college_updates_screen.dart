@@ -63,7 +63,13 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.of(context).maybePop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.home);
+            }
+          },
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         title: const Text('College updates', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
