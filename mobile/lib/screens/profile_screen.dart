@@ -802,24 +802,6 @@ class _FlipIdCard extends StatefulWidget {
 
 class _FlipIdCardState extends State<_FlipIdCard>
     with SingleTickerProviderStateMixin {
-  /// Visibility state belongs to the ID card and is independent of profile details.
-  final Set<String> _revealedOnCard = {};
-
-  bool _isRevealed(_BackRow? row) =>
-      row != null && (!row.sensitive || _revealedOnCard.contains(row.key));
-
-  String _displayText(_BackRow row) =>
-      _isRevealed(row) ? row.text : _mask(row.text);
-
-  void _toggleCardField(_BackRow row) {
-    if (!row.sensitive) return;
-    setState(() {
-      if (!_revealedOnCard.add(row.key)) {
-        _revealedOnCard.remove(row.key);
-      }
-    });
-  }
-
   // Designed at a fixed logical size, scaled to fit the screen width.
   static const double _w = 340;
   static const double _h = 214;
@@ -1003,7 +985,7 @@ class _FlipIdCardState extends State<_FlipIdCard>
                       const SizedBox(width: 5),
                       Flexible(
                         child: Text(
-                          _displayText(email),
+                          email.text,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -1013,21 +995,6 @@ class _FlipIdCardState extends State<_FlipIdCard>
                           ),
                         ),
                       ),
-                      if (email.sensitive)
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => _toggleCardField(email),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 6),
-                            child: Icon(
-                              _isRevealed(email)
-                                  ? Icons.visibility_off_rounded
-                                  : Icons.visibility_rounded,
-                              size: 14,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ],
@@ -1127,7 +1094,7 @@ class _FlipIdCardState extends State<_FlipIdCard>
           const Text(': ', style: TextStyle(color: _cardInk, fontSize: 10.5)),
           Flexible(
             child: Text(
-              _displayText(r),
+              r.text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -1138,21 +1105,6 @@ class _FlipIdCardState extends State<_FlipIdCard>
               ),
             ),
           ),
-          if (r.sensitive)
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => _toggleCardField(r),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Icon(
-                  _isRevealed(r)
-                      ? Icons.visibility_off_rounded
-                      : Icons.visibility_rounded,
-                  size: 13,
-                  color: Colors.black54,
-                ),
-              ),
-            ),
         ],
       ),
     );
