@@ -7,6 +7,9 @@ const router = Router();
 // Public institutional information; no student ERP session is required.
 router.get("/updates", collegeSiteController.updates.bind(collegeSiteController));
 
+// Public maintenance endpoint: scrape and version homepage announcements/events.
+router.post("/updates/scrape", collegeSiteController.scrapeAndStore.bind(collegeSiteController));
+
 // Public month-specific calendar. Data is served exclusively from MongoDB.
 router.get("/calendar", academicCalendarController.month.bind(academicCalendarController));
 
