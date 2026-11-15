@@ -57,9 +57,9 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
     final announcements = _items(_updates?['announcements']);
     final events = _items(_updates?['events']);
     return Scaffold(
-      backgroundColor: AppTheme.colors.background,
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        backgroundColor: AppTheme.colors.background,
+        backgroundColor: AppTheme.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -82,17 +82,17 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
               ? _errorView()
               : RefreshIndicator(
                   onRefresh: () => _load(refresh: true),
-                  color: AppTheme.colors.crimson,
-                  backgroundColor: AppTheme.colors.backgroundSoft,
+                  color: AppTheme.crimson,
+                  backgroundColor: AppTheme.backgroundSoft,
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                     padding: const EdgeInsets.fromLTRB(18, 8, 18, 32),
                     children: [
-                      const Text('What’s happening at Loyola', style: TextStyle(color: AppTheme.colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+                      const Text('What’s happening at Loyola', style: TextStyle(color: AppTheme.white, fontSize: 22, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 7),
                       const Text(
                         'Notices and events from the Loyola College website.',
-                        style: TextStyle(color: AppTheme.colors.white54, fontSize: 13, height: 1.45),
+                        style: TextStyle(color: AppTheme.white54, fontSize: 13, height: 1.45),
                       ),
                       const SizedBox(height: 25),
                       _calendarShortcut(),
@@ -115,7 +115,7 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
                         Text(
                           'Last synced: ' + _updates!['fetchedAt'].toString(),
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: AppTheme.colors.white38, fontSize: 11),
+                          style: const TextStyle(color: AppTheme.white38, fontSize: 11),
                         ),
                       ],
                     ],
@@ -131,9 +131,9 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.colors.crimson.withValues(alpha: 0.09),
+          color: AppTheme.crimson.withValues(alpha: 0.09),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.colors.crimson.withValues(alpha: 0.25)),
+          border: Border.all(color: AppTheme.crimson.withValues(alpha: 0.25)),
         ),
         child: Row(
           children: [
@@ -141,23 +141,23 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppTheme.colors.crimson.withValues(alpha: 0.14),
+                color: AppTheme.crimson.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(13),
               ),
-              child: const Icon(Icons.calendar_month_rounded, color: AppTheme.colors.crimson),
+              child: const Icon(Icons.calendar_month_rounded, color: AppTheme.crimson),
             ),
             const SizedBox(width: 13),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Academic calendar', style: TextStyle(color: AppTheme.colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                  Text('Academic calendar', style: TextStyle(color: AppTheme.white, fontSize: 14, fontWeight: FontWeight.w700)),
                   SizedBox(height: 4),
-                  Text('Browse dates and day-wise schedule', style: TextStyle(color: AppTheme.colors.white54, fontSize: 12)),
+                  Text('Browse dates and day-wise schedule', style: TextStyle(color: AppTheme.white54, fontSize: 12)),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 15, color: AppTheme.colors.crimson),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 15, color: AppTheme.crimson),
           ],
         ),
       ),
@@ -172,15 +172,15 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(color: AppTheme.colors.white, fontSize: 17, fontWeight: FontWeight.w700)),
+              Text(title, style: const TextStyle(color: AppTheme.white, fontSize: 17, fontWeight: FontWeight.w700)),
               if (subtitle != null && subtitle.isNotEmpty) ...[
                 const SizedBox(height: 3),
-                Text(subtitle, style: const TextStyle(color: AppTheme.colors.white54, fontSize: 12)),
+                Text(subtitle, style: const TextStyle(color: AppTheme.white54, fontSize: 12)),
               ],
             ],
           ),
         ),
-        Text(count.toString(), style: const TextStyle(color: AppTheme.colors.white38, fontSize: 12, fontWeight: FontWeight.w600)),
+        Text(count.toString(), style: const TextStyle(color: AppTheme.white38, fontSize: 12, fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -195,19 +195,19 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.campaign_outlined, color: AppTheme.colors.crimson, size: 20),
+              const Icon(Icons.campaign_outlined, color: AppTheme.crimson, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   announcement.title,
-                  style: const TextStyle(color: AppTheme.colors.white, fontSize: 14, fontWeight: FontWeight.w700, height: 1.4),
+                  style: const TextStyle(color: AppTheme.white, fontSize: 14, fontWeight: FontWeight.w700, height: 1.4),
                 ),
               ),
             ],
           ),
           if (details.isNotEmpty) ...[
             const SizedBox(height: 10),
-            Text(details, style: const TextStyle(color: AppTheme.colors.white70, fontSize: 13, height: 1.5)),
+            Text(details, style: const TextStyle(color: AppTheme.white70, fontSize: 13, height: 1.5)),
           ],
           const SizedBox(height: 12),
           _linkButton(announcement.isPdf ? 'Read full notice (PDF)' : 'Open notice', () => _openLink(announcement.url)),
@@ -227,7 +227,7 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(color: AppTheme.colors.white, fontSize: 14, fontWeight: FontWeight.w700, height: 1.4)),
+          Text(title, style: const TextStyle(color: AppTheme.white, fontSize: 14, fontWeight: FontWeight.w700, height: 1.4)),
           if (date.isNotEmpty) ...[
             const SizedBox(height: 9),
             _detailLine(Icons.calendar_today_outlined, date),
@@ -242,7 +242,7 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
           ],
           if (details.isNotEmpty) ...[
             const SizedBox(height: 10),
-            Text(details, style: const TextStyle(color: AppTheme.colors.white54, fontSize: 12, height: 1.45)),
+            Text(details, style: const TextStyle(color: AppTheme.white54, fontSize: 12, height: 1.45)),
           ],
           if (url.isNotEmpty) ...[
             const SizedBox(height: 10),
@@ -257,9 +257,9 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: AppTheme.colors.white38),
+        Icon(icon, size: 14, color: AppTheme.white38),
         const SizedBox(width: 7),
-        Expanded(child: Text(value, style: const TextStyle(color: AppTheme.colors.white70, fontSize: 12, height: 1.4))),
+        Expanded(child: Text(value, style: const TextStyle(color: AppTheme.white70, fontSize: 12, height: 1.4))),
       ],
     );
   }
@@ -270,9 +270,9 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
       margin: const EdgeInsets.only(bottom: 9),
       padding: padding ?? const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: AppTheme.colors.backgroundSoft,
+        color: AppTheme.backgroundSoft,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.colors.outline),
+        border: Border.all(color: AppTheme.outline),
       ),
       child: child,
     );
@@ -284,7 +284,7 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
       child: TextButton.icon(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          foregroundColor: AppTheme.colors.crimson,
+          foregroundColor: AppTheme.crimson,
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
           visualDensity: VisualDensity.compact,
         ),
@@ -297,7 +297,7 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
   Widget _empty(String message) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Text(message, style: const TextStyle(color: AppTheme.colors.white54, fontSize: 13, height: 1.4)),
+      child: Text(message, style: const TextStyle(color: AppTheme.white54, fontSize: 13, height: 1.4)),
     );
   }
 
@@ -308,9 +308,9 @@ class _CollegeUpdatesScreenState extends State<CollegeUpdatesScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_outlined, size: 38, color: AppTheme.colors.white54),
+            const Icon(Icons.cloud_off_outlined, size: 38, color: AppTheme.white54),
             const SizedBox(height: 12),
-            Text(_error ?? 'Unable to load college updates.', textAlign: TextAlign.center, style: const TextStyle(color: AppTheme.colors.white70, fontSize: 13)),
+            Text(_error ?? 'Unable to load college updates.', textAlign: TextAlign.center, style: const TextStyle(color: AppTheme.white70, fontSize: 13)),
             const SizedBox(height: 14),
             FilledButton(onPressed: () => _load(refresh: true), child: const Text('Try again')),
           ],
