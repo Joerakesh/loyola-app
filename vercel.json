@@ -13,5 +13,8 @@
       "path": "/api/v1/college/updates/scrape",
       "schedule": "0 3 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }
