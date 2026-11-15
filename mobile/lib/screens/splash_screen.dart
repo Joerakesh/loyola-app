@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/app_router.dart';
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 import '../core/theme/responsive.dart';
 import '../services/auth_provider.dart';
 import '../services/cache_warmup.dart';
@@ -105,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen>
             end: Alignment.bottomRight,
             colors: [
               Color(0xFF111920),
-              AppColors.background,
+              AppTheme.colors.background,
               Color(0xFF0B1014),
             ],
           ),
@@ -162,14 +162,14 @@ class _SplashScreenState extends State<SplashScreen>
                             height: logoSize,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppColors.glass,
+                              color: AppTheme.colors.glass,
                               border: Border.all(
-                                color: AppColors.crimson,
+                                color: AppTheme.colors.crimson,
                                 width: 2,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.crimson.withValues(
+                                  color: AppTheme.colors.crimson.withValues(
                                     alpha: 0.16,
                                   ),
                                   blurRadius: 22,
@@ -185,7 +185,7 @@ class _SplashScreenState extends State<SplashScreen>
                                     Icon(
                                       Icons.school_rounded,
                                       size: logoSize * 0.43,
-                                      color: AppColors.white,
+                                      color: AppTheme.colors.white,
                                     ),
                               ),
                             ),
@@ -203,7 +203,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   'LOYOLA COLLEGE',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: AppColors.white,
+                                    color: AppTheme.colors.white,
                                     fontSize: Responsive.sp(context, 26),
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 4.5,
@@ -214,7 +214,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   'C H E N N A I',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: AppColors.gold,
+                                    color: AppTheme.colors.gold,
                                     fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 8,
@@ -225,7 +225,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   'Autonomous · Affiliated to University of Madras',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: AppColors.white38,
+                                    color: AppTheme.colors.white38,
                                     fontSize: Responsive.sp(context, 11),
                                     letterSpacing: 0.5,
                                     fontWeight: FontWeight.w500,
@@ -244,8 +244,8 @@ class _SplashScreenState extends State<SplashScreen>
                               borderRadius: BorderRadius.circular(4),
                               child: const LinearProgressIndicator(
                                 minHeight: 4,
-                                backgroundColor: AppColors.outline,
-                                color: AppColors.gold,
+                                backgroundColor: AppTheme.colors.outline,
+                                color: AppTheme.colors.gold,
                               ),
                             ),
                           ),
