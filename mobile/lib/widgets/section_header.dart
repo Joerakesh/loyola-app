@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
@@ -26,7 +26,7 @@ class SectionHeader extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  color: AppColors.white,
+                  color: AppTheme.colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
@@ -37,7 +37,7 @@ class SectionHeader extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: const TextStyle(
-                    color: AppColors.white54,
+                    color: AppTheme.colors.white54,
                     fontSize: 12,
                   ),
                 ),
