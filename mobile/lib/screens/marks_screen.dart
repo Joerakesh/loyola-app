@@ -139,7 +139,7 @@ class _MarksScreenState extends State<MarksScreen> {
         const SliverToBoxAdapter(
           child: GlassAppBar(
             title: 'CIA Marks',
-            showBackButton: false,
+            showBackButton: true,
             bottomPadding: true,
           ),
         ),
@@ -232,7 +232,7 @@ class _MarksScreenState extends State<MarksScreen> {
         const SliverToBoxAdapter(
           child: GlassAppBar(
             title: 'CIA Marks',
-            showBackButton: false,
+            showBackButton: true,
             bottomPadding: true,
           ),
         ),
