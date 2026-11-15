@@ -182,6 +182,7 @@ class AccountSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
+    final googlePhotoUrl = user?.avatarUrl?.trim();
     final erp = user?.erpLinked == true;
     final googleLinked = user?.googleId.isNotEmpty == true;
     final email = user?.email.isNotEmpty == true ? user!.email : '';
@@ -199,7 +200,7 @@ class AccountSettingsScreen extends StatelessWidget {
                 children: [
                   _header(context),
                   const SizedBox(height: 22),
-                  _identityCard(email, googleLinked, erp),
+                  _identityCard(email, googleLinked, erp, googlePhotoUrl),
                   if (auth.error != null) ...[
                     const SizedBox(height: 14),
                     AppCard(
@@ -419,7 +420,12 @@ class AccountSettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _identityCard(String email, bool googleLinked, bool erp) {
+  Widget _identityCard(
+    String email,
+    bool googleLinked,
+    bool erp,
+    String? googlePhotoUrl,
+  ) {
     final initial = email.isNotEmpty ? email[0].toUpperCase() : 'S';
     return AppCard(
       padding: const EdgeInsets.all(18),
@@ -428,23 +434,25 @@ class AccountSettingsScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppTheme.crimson,
-                ),
-                child: Text(
-                  initial,
-                  style: const TextStyle(
-                    color: AppTheme.background,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
+              CircleAvatar(
+                radius: 26,
+                backgroundColor: AppTheme.crimson,
+                backgroundImage:
+                    googlePhotoUrl != null && googlePhotoUrl.isNotEmpty
+                    ? NetworkImage(googlePhotoUrl)
+                    : null,
+                child: googlePhotoUrl == null || googlePhotoUrl.isEmpty
+                    ? Text(
+                        initial,
+                        style: const TextStyle(
+                          color: AppTheme.background,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      )
+                    : null,
               ),
+
               const SizedBox(width: 14),
               Expanded(
                 child: Column(

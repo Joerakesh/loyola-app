@@ -59,155 +59,143 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _showAccountSheet() {
-    final authProvider = context.read<AuthProvider>();
-    final dashboard = _dashboard!;
-    final student = dashboard.student;
+    final auth = context.read<AuthProvider>();
+    final student = _dashboard!.student;
 
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: AppTheme.backgroundSoft,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       builder: (sheetContext) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-          decoration: BoxDecoration(
-            color: AppTheme.backgroundSoft,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(color: AppTheme.outline),
-          ),
-          child: SafeArea(
-            top: false,
+        void go(String route) {
+          Navigator.pop(sheetContext);
+          context.go(route);
+        }
+
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Drag handle
-                Container(
-                  width: 38,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppTheme.white30,
-                    borderRadius: BorderRadius.circular(10),
+                // Identity: tap to open the full profile
+                AppCard(
+                  padding: const EdgeInsets.all(16),
+                  onTap: () => go(AppRoutes.profile),
+                  semanticLabel: 'Open profile',
+                  child: Row(
+                    children: [
+                      GlassAvatar(
+                        name: student.name,
+                        imageDataUri: auth.studentPhotoDataUri,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              student.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AppTheme.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              student.department.isNotEmpty
+                                  ? student.department
+                                  : 'Student account',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AppTheme.white54,
+                                fontSize: 12.5,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'View profile',
+                              style: TextStyle(
+                                color: AppTheme.crimson,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppTheme.white38,
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 14),
 
-                const SizedBox(height: 24),
-
-                // Student identity
-                Row(
+                // Navigation
+                AppListGroup(
                   children: [
-                    GlassAvatar(
-                      name: student.name,
-                      imageDataUri: authProvider.studentPhotoDataUri,
+                    AppListTile(
+                      icon: Icons.school_outlined,
+                      title: 'Academic details',
+                      subtitle: 'Course, subjects and semester',
+                      onTap: () => go(AppRoutes.academics),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            student.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppTheme.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            student.department.isNotEmpty
-                                ? student.department
-                                : 'Student Account',
-                            style: const TextStyle(
-                              color: AppTheme.white54,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
+                    AppListTile(
+                      icon: Icons.settings_outlined,
+                      title: 'Settings & security',
+                      subtitle: 'Linked accounts and passwords',
+                      onTap: () => go(AppRoutes.settings),
                     ),
-                    Icon(
-                      Icons.verified_user_rounded,
-                      color: AppTheme.green,
-                      size: 21,
-                    ),
+                    // Add Notifications / Help here once their screens exist:
+                    // AppListTile(icon: ..., title: ..., onTap: () => go(...)),
                   ],
                 ),
+                const SizedBox(height: 14),
 
-                const SizedBox(height: 24),
-                Divider(color: AppTheme.outline),
-                const SizedBox(height: 8),
-
-                // Account options
-                _accountTile(
-                  icon: Icons.person_outline_rounded,
-                  title: 'My Profile',
-                  subtitle: 'Personal information and details',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.go(AppRoutes.profile);
-                  },
-                ),
-
-                _accountTile(
-                  icon: Icons.school_outlined,
-                  title: 'Academic Details',
-                  subtitle: 'Course, department and semester',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.go(AppRoutes.academics);
-                  },
-                ),
-
-                _accountTile(
-                  icon: Icons.notifications_none_rounded,
-                  title: 'Notifications',
-                  subtitle: 'Manage your notification preferences',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    // Add your notification settings navigation here.
-                  },
-                ),
-
-                _accountTile(
-                  icon: Icons.settings_outlined,
-                  title: 'Settings',
-                  subtitle: 'App preferences and appearance',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.go(AppRoutes.settings);
-                  },
-                ),
-
-                _accountTile(
-                  icon: Icons.help_outline_rounded,
-                  title: 'Help & Support',
-                  subtitle: 'Get assistance with the app',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    // Add your support navigation here.
-                  },
-                ),
-
-                const SizedBox(height: 12),
-                Divider(color: AppTheme.outline),
-                const SizedBox(height: 8),
-
-                // Logout
-                _accountTile(
-                  icon: Icons.logout_rounded,
-                  title: 'Logout',
-                  subtitle: 'Sign out from your account',
-                  color: AppTheme.red,
-                  onTap: () async {
-                    Navigator.pop(sheetContext);
-
-                    await authProvider.logout();
-
-                    if (!mounted) return;
-                    context.go(AppRoutes.login);
-                  },
+                // Sign out
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      Navigator.pop(sheetContext);
+                      await auth.logout();
+                      if (!mounted) return;
+                      context.go(AppRoutes.login);
+                    },
+                    icon: const Icon(Icons.logout_rounded, size: 18),
+                    label: const Text(
+                      'Sign out',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.red,
+                      side: BorderSide(
+                        color: AppTheme.red.withValues(alpha: 0.7),
+                      ),
+                      backgroundColor: AppTheme.red.withValues(alpha: 0.08),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.surface),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -215,7 +203,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       },
     );
-  } // ---------------------------------------------------------------------------
+  }
 
   Widget _accountTile({
     required IconData icon,
@@ -552,7 +540,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-        GestureDetector(
+        PressableScale(
           onTap: _showAccountSheet,
           child: GlassAvatar(
             name: student.name,
