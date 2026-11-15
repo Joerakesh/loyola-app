@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { academicCalendarService } from "../services/academic-calendar.service.js";
+import { academicCalendarRepository } from "../repositories/academic-calendar.repository.js";
 
 export class AcademicCalendarController {
   async month(req: Request, res: Response) {
@@ -21,22 +22,102 @@ export class AcademicCalendarController {
     }
 
     try {
-      const data = await academicCalendarService.getMonth(year, month, req.query.refresh === "1");
+      // App reads only the archived MongoDB snapshot; this endpoint never
+      // contacts the college website.
+      const data = await academicCalendarRepository.getMonth(year, month);
+      if (!data) {
+        return res.status(404).json({
+          status: "error",
+          message: "This calendar month has not been imported yet",
+        });
+      }
       res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
       return res.json({ status: "success", data });
     } catch (error) {
-      console.error("Academic calendar fetch failed", {
+      console.error("Academic calendar database read failed", {
         year,
         month,
-        refresh: req.query.refresh === "1",
         error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
       });
-      return res.status(502).json({
+      return res.status(503).json({
         status: "error",
-        message: "Unable to fetch the requested academic calendar month from Loyola College",
+        message: "Unable to read the academic calendar from storage",
       });
     }
+  }
+
+  async scrapeAndStore(req: Request, res: Response) {
+    const now = new Date();
+    const defaultStartYear = now.getUTCMonth() >= 5
+      ? now.getUTCFullYear()
+      : now.getUTCFullYear() - 1;
+    const startYear = req.body?.startYear === undefined
+      ? defaultStartYear
+      : Number(req.body.startYear);
+
+    if (!Number.isInteger(startYear) || startYear < 2000 || startYear > 2100) {
+      return res.status(400).json({
+        status: "error",
+        message: "startYear must be an integer between 2000 and 2100",
+      });
+    }
+
+    const results: Array<{
+      year: number;
+      month: number;
+      status: "created" | "updated" | "unchanged" | "failed";
+      version?: number;
+      entries?: number;
+      message?: string;
+    }> = [];
+
+    // Loyola's academic year runs June through May.
+    for (let offset = 0; offset < 12; offset += 1) {
+      const date = new Date(Date.UTC(startYear, 5 + offset, 1));
+      const year = date.getUTCFullYear();
+      const month = date.getUTCMonth() + 1;
+
+      try {
+        const scraped = await academicCalendarService.scrapeMonth(year, month);
+        const archived = await academicCalendarRepository.archiveMonth(scraped);
+        results.push({
+          year,
+          month,
+          status: archived.changed
+            ? (archived.version === 1 ? "created" : "updated")
+            : "unchanged",
+          version: archived.version,
+          entries: scraped.entries.length,
+        });
+      } catch (error) {
+        // Keep the last known good MongoDB snapshot when the source is
+        // temporarily unavailable or a page cannot be parsed.
+        results.push({
+          year,
+          month,
+          status: "failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    const failed = results.filter((item) => item.status === "failed").length;
+    const changed = results.filter((item) =>
+      item.status === "created" || item.status === "updated",
+    ).length;
+
+    return res.status(failed === 12 ? 502 : 200).json({
+      status: failed === 12 ? "error" : "success",
+      academicYear: `${startYear}-${startYear + 1}`,
+      summary: {
+        months: results.length,
+        changed,
+        unchanged: results.filter((item) => item.status === "unchanged").length,
+        failed,
+      },
+      data: results,
+      completedAt: new Date().toISOString(),
+    });
   }
 }
 
