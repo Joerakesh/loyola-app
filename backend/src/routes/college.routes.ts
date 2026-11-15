@@ -2,7 +2,6 @@ import { Router } from "express";
 import { collegeSiteController } from "../controllers/college-site.controller.js";
 import { academicCalendarController } from "../controllers/academic-calendar.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
-import { requireAdmin } from "../middleware/admin.middleware.js";
 
 const router = Router();
 
@@ -16,7 +15,6 @@ router.get("/calendar", academicCalendarController.month.bind(academicCalendarCo
 router.post(
   "/calendar/scrape",
   requireAuth,
-  requireAdmin,
   academicCalendarController.scrapeAndStore.bind(academicCalendarController),
 );
 
