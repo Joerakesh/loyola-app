@@ -22,6 +22,21 @@ class AppTheme {
   static const textDisabled = Color(0xFF5C6D74);
   static const onPrimary = Color(0xFF0B1014);
   static const overlay = Color(0x33FFFFFF);
+
+  // Legacy names retained as compile-time aliases during screen migration.
+  // Keep these mapped to semantic tokens so the theme remains the source of truth.
+  static const crimson = primary;
+  static const gold = secondary;
+  static const glass = surface;
+  static const green = success;
+  static const red = error;
+  static const white = textPrimary;
+  static const white70 = textSecondary;
+  static const white60 = Color(0xFFB0BEC1);
+  static const white54 = textMuted;
+  static const white38 = textSubtle;
+  static const white30 = textDisabled;
+  static const white24 = Color(0xFF4A5B62);
   static const colors = AppPalette();
 
   static ThemeData dark() {
