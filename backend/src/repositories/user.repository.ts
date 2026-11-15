@@ -39,6 +39,12 @@ export class UserRepository {
       { $set: fields },
     );
   }
+  async clearGoogleIdentity(id: ObjectId): Promise<void> {
+    await (await this.collection()).updateOne(
+      { _id: id, "erpCredential.registrationNumber": { $exists: true } },
+      { $unset: { googleId: "", email: "", avatarUrl: "" }, $set: { updatedAt: new Date() } },
+    );
+  }
   async updateAvatar(id: ObjectId, avatarUrl: string): Promise<void> {
     await (await this.collection()).updateOne({ _id: id }, { $set: { avatarUrl, updatedAt: new Date() } });
   }

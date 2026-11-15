@@ -1,43 +1,12 @@
 import 'package:flutter/foundation.dart';
-
 class ApiConstants {
   ApiConstants._();
-
-  /// Override at build time with
-  /// `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5000/api/v1`.
-  /// Android defaults to 127.0.0.1 with `adb reverse tcp:5000 tcp:5000`.
-  static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
-
-  // static const String _defaultLocal = 'http://127.0.0.1:5000/api/v1';
-  // static const String _host = 'http://127.0.0.1:5000/api/v1';
-  static const String _defaultLocal =
-      'https://loyola-app-livid.vercel.app/api/v1';
-  static const String _host = 'https://loyola-app-livid.vercel.app/api/v1';
-
-  static String get baseUrl {
-    if (_envBaseUrl.isNotEmpty) {
-      return _envBaseUrl;
-    }
-    if (kIsWeb) {
-      return _host;
-    }
-    return _defaultLocal;
-  }
-
-  static const String googleLogin = '/auth/google';
-  static const String erpLogin = '/auth/erp';
-  static const String refresh = '/auth/refresh';
-  static const String logout = '/auth/logout';
-  static const String me = '/auth/google/me';
-
-  static const String dashboard = '/dashboard';
-  static const String marks = '/marks/internal';
-  static const String subjects = '/subjects';
-  static const String profile = '/student/profile';
-  static const String studentPhoto = '/student/photo';
-
-  static const String attendanceHourly = '/attendance/hourly';
-  static const String attendanceSummary = '/attendance/summary';
-  static const String collegeUpdates = '/college/updates';
-  static const String collegeCalendar = '/college/calendar';
+  static const String _envBaseUrl=String.fromEnvironment('API_BASE_URL');
+  static const String _defaultLocal='https://loyola-app-livid.vercel.app/api/v1';
+  static const String _host='https://loyola-app-livid.vercel.app/api/v1';
+  static String get baseUrl=>_envBaseUrl.isNotEmpty?_envBaseUrl:(kIsWeb?_host:_defaultLocal);
+  static const String googleLogin='/auth/google', erpLogin='/auth/erp', refresh='/auth/refresh', logout='/auth/logout', me='/auth/google/me';
+  static const String bindErp='/auth/bind-erp', erpPassword='/auth/erp-password', unbindErp='/auth/unbind-erp', unbindGoogle='/auth/unbind-google';
+  static const String dashboard='/dashboard', marks='/marks/internal', subjects='/subjects', profile='/student/profile', studentPhoto='/student/photo';
+  static const String attendanceHourly='/attendance/hourly', attendanceSummary='/attendance/summary', collegeUpdates='/college/updates', collegeCalendar='/college/calendar';
 }

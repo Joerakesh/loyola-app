@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { authController } from "../controllers/auth.controller.js";
-import { bindGoogleIdentity } from "../controllers/identity.controller.js";
+import { bindGoogleIdentity, unbindGoogleIdentity } from "../controllers/identity.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 const router = Router();
 router.post("/google", (req, res) => authController.googleLogin(req, res));
 router.post("/erp", (req, res) => authController.erpLogin(req, res));
 router.post("/bind-google", requireAuth, bindGoogleIdentity);
+router.post("/unbind-google", requireAuth, unbindGoogleIdentity);
 router.get("/google/me", requireAuth, (req, res) => authController.me(req, res));
 router.post("/refresh", requireAuth, (req, res) => authController.refresh(req, res));
 router.post("/logout", requireAuth, (req, res) => authController.logout(req, res));
