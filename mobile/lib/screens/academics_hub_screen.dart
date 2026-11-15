@@ -100,8 +100,10 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
       if (results[2] is FetchResult<List<CourseMarks>>) {
         _marks = (results[2] as FetchResult<List<CourseMarks>>).data;
       }
-      final failures =
-          results.whereType<Object>().where((v) => v is! FetchResult).length;
+      final failures = results
+          .whereType<Object>()
+          .where((v) => v is! FetchResult)
+          .length;
       _error = failures == 3
           ? 'Academic records could not be reached. Pull down to retry.'
           : null;
@@ -140,10 +142,8 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
   Widget build(BuildContext context) {
     final percent = _attendancePercent;
     final side = Responsive.dp(context, 20);
-    final noData = _loading &&
-        _attendance.isEmpty &&
-        _subjects.isEmpty &&
-        _marks.isEmpty;
+    final noData =
+        _loading && _attendance.isEmpty && _subjects.isEmpty && _marks.isEmpty;
 
     return Scaffold(
       body: GlassBackground(
@@ -282,8 +282,11 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                       color: AppTheme.crimson,
                     ),
                   )
-                : const Icon(Icons.refresh_rounded,
-                    color: AppTheme.white70, size: 20),
+                : const Icon(
+                    Icons.refresh_rounded,
+                    color: AppTheme.white70,
+                    size: 20,
+                  ),
           ),
         ),
       ],
@@ -297,8 +300,8 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     final color = percent == null
         ? AppTheme.white54
         : percent >= 75
-            ? AppTheme.crimson
-            : AppTheme.orange;
+        ? AppTheme.crimson
+        : AppTheme.orange;
 
     return AppTicketCard(
       onTap: () => context.push(AppRoutes.attendance),
@@ -351,8 +354,8 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _countPill('\$_present', 'present', AppTheme.green),
-              _countPill('\$_absent', 'absent', AppTheme.orange),
+              _countPill('$_present', 'present', AppTheme.green),
+              _countPill('$_absent', 'absent', AppTheme.orange),
             ],
           ),
           if (percent != null) ...[
@@ -371,30 +374,30 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
   }
 
   Widget _countPill(String value, String label, Color color) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(12),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+          ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: const TextStyle(color: AppTheme.white54, fontSize: 10.5),
-            ),
-          ],
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: const TextStyle(color: AppTheme.white54, fontSize: 10.5),
         ),
-      );
+      ],
+    ),
+  );
 
   // ---------------------------------------------------------------------------
   // TOOL TILES (bento row)
@@ -579,10 +582,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppTheme.purple.withValues(alpha: 0.16),
-              AppTheme.glass,
-            ],
+            colors: [AppTheme.purple.withValues(alpha: 0.16), AppTheme.glass],
           ),
           border: Border.all(color: AppTheme.purple.withValues(alpha: 0.22)),
         ),
@@ -595,8 +595,11 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 color: AppTheme.purple.withValues(alpha: 0.16),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: const Icon(Icons.calculate_rounded,
-                  color: AppTheme.purple, size: 24),
+              child: const Icon(
+                Icons.calculate_rounded,
+                color: AppTheme.purple,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 14),
             const Expanded(
@@ -647,8 +650,8 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
           final needed = (total == 0 || reached)
               ? 0
               : ((target * total - 100 * present) / (100 - target))
-                  .ceil()
-                  .clamp(0, 100000);
+                    .ceil()
+                    .clamp(0, 100000);
 
           return Padding(
             padding: EdgeInsets.fromLTRB(
@@ -736,52 +739,54 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                           style: TextStyle(color: AppTheme.orange),
                         )
                       : reached
-                          ? const Row(
-                              children: [
-                                Icon(Icons.check_circle_rounded,
-                                    color: AppTheme.crimson),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'You have already reached this target.',
-                                    style: TextStyle(
-                                      color: AppTheme.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '$needed',
-                                  style: const TextStyle(
-                                    color: AppTheme.crimson,
-                                    fontSize: 44,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -1.5,
-                                    height: 1,
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                const Expanded(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(bottom: 4),
-                                    child: Text(
-                                      'consecutive sessions to attend to reach your target',
-                                      style: TextStyle(
-                                        color: AppTheme.white70,
-                                        fontSize: 12.5,
-                                        height: 1.35,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                      ? const Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: AppTheme.crimson,
                             ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'You have already reached this target.',
+                                style: TextStyle(
+                                  color: AppTheme.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '$needed',
+                              style: const TextStyle(
+                                color: AppTheme.crimson,
+                                fontSize: 44,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1.5,
+                                height: 1,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Expanded(
+                              child: Padding(
+                                padding: EdgeInsets.only(bottom: 4),
+                                child: Text(
+                                  'consecutive sessions to attend to reach your target',
+                                  style: TextStyle(
+                                    color: AppTheme.white70,
+                                    fontSize: 12.5,
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
                 const SizedBox(height: 10),
                 const Text(
@@ -797,24 +802,21 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
   }
 
   Widget _notice(String message, IconData icon) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: AppCard(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Icon(icon, color: AppTheme.white54, size: 18),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  message,
-                  style: const TextStyle(
-                    color: AppTheme.white54,
-                    fontSize: 12.5,
-                  ),
-                ),
-              ),
-            ],
+    padding: const EdgeInsets.only(bottom: 12),
+    child: AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          Icon(icon, color: AppTheme.white54, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: AppTheme.white54, fontSize: 12.5),
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
