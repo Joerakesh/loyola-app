@@ -105,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen>
             end: Alignment.bottomRight,
             colors: [
               Color(0xFF111920),
-              AppTheme.colors.background,
+              AppTheme.background,
               Color(0xFF0B1014),
             ],
           ),
@@ -162,14 +162,14 @@ class _SplashScreenState extends State<SplashScreen>
                             height: logoSize,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppTheme.colors.glass,
+                              color: AppTheme.glass,
                               border: Border.all(
-                                color: AppTheme.colors.crimson,
+                                color: AppTheme.crimson,
                                 width: 2,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.colors.crimson.withValues(
+                                  color: AppTheme.crimson.withValues(
                                     alpha: 0.16,
                                   ),
                                   blurRadius: 22,
@@ -185,7 +185,7 @@ class _SplashScreenState extends State<SplashScreen>
                                     Icon(
                                       Icons.school_rounded,
                                       size: logoSize * 0.43,
-                                      color: AppTheme.colors.white,
+                                      color: AppTheme.white,
                                     ),
                               ),
                             ),
@@ -203,7 +203,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   'LOYOLA COLLEGE',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: AppTheme.colors.white,
+                                    color: AppTheme.white,
                                     fontSize: Responsive.sp(context, 26),
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 4.5,
@@ -214,7 +214,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   'C H E N N A I',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: AppTheme.colors.gold,
+                                    color: AppTheme.gold,
                                     fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 8,
@@ -225,7 +225,7 @@ class _SplashScreenState extends State<SplashScreen>
                                   'Autonomous · Affiliated to University of Madras',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: AppTheme.colors.white38,
+                                    color: AppTheme.white38,
                                     fontSize: Responsive.sp(context, 11),
                                     letterSpacing: 0.5,
                                     fontWeight: FontWeight.w500,
@@ -244,8 +244,8 @@ class _SplashScreenState extends State<SplashScreen>
                               borderRadius: BorderRadius.circular(4),
                               child: const LinearProgressIndicator(
                                 minHeight: 4,
-                                backgroundColor: AppTheme.colors.outline,
-                                color: AppTheme.colors.gold,
+                                backgroundColor: AppTheme.outline,
+                                color: AppTheme.gold,
                               ),
                             ),
                           ),
