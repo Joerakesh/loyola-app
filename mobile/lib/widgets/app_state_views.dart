@@ -8,7 +8,7 @@ class LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: CircularProgressIndicator(color: AppTheme.colors.white),
+      child: CircularProgressIndicator(color: AppTheme.white),
     );
   }
 }
@@ -35,7 +35,7 @@ class ErrorView extends StatelessWidget {
           children: [
             const Icon(
               Icons.cloud_off_rounded,
-              color: AppTheme.colors.white54,
+              color: AppTheme.white54,
               size: 48,
             ),
             const SizedBox(height: 16),
@@ -43,7 +43,7 @@ class ErrorView extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: AppTheme.colors.white,
+                color: AppTheme.white,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -53,7 +53,7 @@ class ErrorView extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: AppTheme.colors.white54,
+                color: AppTheme.white54,
                 fontSize: 13,
               ),
             ),
@@ -63,8 +63,8 @@ class ErrorView extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.colors.crimson,
-                foregroundColor: AppTheme.colors.background,
+                backgroundColor: AppTheme.crimson,
+                foregroundColor: AppTheme.background,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
