@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 import '../core/theme/responsive.dart';
 import '../models/subject_model.dart';
 import '../services/subject_service.dart';
@@ -111,8 +111,8 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
         ],
         child: RefreshIndicator(
           onRefresh: _refreshData,
-          color: AppColors.white,
-          backgroundColor: AppColors.glass,
+          color: AppTheme.colors.white,
+          backgroundColor: AppTheme.colors.glass,
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
@@ -207,13 +207,13 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           Icon(
             Icons.menu_book_rounded,
             size: 48,
-            color: AppColors.white.withValues(alpha: 0.2),
+            color: AppTheme.colors.white.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 16),
           Text(
             message,
             style: TextStyle(
-              color: AppColors.white.withValues(alpha: 0.5),
+              color: AppTheme.colors.white.withValues(alpha: 0.5),
               fontSize: 16,
             ),
           ),
@@ -238,7 +238,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
             title: 'Total Courses',
             value: '${subjects.length}',
             icon: Icons.library_books_rounded,
-            accentColor: AppColors.crimson,
+            accentColor: AppTheme.colors.crimson,
           ),
         ),
         const SizedBox(width: 14),
@@ -247,7 +247,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
             title: 'Total Credits',
             value: '$totalCredits',
             icon: Icons.stars_rounded,
-            accentColor: AppColors.gold,
+            accentColor: AppTheme.colors.gold,
           ),
         ),
       ],
@@ -289,16 +289,16 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
-            color: selected ? AppColors.crimson : AppColors.backgroundSoft,
+            color: selected ? AppTheme.colors.crimson : AppTheme.colors.backgroundSoft,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? AppColors.crimson : AppColors.outline,
+              color: selected ? AppTheme.colors.crimson : AppTheme.colors.outline,
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? AppColors.background : AppColors.white70,
+              color: selected ? AppTheme.colors.background : AppTheme.colors.white70,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
@@ -331,7 +331,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           Text(
             title,
             style: const TextStyle(
-              color: AppColors.white54,
+              color: AppTheme.colors.white54,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -340,7 +340,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
           Text(
             value,
             style: const TextStyle(
-              color: AppColors.white,
+              color: AppTheme.colors.white,
               fontSize: 26,
               fontWeight: FontWeight.w800,
             ),
@@ -365,15 +365,15 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
             width: iconBox,
             height: iconBox,
             decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.08),
+              color: AppTheme.colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppColors.white.withValues(alpha: 0.15),
+                color: AppTheme.colors.white.withValues(alpha: 0.15),
               ),
             ),
             child: Icon(
               Icons.import_contacts_rounded,
-              color: AppColors.white,
+              color: AppTheme.colors.white,
               size: Responsive.dp(context, 22),
             ),
           ),
@@ -388,7 +388,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: AppColors.white,
+                    color: AppTheme.colors.white,
                     fontSize: Responsive.sp(context, 16),
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.2,
@@ -403,13 +403,13 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.white.withValues(alpha: 0.1),
+                        color: AppTheme.colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         subject.courseCode,
                         style: const TextStyle(
-                          color: AppColors.white70,
+                          color: AppTheme.colors.white70,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
@@ -424,7 +424,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: AppColors.white54,
+                            color: AppTheme.colors.white54,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -444,7 +444,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               Text(
                 '${subject.credits}',
                 style: TextStyle(
-                  color: AppColors.white,
+                  color: AppTheme.colors.white,
                   fontSize: Responsive.sp(context, 22),
                   fontWeight: FontWeight.w800,
                 ),
@@ -452,7 +452,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               const Text(
                 'CR',
                 style: TextStyle(
-                  color: AppColors.white54,
+                  color: AppTheme.colors.white54,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
