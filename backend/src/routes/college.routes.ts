@@ -9,6 +9,8 @@ router.get("/updates", collegeSiteController.updates.bind(collegeSiteController)
 
 // Public maintenance endpoint: scrape and version homepage announcements/events.
 router.post("/updates/scrape", collegeSiteController.scrapeAndStore.bind(collegeSiteController));
+// Vercel Cron invokes GET; manual refreshes can use POST.
+router.get("/updates/scrape", collegeSiteController.scrapeAndStore.bind(collegeSiteController));
 
 // Public month-specific calendar. Data is served exclusively from MongoDB.
 router.get("/calendar", academicCalendarController.month.bind(academicCalendarController));
