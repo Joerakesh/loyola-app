@@ -507,7 +507,8 @@
           "200": {
             "description": "College updates"
           }
-        }
+        },
+        "description": "Returns the latest archived announcements and events from MongoDB, plus the current month's archived academic calendar. Does not contact the college website."
       }
     },
     "/v1/college/calendar": {
@@ -914,6 +915,38 @@
           },
           "502": {
             "description": "All calendar months failed to scrape"
+          }
+        }
+      }
+    },
+    "/v1/college/updates/scrape": {
+      "post": {
+        "tags": [
+          "Campus"
+        ],
+        "summary": "Scrape and archive college announcements and events",
+        "description": "Public maintenance endpoint. Fetches Loyola College homepage announcements and events, stores the latest snapshot in MongoDB, and creates an immutable version only when content changes. Previous archive is preserved if scraping fails.",
+        "responses": {
+          "200": {
+            "description": "Scrape completed; includes changed status, version, and item counts"
+          },
+          "502": {
+            "description": "Unable to fetch or parse the college homepage"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Campus"
+        ],
+        "summary": "Scheduled refresh of college announcements and events",
+        "description": "Same operation as POST; invoked by Vercel Cron once daily.",
+        "responses": {
+          "200": {
+            "description": "Scrape completed"
+          },
+          "502": {
+            "description": "Unable to fetch or parse the college homepage"
           }
         }
       }
