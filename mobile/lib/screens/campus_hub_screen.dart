@@ -8,6 +8,7 @@ import '../models/college_announcement.dart';
 import '../services/college_updates_service.dart';
 import '../utils/announcement_links.dart';
 import '../widgets/announcement_card.dart';
+import '../widgets/app_card.dart';
 import '../widgets/glass_background.dart';
 import '../widgets/glass_container.dart';
 import '../widgets/section_header.dart';
@@ -218,140 +219,105 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
   // ---------------------------------------------------------------------------
   Widget _calendarHero() {
     final now = DateTime.now();
+    final ink = AppCard.ink(context);
     const months = [
-      'JAN',
-      'FEB',
-      'MAR',
-      'APR',
-      'MAY',
-      'JUN',
-      'JUL',
-      'AUG',
-      'SEP',
-      'OCT',
-      'NOV',
-      'DEC',
+      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
     ];
 
-    return PressableScale(
-      scale: 0.985,
+    return AppCard.feature(
       onTap: () => context.push(AppRoutes.calendar),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(26),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.crimson.withValues(alpha: 0.18),
-              AppTheme.glass,
-              AppTheme.backgroundSoft,
-            ],
-            stops: const [0, 0.55, 1],
-          ),
-          border: Border.all(color: AppTheme.crimson.withValues(alpha: 0.22)),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.crimson.withValues(alpha: 0.08),
-              blurRadius: 28,
-              offset: const Offset(0, 12),
+      semanticLabel: 'Open academic calendar',
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        children: [
+          Container(
+            width: 62,
+            height: 68,
+            decoration: BoxDecoration(
+              color: ink.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: ink.withValues(alpha: 0.12)),
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // mini "calendar leaf" showing today
-            Container(
-              width: 62,
-              height: 68,
-              decoration: BoxDecoration(
-                color: AppTheme.background.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: AppTheme.white.withValues(alpha: 0.1),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    color: ink,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(17),
+                    ),
+                  ),
+                  child: Text(
+                    months[now.month - 1],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.crimson,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(17),
-                      ),
-                    ),
+                Expanded(
+                  child: Center(
                     child: Text(
-                      months[now.month - 1],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppTheme.background,
-                        fontSize: 10,
+                      '\${now.day}',
+                      style: TextStyle(
+                        color: ink,
+                        fontSize: 26,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
+                        letterSpacing: -0.8,
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        '${now.day}',
-                        style: const TextStyle(
-                          color: AppTheme.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.8,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: 16),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Academic calendar',
-                    style: TextStyle(
-                      color: AppTheme.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.3,
-                    ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Academic calendar',
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Plan around official college dates, month by month.',
-                    style: TextStyle(
-                      color: AppTheme.white54,
-                      fontSize: 12,
-                      height: 1.4,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Plan around official college dates, month by month.',
+                  style: TextStyle(
+                    color: ink.withValues(alpha: 0.72),
+                    fontSize: 12,
+                    height: 1.4,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: AppTheme.crimson,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_forward_rounded,
-                color: AppTheme.background,
-                size: 18,
-              ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: ink,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
-        ),
+            child: Icon(
+              Icons.arrow_forward_rounded,
+              color: Theme.of(context).colorScheme.primary,
+              size: 18,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -579,83 +545,23 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
       children: [
         const SectionHeader(title: 'Campus toolkit'),
         const SizedBox(height: 14),
-        _toolTile(
-          icon: Icons.calendar_month_rounded,
-          color: AppTheme.orange,
-          title: 'Academic calendar',
-          subtitle: 'Official dates, month by month',
-          onTap: () => context.push(AppRoutes.calendar),
-        ),
-        _toolTile(
-          icon: Icons.notifications_active_rounded,
-          color: AppTheme.purple,
-          title: 'All announcements',
-          subtitle: 'Notices, circulars and documents',
-          onTap: () => context.push(AppRoutes.updates),
+        AppListGroup(
+          children: [
+            AppListTile(
+              icon: Icons.calendar_month_rounded,
+              title: 'Academic calendar',
+              subtitle: 'Official dates, month by month',
+              onTap: () => context.push(AppRoutes.calendar),
+            ),
+            AppListTile(
+              icon: Icons.notifications_active_rounded,
+              title: 'All announcements',
+              subtitle: 'Notices, circulars and documents',
+              onTap: () => context.push(AppRoutes.updates),
+            ),
+          ],
         ),
       ],
-    );
-  }
-
-  Widget _toolTile({
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: PressableScale(
-        scale: 0.985,
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppTheme.backgroundSoft,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppTheme.outline),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(13),
-                ),
-                child: Icon(icon, color: color, size: 21),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: AppTheme.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        color: AppTheme.white54,
-                        fontSize: 11.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded, color: AppTheme.white38),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
