@@ -1,0 +1,88 @@
+name: loyola-dev
+
+services:
+  flutter:
+    image: loyola-dev/flutter:local
+    build:
+      context: .
+      dockerfile: docker/flutter/Dockerfile
+      args:
+        ANDROID_PLATFORM: ${ANDROID_PLATFORM:-android-37}
+        ANDROID_BUILD_TOOLS: ${ANDROID_BUILD_TOOLS:-36.0.0}
+    working_dir: /workspace
+    init: true
+    volumes:
+      - ..:/workspace
+      - flutter-pub-cache:/root/.pub-cache
+      - gradle-cache:/root/.gradle
+    environment:
+      PUB_CACHE: /root/.pub-cache
+      GRADLE_USER_HOME: /root/.gradle
+    mem_limit: 4g
+    cpus: 3
+    profiles: ["build"]
+
+  node:
+    image: loyola-dev/node:local
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    working_dir: /workspace
+    init: true
+    volumes:
+      - ..:/workspace
+      - npm-cache:/home/dev/.npm
+    mem_limit: 1g
+    cpus: 2
+    profiles: ["node"]
+
+  python:
+    image: loyola-dev/python:local
+    build:
+      context: .
+      dockerfile: docker/python/Dockerfile
+    working_dir: /workspace
+    init: true
+    volumes:
+      - ..:/workspace
+      - pip-cache:/home/dev/.cache/pip
+    mem_limit: 1g
+    cpus: 2
+    profiles: ["python"]
+
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: loyola
+      POSTGRES_PASSWORD: loyola_dev_only
+      POSTGRES_DB: loyola_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    mem_limit: 768m
+    cpus: 1
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U loyola -d loyola_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo:
+    image: mongo:7
+    profiles: ["mongo"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    mem_limit: 768m
+    cpus: 1
+
+volumes:
+  flutter-pub-cache:
+  gradle-cache:
+  npm-cache:
+  pip-cache:
+  postgres-data:
+  mongo-data:
