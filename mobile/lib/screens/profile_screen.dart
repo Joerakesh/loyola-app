@@ -405,8 +405,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
         child: RefreshIndicator(
           onRefresh: _refreshData,
-          color: AppTheme.colors.white,
-          backgroundColor: AppTheme.colors.glass,
+          color: AppTheme.white,
+          backgroundColor: AppTheme.glass,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
             switchInCurve: Curves.easeOutCubic,
@@ -495,7 +495,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Text(
                   'Tap or swipe the card to flip',
                   style: TextStyle(
-                    color: AppTheme.colors.white.withValues(alpha: 0.4),
+                    color: AppTheme.white.withValues(alpha: 0.4),
                     fontSize: 11,
                     letterSpacing: 0.3,
                   ),
@@ -537,12 +537,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildAvatar(StudentProfile profile, String? avatarUrl) {
     final url = avatarUrl?.trim();
     final fallback = Container(
-      color: AppTheme.colors.crimson,
+      color: AppTheme.crimson,
       alignment: Alignment.center,
       child: Text(
         profile.name.isNotEmpty ? profile.name[0].toUpperCase() : 'S',
         style: const TextStyle(
-          color: AppTheme.colors.white,
+          color: AppTheme.white,
           fontSize: 32,
           fontWeight: FontWeight.bold,
         ),
@@ -607,13 +607,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Row(
               children: [
-                Icon(group.icon, size: 16, color: AppTheme.colors.white70),
+                Icon(group.icon, size: 16, color: AppTheme.white70),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     group.title,
                     style: const TextStyle(
-                      color: AppTheme.colors.white,
+                      color: AppTheme.white,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.3,
@@ -631,7 +631,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     label: Text(allShown ? 'Hide' : 'Reveal'),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppTheme.colors.white70,
+                      foregroundColor: AppTheme.white70,
                       textStyle: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -648,7 +648,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Divider(
-                    color: AppTheme.colors.white.withValues(alpha: 0.05),
+                    color: AppTheme.white.withValues(alpha: 0.05),
                     height: 1,
                   ),
                 ),
@@ -673,12 +673,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: iconBox,
             height: iconBox,
             decoration: BoxDecoration(
-              color: AppTheme.colors.white.withValues(alpha: 0.05),
+              color: AppTheme.white.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
             child: Icon(
               f.icon,
-              color: AppTheme.colors.white54,
+              color: AppTheme.white54,
               size: compact ? 14 : 16,
             ),
           ),
@@ -692,7 +692,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: AppTheme.colors.white54,
+                    color: AppTheme.white54,
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -706,7 +706,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     maxLines: compact ? 2 : 4,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: AppTheme.colors.white,
+                      color: AppTheme.white,
                       fontSize: compact ? 13 : 14,
                       fontWeight: FontWeight.w600,
                       letterSpacing: shown ? 0 : 1.1,
@@ -727,7 +727,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ? Icons.visibility_off_rounded
                       : Icons.visibility_rounded,
                   size: 16,
-                  color: AppTheme.colors.white54,
+                  color: AppTheme.white54,
                 ),
               ),
             ),
@@ -755,9 +755,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppTheme.colors.red,
-          side: const BorderSide(color: AppTheme.colors.red, width: 1.2),
-          backgroundColor: AppTheme.colors.red.withValues(alpha: 0.1),
+          foregroundColor: AppTheme.red,
+          side: const BorderSide(color: AppTheme.red, width: 1.2),
+          backgroundColor: AppTheme.red.withValues(alpha: 0.1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
