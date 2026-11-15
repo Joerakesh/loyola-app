@@ -1095,7 +1095,7 @@ class _FlipIdCardState extends State<_FlipIdCard>
           Flexible(
             child: Text(
               r.text,
-              maxLines: 1,
+              maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: _cardInk,
