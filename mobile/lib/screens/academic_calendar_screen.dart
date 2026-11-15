@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../app/app_router.dart';
 import '../core/theme/app_theme.dart';
 import '../services/college_updates_service.dart';
 
@@ -184,6 +186,16 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
         backgroundColor: AppTheme.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.home);
+            }
+          },
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
         title: const Text(
           'Academic calendar',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
