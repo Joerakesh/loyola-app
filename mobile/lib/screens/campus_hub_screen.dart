@@ -264,7 +264,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      '\${now.day}',
+                      '${now.day}',
                       style: TextStyle(
                         color: ink,
                         fontSize: 26,
