@@ -144,7 +144,7 @@ export class AcademicCalendarService {
     const pending = inFlight.get(key);
     if (!refresh && pending) return pending;
 
-    const request = this.fetchMonth(year, monthNumber)
+    const request = this.scrapeMonth(year, monthNumber)
       .then((value) => {
         cache.set(key, { value, expiresAt: Date.now() + TTL });
         return value;
@@ -155,7 +155,7 @@ export class AcademicCalendarService {
     return request;
   }
 
-  private async fetchMonth(year: number, monthNumber: number): Promise<AcademicCalendarMonth> {
+  async scrapeMonth(year: number, monthNumber: number): Promise<AcademicCalendarMonth> {
     // Loyola navigates from the currently displayed month: list_next's month
     // is the month before the requested one, while list_prev's month is the
     // month after it. The page returns 403 for list_next requests into the past.
