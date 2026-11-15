@@ -131,13 +131,13 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
   Widget build(BuildContext context) {
     final percent = _attendancePercent;
     return Scaffold(
-      backgroundColor: AppTheme.colors.background,
+      backgroundColor: AppTheme.background,
       body: SafeArea(
         bottom: false,
         child: RefreshIndicator(
           onRefresh: _refresh,
-          color: AppTheme.colors.crimson,
-          backgroundColor: AppTheme.colors.glass,
+          color: AppTheme.crimson,
+          backgroundColor: AppTheme.glass,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
@@ -149,7 +149,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
               const Text(
                 'Your academic workspace',
                 style: TextStyle(
-                  color: AppTheme.colors.white,
+                  color: AppTheme.white,
                   fontSize: 27,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.8,
@@ -159,7 +159,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
               const Text(
                 'Everything you need to stay on top of the semester.',
                 style: TextStyle(
-                  color: AppTheme.colors.white54,
+                  color: AppTheme.white54,
                   fontSize: 13,
                   height: 1.45,
                 ),
@@ -233,7 +233,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
               Text(
                 'Attendance totals above use the available hourly history. They may not represent the complete semester total if the ERP returns only a partial history.',
                 style: TextStyle(
-                  color: AppTheme.colors.white38,
+                  color: AppTheme.white38,
                   fontSize: 11,
                   height: 1.4,
                 ),
@@ -251,12 +251,12 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
         width: 38,
         height: 38,
         decoration: BoxDecoration(
-          color: AppTheme.colors.crimson,
+          color: AppTheme.crimson,
           borderRadius: BorderRadius.circular(13),
         ),
         child: const Icon(
           Icons.school_rounded,
-          color: AppTheme.colors.background,
+          color: AppTheme.background,
           size: 21,
         ),
       ),
@@ -265,7 +265,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
         child: Text(
           'ACADEMICS',
           style: TextStyle(
-            color: AppTheme.colors.white70,
+            color: AppTheme.white70,
             fontSize: 11,
             fontWeight: FontWeight.w800,
             letterSpacing: 1.8,
@@ -277,7 +277,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
         tooltip: 'Refresh records',
         icon: Icon(
           Icons.refresh_rounded,
-          color: _refreshing ? AppTheme.colors.white38 : AppTheme.colors.white70,
+          color: _refreshing ? AppTheme.white38 : AppTheme.white70,
         ),
       ),
     ],
@@ -286,10 +286,10 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
   Widget _attendanceCard(double? percent) {
     final value = percent == null ? '—' : '${percent.toStringAsFixed(1)}%';
     final color = percent == null
-        ? AppTheme.colors.white54
+        ? AppTheme.white54
         : percent >= 75
-        ? AppTheme.colors.crimson
-        : AppTheme.colors.orange;
+        ? AppTheme.crimson
+        : AppTheme.orange;
     return Container(
       padding: const EdgeInsets.all(19),
       decoration: BoxDecoration(
@@ -299,7 +299,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
           colors: [Color(0xFF263A32), Color(0xFF17251F)],
         ),
         borderRadius: BorderRadius.circular(23),
-        border: Border.all(color: AppTheme.colors.crimson.withValues(alpha: .18)),
+        border: Border.all(color: AppTheme.crimson.withValues(alpha: .18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,7 +310,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 child: Text(
                   'ATTENDANCE SNAPSHOT',
                   style: TextStyle(
-                    color: AppTheme.colors.white70,
+                    color: AppTheme.white70,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.3,
@@ -319,7 +319,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
               ),
               Icon(
                 Icons.north_east_rounded,
-                color: AppTheme.colors.crimson,
+                color: AppTheme.crimson,
                 size: 18,
               ),
             ],
@@ -342,7 +342,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 padding: EdgeInsets.only(bottom: 7),
                 child: Text(
                   'from loaded history',
-                  style: TextStyle(color: AppTheme.colors.white54, fontSize: 11),
+                  style: TextStyle(color: AppTheme.white54, fontSize: 11),
                 ),
               ),
             ],
@@ -362,9 +362,9 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
           const SizedBox(height: 13),
           Row(
             children: [
-              _legend('$_present present', AppTheme.colors.crimson),
+              _legend('$_present present', AppTheme.crimson),
               const SizedBox(width: 18),
-              _legend('$_absent absent', AppTheme.colors.orange),
+              _legend('$_absent absent', AppTheme.orange),
               const Spacer(),
               TextButton(
                 onPressed: () => context.push(AppRoutes.attendance),
@@ -387,7 +387,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
       const SizedBox(width: 6),
       Text(
         label,
-        style: const TextStyle(color: AppTheme.colors.white70, fontSize: 11),
+        style: const TextStyle(color: AppTheme.white70, fontSize: 11),
       ),
     ],
   );
@@ -395,13 +395,13 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
   Widget _statCard(String label, String value, IconData icon) => Container(
     padding: const EdgeInsets.all(15),
     decoration: BoxDecoration(
-      color: AppTheme.colors.backgroundSoft,
+      color: AppTheme.backgroundSoft,
       borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: AppTheme.colors.outline),
+      border: Border.all(color: AppTheme.outline),
     ),
     child: Row(
       children: [
-        Icon(icon, color: AppTheme.colors.crimson, size: 19),
+        Icon(icon, color: AppTheme.crimson, size: 19),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -410,14 +410,14 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
               Text(
                 value,
                 style: const TextStyle(
-                  color: AppTheme.colors.white,
+                  color: AppTheme.white,
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               Text(
                 label,
-                style: const TextStyle(color: AppTheme.colors.white54, fontSize: 11),
+                style: const TextStyle(color: AppTheme.white54, fontSize: 11),
               ),
             ],
           ),
@@ -432,7 +432,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
       Text(
         title,
         style: const TextStyle(
-          color: AppTheme.colors.white,
+          color: AppTheme.white,
           fontSize: 17,
           fontWeight: FontWeight.w800,
         ),
@@ -440,7 +440,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
       const SizedBox(height: 3),
       Text(
         subtitle,
-        style: const TextStyle(color: AppTheme.colors.white54, fontSize: 11),
+        style: const TextStyle(color: AppTheme.white54, fontSize: 11),
       ),
     ],
   );
@@ -454,9 +454,9 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
   }) => Container(
     margin: const EdgeInsets.only(bottom: 9),
     decoration: BoxDecoration(
-      color: AppTheme.colors.backgroundSoft,
+      color: AppTheme.backgroundSoft,
       borderRadius: BorderRadius.circular(17),
-      border: Border.all(color: AppTheme.colors.outline),
+      border: Border.all(color: AppTheme.outline),
     ),
     child: ListTile(
       onTap: onTap,
@@ -465,15 +465,15 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: AppTheme.colors.crimson.withValues(alpha: .11),
+          color: AppTheme.crimson.withValues(alpha: .11),
           borderRadius: BorderRadius.circular(13),
         ),
-        child: Icon(icon, color: AppTheme.colors.crimson, size: 20),
+        child: Icon(icon, color: AppTheme.crimson, size: 20),
       ),
       title: Text(
         title,
         style: const TextStyle(
-          color: AppTheme.colors.white,
+          color: AppTheme.white,
           fontSize: 14,
           fontWeight: FontWeight.w700,
         ),
@@ -482,7 +482,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
         padding: const EdgeInsets.only(top: 4),
         child: Text(
           subtitle,
-          style: const TextStyle(color: AppTheme.colors.white54, fontSize: 11),
+          style: const TextStyle(color: AppTheme.white54, fontSize: 11),
         ),
       ),
       trailing: Row(
@@ -491,13 +491,13 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
           Text(
             trailing,
             style: const TextStyle(
-              color: AppTheme.colors.crimson,
+              color: AppTheme.crimson,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(width: 5),
-          const Icon(Icons.chevron_right_rounded, color: AppTheme.colors.white38),
+          const Icon(Icons.chevron_right_rounded, color: AppTheme.white38),
         ],
       ),
     ),
@@ -507,9 +507,9 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     margin: const EdgeInsets.only(bottom: 8),
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: AppTheme.colors.backgroundSoft,
+      color: AppTheme.backgroundSoft,
       borderRadius: BorderRadius.circular(15),
-      border: Border.all(color: AppTheme.colors.outline),
+      border: Border.all(color: AppTheme.outline),
     ),
     child: Row(
       children: [
@@ -517,12 +517,12 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: AppTheme.colors.blue.withValues(alpha: .12),
+            color: AppTheme.blue.withValues(alpha: .12),
             borderRadius: BorderRadius.circular(11),
           ),
           child: const Icon(
             Icons.book_outlined,
-            color: AppTheme.colors.blue,
+            color: AppTheme.blue,
             size: 18,
           ),
         ),
@@ -536,7 +536,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: AppTheme.colors.white,
+                  color: AppTheme.white,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -544,14 +544,14 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
               const SizedBox(height: 3),
               Text(
                 '${subject.courseCode}  •  ${subject.credits} credits',
-                style: const TextStyle(color: AppTheme.colors.white54, fontSize: 10),
+                style: const TextStyle(color: AppTheme.white54, fontSize: 10),
               ),
             ],
           ),
         ),
         Text(
           'Sem ${subject.semester}',
-          style: const TextStyle(color: AppTheme.colors.white38, fontSize: 10),
+          style: const TextStyle(color: AppTheme.white38, fontSize: 10),
         ),
       ],
     ),
@@ -564,13 +564,13 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.colors.glass,
+          color: AppTheme.glass,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppTheme.colors.outline),
+          border: Border.all(color: AppTheme.outline),
         ),
         child: const Row(
           children: [
-            Icon(Icons.calculate_rounded, color: AppTheme.colors.crimson, size: 25),
+            Icon(Icons.calculate_rounded, color: AppTheme.crimson, size: 25),
             SizedBox(width: 13),
             Expanded(
               child: Column(
@@ -579,7 +579,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                   Text(
                     'Attendance target calculator',
                     style: TextStyle(
-                      color: AppTheme.colors.white,
+                      color: AppTheme.white,
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),
@@ -587,14 +587,14 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                   SizedBox(height: 4),
                   Text(
                     'Estimate classes needed to reach your target',
-                    style: TextStyle(color: AppTheme.colors.white54, fontSize: 11),
+                    style: TextStyle(color: AppTheme.white54, fontSize: 11),
                   ),
                 ],
               ),
             ),
             Icon(
               Icons.arrow_forward_ios_rounded,
-              color: AppTheme.colors.white38,
+              color: AppTheme.white38,
               size: 14,
             ),
           ],
@@ -611,7 +611,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppTheme.colors.backgroundSoft,
+      backgroundColor: AppTheme.backgroundSoft,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
       ),
@@ -639,7 +639,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 const Text(
                   'Attendance calculator',
                   style: TextStyle(
-                    color: AppTheme.colors.white,
+                    color: AppTheme.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                   ),
@@ -648,7 +648,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 Text(
                   'Based on $present present and $absent absent sessions in loaded history.',
                   style: const TextStyle(
-                    color: AppTheme.colors.white54,
+                    color: AppTheme.white54,
                     fontSize: 12,
                   ),
                 ),
@@ -666,12 +666,12 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 if (total == 0)
                   const Text(
                     'Not enough attendance history to calculate a result.',
-                    style: TextStyle(color: AppTheme.colors.orange),
+                    style: TextStyle(color: AppTheme.orange),
                   )
                 else if (target <= 0 || target >= 100)
                   const Text(
                     'Enter a target greater than 0 and below 100.',
-                    style: TextStyle(color: AppTheme.colors.orange),
+                    style: TextStyle(color: AppTheme.orange),
                   )
                 else
                   Text(
@@ -679,7 +679,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                         ? 'You have already reached your target.'
                         : 'Attend the next $needed consecutive sessions to reach ${target.toStringAsFixed(0)}%.',
                     style: const TextStyle(
-                      color: AppTheme.colors.crimson,
+                      color: AppTheme.crimson,
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
@@ -687,7 +687,7 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
                 const SizedBox(height: 8),
                 const Text(
                   'Assumes every future scheduled session is attended and no additional absences occur.',
-                  style: TextStyle(color: AppTheme.colors.white38, fontSize: 10),
+                  style: TextStyle(color: AppTheme.white38, fontSize: 10),
                 ),
               ],
             ),
@@ -701,18 +701,18 @@ class _AcademicsHubScreenState extends State<AcademicsHubScreen> {
     margin: const EdgeInsets.only(bottom: 12),
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: AppTheme.colors.glass,
+      color: AppTheme.glass,
       borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: AppTheme.colors.outline),
+      border: Border.all(color: AppTheme.outline),
     ),
     child: Row(
       children: [
-        Icon(icon, color: AppTheme.colors.white54, size: 18),
+        Icon(icon, color: AppTheme.white54, size: 18),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             message,
-            style: const TextStyle(color: AppTheme.colors.white54, fontSize: 12),
+            style: const TextStyle(color: AppTheme.white54, fontSize: 12),
           ),
         ),
       ],
