@@ -886,15 +886,10 @@
     "/v1/college/calendar/scrape": {
       "post": {
         "tags": [
-          "Administration"
+          "Campus"
         ],
         "summary": "Scrape and version the Loyola academic calendar",
-        "description": "Requires a valid app session. Scrapes the June–May academic year, stores snapshots in MongoDB, creates a new version only when calendar content changes, and preserves the last known good snapshot when scraping fails. Optional startYear selects the academic year start.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "description": "Public endpoint; no authentication required. Scrapes the June–May academic year, stores snapshots in MongoDB, creates a new version only when calendar content changes, and preserves the last known good snapshot when scraping fails. Optional startYear selects the academic year start.",
         "requestBody": {
           "required": false,
           "content": {
@@ -916,9 +911,6 @@
         "responses": {
           "200": {
             "description": "Calendar scrape completed; per-month created, updated, unchanged and failed results returned"
-          },
-          "401": {
-            "description": "Authentication required"
           },
           "502": {
             "description": "All calendar months failed to scrape"
