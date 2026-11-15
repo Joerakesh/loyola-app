@@ -42,34 +42,35 @@ class AuthProvider extends ChangeNotifier {
     await _refreshStudentPhoto();
   }
 
-  /// Attempts to restore the previous session automatically. Returns true
-  /// when the user is in, false when the splash screen should send them to
-  /// the login screen.
+  /// Restores the account from the backend using the locally stored JWT.
   Future<bool> autoLogin() async {
-    if (await _authService.hasValidSession()) {
-      _user = await _authService.getUser();
-      _isAuthenticated = true;
-      await _loadCachedStudentPhoto();
-      if (_user?.erpLinked == true) unawaited(_refreshStudentPhoto());
-      _error = null;
-      notifyListeners();
-      return true;
-    }
-
-    // Token expired or missing: try to re-issue it with the backend.
     try {
-      _user = await _authService.refresh();
+      if (!await _authService.hasValidSession()) {
+        await _clearFailedSession();
+        return false;
+      }
+
+      _user = await _authService.getCurrentUser();
       _isAuthenticated = true;
       await _loadCachedStudentPhoto();
       if (_user?.erpLinked == true) unawaited(_refreshStudentPhoto());
       _error = null;
       notifyListeners();
       return true;
-    } catch (e) {
-      debugPrint('AUTO-LOGIN REFRESH FAILED: $e');
-      _isAuthenticated = false;
+    } catch (error) {
+      debugPrint('AUTO-LOGIN FAILED: $error');
+      await _clearFailedSession();
       return false;
     }
+  }
+
+  Future<void> _clearFailedSession() async {
+    await _authService.clearLocalSession();
+    await DataCache.instance.clearAll();
+    _user = null;
+    _studentPhotoDataUri = null;
+    _isAuthenticated = false;
+    notifyListeners();
   }
 
   /// Signs in with Google (Firebase popup) and exchanges the ID token for a
@@ -96,11 +97,17 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Signs in directly with the student's Loyola ERP credentials.
-  Future<void> loginWithErp({required String username, required String password}) async {
+  Future<void> loginWithErp({
+    required String username,
+    required String password,
+  }) async {
     _setLoading(true);
     _error = null;
     try {
-      final user = await _authService.loginWithErp(username: username, password: password);
+      final user = await _authService.loginWithErp(
+        username: username,
+        password: password,
+      );
       _user = user;
       _isAuthenticated = true;
       await _loadCachedStudentPhoto();
