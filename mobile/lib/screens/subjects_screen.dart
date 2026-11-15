@@ -119,7 +119,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               parent: AlwaysScrollableScrollPhysics(),
             ),
             slivers: [
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: GlassAppBar(
                   title: 'Subjects',
                   showBackButton: true,
