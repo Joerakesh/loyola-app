@@ -231,6 +231,20 @@ async function scrape(): Promise<CollegeUpdates> {
 }
 
 export class CollegeSiteService {
+  async scrapeForArchive(): Promise<Pick<CollegeUpdates, "announcements" | "events" | "sources" | "fetchedAt">> {
+    const homeHtml = await fetchHtml(HOME_URL);
+    const home = cheerio.load(homeHtml);
+    return {
+      announcements: scrapeAnnouncements(home),
+      events: scrapeEvents(home),
+      sources: {
+        homepage: HOME_URL,
+        calendar: CALENDAR_URL,
+      },
+      fetchedAt: new Date().toISOString(),
+    };
+  }
+
   async getUpdates(options: { refresh?: boolean } = {}): Promise<CollegeUpdates> {
     if (!options.refresh && cache && cache.expiresAt > Date.now()) {
       return cache.value;
