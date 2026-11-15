@@ -18,6 +18,7 @@ import '../services/dashboard_service.dart';
 import '../utils/announcement_links.dart';
 import '../widgets/announcement_card.dart';
 import '../widgets/app_state_views.dart';
+import '../widgets/app_card.dart';
 import '../widgets/glass_background.dart';
 import '../widgets/glass_container.dart';
 import '../widgets/section_header.dart';
@@ -405,151 +406,120 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final color = onTrack ? AppTheme.crimson : AppTheme.red;
     final hours = record?.hours.take(8).toList() ?? [];
 
-    return PressableScale(
-      scale: 0.985,
+    return AppTicketCard(
       onTap: () => context.go(AppRoutes.attendance),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color.withValues(alpha: 0.16),
-              AppTheme.glass,
-              AppTheme.backgroundSoft,
-            ],
-            stops: const [0, 0.55, 1],
-          ),
-          border: Border.all(color: color.withValues(alpha: 0.22)),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.10),
-              blurRadius: 30,
-              offset: const Offset(0, 14),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      semanticLabel: 'Overall attendance and today’s attendance hours',
+      top: Row(
+        children: [
+          ProgressRing(
+            value: hasSummary ? percentage / 100 : 0,
+            color: color,
+            size: Responsive.dp(context, 104),
+            stroke: 10,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                ProgressRing(
-                  value: hasSummary ? percentage / 100 : 0,
-                  color: color,
-                  size: Responsive.dp(context, 104),
-                  stroke: 10,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        hasSummary ? percentage.toStringAsFixed(0) : '—',
-                        style: TextStyle(
-                          color: AppTheme.white,
-                          fontSize: Responsive.sp(context, 28),
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -1,
-                          height: 1,
-                        ),
-                      ),
-                      const Text(
-                        'PERCENT',
-                        style: TextStyle(
-                          color: AppTheme.white54,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
+                Text(
+                  hasSummary ? percentage.toStringAsFixed(0) : '—',
+                  style: TextStyle(
+                    color: AppTheme.white,
+                    fontSize: Responsive.sp(context, 28),
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1,
+                    height: 1,
                   ),
                 ),
-                const SizedBox(width: 18),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Overall attendance',
-                        style: TextStyle(
-                          color: AppTheme.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Minimum requirement 75%',
-                        style: TextStyle(
-                          color: AppTheme.white54,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      if (hasSummary)
-                        StatusChip(
-                          label: onTrack ? 'On track' : 'Below target',
-                          color: color,
-                          icon: onTrack
-                              ? Icons.trending_up_rounded
-                              : Icons.warning_amber_rounded,
-                        ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppTheme.white38,
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Divider(color: AppTheme.white.withValues(alpha: 0.08), height: 1),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                const Icon(
-                  Icons.today_rounded,
-                  size: 15,
-                  color: AppTheme.white54,
-                ),
-                const SizedBox(width: 7),
                 const Text(
-                  'TODAY',
+                  'PERCENT',
                   style: TextStyle(
                     color: AppTheme.white54,
-                    fontSize: 10,
+                    fontSize: 8,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
                   ),
                 ),
-                const Spacer(),
-                Text(
+              ],
+            ),
+          ),
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Overall attendance',
+                  style: TextStyle(
+                    color: AppTheme.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Minimum requirement 75%',
+                  style: TextStyle(color: AppTheme.white54, fontSize: 12),
+                ),
+                const SizedBox(height: 12),
+                if (hasSummary)
+                  StatusChip(
+                    label: onTrack ? 'On track' : 'Below target',
+                    color: color,
+                    icon: onTrack
+                        ? Icons.trending_up_rounded
+                        : Icons.warning_amber_rounded,
+                  ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: AppTheme.white38),
+        ],
+      ),
+      bottom: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.today_rounded,
+                  size: 15, color: AppTheme.white54),
+              const SizedBox(width: 7),
+              const Text(
+                'TODAY',
+                style: TextStyle(
+                  color: AppTheme.white54,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const Spacer(),
+              Flexible(
+                child: Text(
                   _todaySummary(record),
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: AppTheme.white70,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              ],
-            ),
-            if (hours.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  for (var i = 0; i < hours.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 6),
-                    Expanded(child: _hourTile(hours[i])),
-                  ],
-                ],
               ),
             ],
+          ),
+          if (hours.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                for (var i = 0; i < hours.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  Expanded(child: _hourTile(hours[i])),
+                ],
+              ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
