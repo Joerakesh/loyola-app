@@ -93,8 +93,8 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
           bottom: false,
           child: RefreshIndicator(
             onRefresh: () => _load(refresh: true),
-            color: AppTheme.colors.crimson,
-            backgroundColor: AppTheme.colors.glass,
+            color: AppTheme.crimson,
+            backgroundColor: AppTheme.glass,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
@@ -122,7 +122,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                           'Notices',
                           firstLoad ? '—' : '${announcements.length}',
                           Icons.campaign_rounded,
-                          AppTheme.colors.crimson,
+                          AppTheme.crimson,
                           () => context.push(AppRoutes.updates),
                         ),
                       ),
@@ -132,7 +132,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                           'Events',
                           firstLoad ? '—' : '${events.length}',
                           Icons.event_available_rounded,
-                          AppTheme.colors.blue,
+                          AppTheme.blue,
                           () => context.push(AppRoutes.updates),
                         ),
                       ),
@@ -178,7 +178,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
               const Text(
                 'CAMPUS',
                 style: TextStyle(
-                  color: AppTheme.colors.white54,
+                  color: AppTheme.white54,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.6,
@@ -188,7 +188,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
               Text(
                 'Stay in the loop',
                 style: TextStyle(
-                  color: AppTheme.colors.white,
+                  color: AppTheme.white,
                   fontSize: Responsive.sp(context, 30),
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.9,
@@ -199,7 +199,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
               const Text(
                 'Notices, events and academic dates in one place.',
                 style: TextStyle(
-                  color: AppTheme.colors.white54,
+                  color: AppTheme.white54,
                   fontSize: 12.5,
                   height: 1.4,
                 ),
@@ -244,16 +244,16 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppTheme.colors.crimson.withValues(alpha: 0.18),
-              AppTheme.colors.glass,
-              AppTheme.colors.backgroundSoft,
+              AppTheme.crimson.withValues(alpha: 0.18),
+              AppTheme.glass,
+              AppTheme.backgroundSoft,
             ],
             stops: const [0, 0.55, 1],
           ),
-          border: Border.all(color: AppTheme.colors.crimson.withValues(alpha: 0.22)),
+          border: Border.all(color: AppTheme.crimson.withValues(alpha: 0.22)),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.colors.crimson.withValues(alpha: 0.08),
+              color: AppTheme.crimson.withValues(alpha: 0.08),
               blurRadius: 28,
               offset: const Offset(0, 12),
             ),
@@ -266,10 +266,10 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
               width: 62,
               height: 68,
               decoration: BoxDecoration(
-                color: AppTheme.colors.background.withValues(alpha: 0.55),
+                color: AppTheme.background.withValues(alpha: 0.55),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: AppTheme.colors.white.withValues(alpha: 0.1),
+                  color: AppTheme.white.withValues(alpha: 0.1),
                 ),
               ),
               child: Column(
@@ -278,7 +278,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     decoration: const BoxDecoration(
-                      color: AppTheme.colors.crimson,
+                      color: AppTheme.crimson,
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(17),
                       ),
@@ -287,7 +287,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                       months[now.month - 1],
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: AppTheme.colors.background,
+                        color: AppTheme.background,
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.2,
@@ -299,7 +299,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                       child: Text(
                         '${now.day}',
                         style: const TextStyle(
-                          color: AppTheme.colors.white,
+                          color: AppTheme.white,
                           fontSize: 26,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.8,
@@ -318,7 +318,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                   Text(
                     'Academic calendar',
                     style: TextStyle(
-                      color: AppTheme.colors.white,
+                      color: AppTheme.white,
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.3,
@@ -328,7 +328,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                   Text(
                     'Plan around official college dates, month by month.',
                     style: TextStyle(
-                      color: AppTheme.colors.white54,
+                      color: AppTheme.white54,
                       fontSize: 12,
                       height: 1.4,
                     ),
@@ -341,12 +341,12 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: AppTheme.colors.crimson,
+                color: AppTheme.crimson,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
                 Icons.arrow_forward_rounded,
-                color: AppTheme.colors.background,
+                color: AppTheme.background,
                 size: 18,
               ),
             ),
@@ -368,9 +368,9 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppTheme.colors.backgroundSoft,
+          color: AppTheme.backgroundSoft,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.colors.outline),
+          border: Border.all(color: AppTheme.outline),
         ),
         child: Row(
           children: [
@@ -390,7 +390,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                 Text(
                   count,
                   style: const TextStyle(
-                    color: AppTheme.colors.white,
+                    color: AppTheme.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.6,
@@ -401,7 +401,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: AppTheme.colors.white54,
+                    color: AppTheme.white54,
                     fontSize: 11.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -460,12 +460,12 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: AppTheme.colors.blue.withValues(alpha: 0.14),
+                color: AppTheme.blue.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(13),
               ),
               child: const Icon(
                 Icons.event_rounded,
-                color: AppTheme.colors.blue,
+                color: AppTheme.blue,
                 size: 21,
               ),
             ),
@@ -479,7 +479,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: AppTheme.colors.white,
+                      color: AppTheme.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       height: 1.3,
@@ -507,14 +507,14 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
 
   Widget _meta(IconData icon, String text) => Row(
     children: [
-      Icon(icon, size: 13, color: AppTheme.colors.white38),
+      Icon(icon, size: 13, color: AppTheme.white38),
       const SizedBox(width: 6),
       Expanded(
         child: Text(
           text,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: AppTheme.colors.white54, fontSize: 11.5),
+          style: const TextStyle(color: AppTheme.white54, fontSize: 11.5),
         ),
       ),
     ],
@@ -544,14 +544,14 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
               children: [
                 const Icon(
                   Icons.cloud_off_rounded,
-                  color: AppTheme.colors.white54,
+                  color: AppTheme.white54,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
                     'College updates could not be loaded.',
-                    style: TextStyle(color: AppTheme.colors.white54, fontSize: 13),
+                    style: TextStyle(color: AppTheme.white54, fontSize: 13),
                   ),
                 ),
                 TextButton(
@@ -581,14 +581,14 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
         const SizedBox(height: 14),
         _toolTile(
           icon: Icons.calendar_month_rounded,
-          color: AppTheme.colors.orange,
+          color: AppTheme.orange,
           title: 'Academic calendar',
           subtitle: 'Official dates, month by month',
           onTap: () => context.push(AppRoutes.calendar),
         ),
         _toolTile(
           icon: Icons.notifications_active_rounded,
-          color: AppTheme.colors.purple,
+          color: AppTheme.purple,
           title: 'All announcements',
           subtitle: 'Notices, circulars and documents',
           onTap: () => context.push(AppRoutes.updates),
@@ -612,9 +612,9 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppTheme.colors.backgroundSoft,
+            color: AppTheme.backgroundSoft,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppTheme.colors.outline),
+            border: Border.all(color: AppTheme.outline),
           ),
           child: Row(
             children: [
@@ -635,7 +635,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                     Text(
                       title,
                       style: const TextStyle(
-                        color: AppTheme.colors.white,
+                        color: AppTheme.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -644,14 +644,14 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
                     Text(
                       subtitle,
                       style: const TextStyle(
-                        color: AppTheme.colors.white54,
+                        color: AppTheme.white54,
                         fontSize: 11.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: AppTheme.colors.white38),
+              const Icon(Icons.chevron_right_rounded, color: AppTheme.white38),
             ],
           ),
         ),
@@ -669,7 +669,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
       trailing: TextButton(
         onPressed: onAll,
         style: TextButton.styleFrom(
-          foregroundColor: AppTheme.colors.crimson,
+          foregroundColor: AppTheme.crimson,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           visualDensity: VisualDensity.compact,
         ),
@@ -689,12 +689,12 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
     padding: const EdgeInsets.all(16),
     child: Row(
       children: [
-        Icon(icon, color: AppTheme.colors.white54, size: 19),
+        Icon(icon, color: AppTheme.white54, size: 19),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             message,
-            style: const TextStyle(color: AppTheme.colors.white54, fontSize: 12.5),
+            style: const TextStyle(color: AppTheme.white54, fontSize: 12.5),
           ),
         ),
       ],
@@ -709,7 +709,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
           'A verified weekly class timetable is not connected yet, so no sample classes are shown.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AppTheme.colors.white38,
+            color: AppTheme.white38,
             fontSize: 11,
             height: 1.45,
           ),
@@ -719,7 +719,7 @@ class _CampusHubScreenState extends State<CampusHubScreen> {
           Text(
             'Last synced: $fetchedAt',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppTheme.colors.white30, fontSize: 10),
+            style: const TextStyle(color: AppTheme.white30, fontSize: 10),
           ),
         ],
       ],
@@ -777,14 +777,14 @@ class _RefreshButtonState extends State<_RefreshButton>
         height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppTheme.colors.backgroundSoft,
-          border: Border.all(color: AppTheme.colors.outline),
+          color: AppTheme.backgroundSoft,
+          border: Border.all(color: AppTheme.outline),
         ),
         child: RotationTransition(
           turns: _c,
           child: const Icon(
             Icons.refresh_rounded,
-            color: AppTheme.colors.white70,
+            color: AppTheme.white70,
             size: 20,
           ),
         ),
