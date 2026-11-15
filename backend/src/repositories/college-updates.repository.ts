@@ -55,6 +55,22 @@ export class CollegeUpdatesRepository {
     return { latest, versions };
   }
 
+  async acquireScrapeSlot(cooldownMs = 5 * 60_000): Promise<boolean> {
+    const db = await getDb();
+    const locks = db.collection("college_updates_scrape_locks");
+    const now = new Date();
+    await locks.updateOne(
+      { _id: "loyola-homepage" },
+      { $setOnInsert: { nextAllowedAt: new Date(0) } },
+      { upsert: true },
+    );
+    const result = await locks.updateOne(
+      { _id: "loyola-homepage", nextAllowedAt: { $lte: now } },
+      { $set: { nextAllowedAt: new Date(now.getTime() + cooldownMs), lastStartedAt: now } },
+    );
+    return result.modifiedCount === 1;
+  }
+
   async getLatest(): Promise<CollegeUpdatesSnapshot | null> {
     const { latest } = await this.collections();
     const doc = await latest.findOne({ key: "loyola-homepage" });
