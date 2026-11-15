@@ -18,7 +18,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   static const _background = Color(0xFF101923);
-  static const _surface = Color(0xFF192633);
   static const _muted = Color(0xFF9AA9B7);
   static const _accent = Color(0xFFB6C7A5);
 
