@@ -380,11 +380,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   _BackRow _toBackRow(_Field f) => _BackRow(
+    key: f.key,
     label: f.label,
-    text: _text(f).replaceAll('\n', ', '),
+    text: f.value.replaceAll('\n', ', '),
     sensitive: f.sensitive,
-    revealed: _shown(f),
-    onToggle: () => _toggle(f.key),
   );
 
   // ---------------------------------------------------------------------------
@@ -772,18 +771,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 // =============================================================================
 class _BackRow {
   const _BackRow({
+    required this.key,
     required this.label,
     required this.text,
     required this.sensitive,
-    required this.revealed,
-    required this.onToggle,
   });
 
+  final String key;
   final String label;
   final String text;
   final bool sensitive;
-  final bool revealed;
-  final VoidCallback onToggle;
 }
 
 class _FlipIdCard extends StatefulWidget {
@@ -805,6 +802,24 @@ class _FlipIdCard extends StatefulWidget {
 
 class _FlipIdCardState extends State<_FlipIdCard>
     with SingleTickerProviderStateMixin {
+  /// Visibility state belongs to the ID card and is independent of profile details.
+  final Set<String> _revealedOnCard = {};
+
+  bool _isRevealed(_BackRow? row) =>
+      row != null && (!row.sensitive || _revealedOnCard.contains(row.key));
+
+  String _displayText(_BackRow row) =>
+      _isRevealed(row) ? row.text : _mask(row.text);
+
+  void _toggleCardField(_BackRow row) {
+    if (!row.sensitive) return;
+    setState(() {
+      if (!_revealedOnCard.add(row.key)) {
+        _revealedOnCard.remove(row.key);
+      }
+    });
+  }
+
   // Designed at a fixed logical size, scaled to fit the screen width.
   static const double _w = 340;
   static const double _h = 214;
@@ -988,7 +1003,7 @@ class _FlipIdCardState extends State<_FlipIdCard>
                       const SizedBox(width: 5),
                       Flexible(
                         child: Text(
-                          email.text,
+                          _displayText(email),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -1001,11 +1016,11 @@ class _FlipIdCardState extends State<_FlipIdCard>
                       if (email.sensitive)
                         GestureDetector(
                           behavior: HitTestBehavior.opaque,
-                          onTap: email.onToggle,
+                          onTap: () => _toggleCardField(email),
                           child: Padding(
                             padding: const EdgeInsets.only(left: 6),
                             child: Icon(
-                              email.revealed
+                              _isRevealed(email)
                                   ? Icons.visibility_off_rounded
                                   : Icons.visibility_rounded,
                               size: 14,
@@ -1112,7 +1127,7 @@ class _FlipIdCardState extends State<_FlipIdCard>
           const Text(': ', style: TextStyle(color: _cardInk, fontSize: 10.5)),
           Flexible(
             child: Text(
-              r.text,
+              _displayText(r),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -1126,11 +1141,11 @@ class _FlipIdCardState extends State<_FlipIdCard>
           if (r.sensitive)
             GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: r.onToggle,
+              onTap: () => _toggleCardField(r),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Icon(
-                  r.revealed
+                  _isRevealed(r)
                       ? Icons.visibility_off_rounded
                       : Icons.visibility_rounded,
                   size: 13,
