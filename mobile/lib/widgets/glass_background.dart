@@ -50,7 +50,7 @@ class GlassBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF111920), AppTheme.colors.background, Color(0xFF0B1014)],
+          colors: [Color(0xFF111920), AppTheme.background, Color(0xFF0B1014)],
           stops: [0, .52, 1],
         ),
       ),
