@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -21,52 +23,36 @@ class AuthService {
       );
 
       final data = response.data;
-
       if (data['status'] != 'success') {
         throw Exception(data['message'] ?? 'Login failed');
       }
 
       final authentication = data['authentication'];
-
-      if (authentication == null) {
-        throw Exception('Authentication data missing');
-      }
-
-      final token = authentication['token'];
-
-      if (token == null) {
+      final token = authentication?['token'];
+      if (token is! String || token.isEmpty) {
         throw Exception('Token missing from response');
       }
 
       await _storage.saveToken(token);
-
-      final expiresAt = authentication['expiresAt'];
-
-      if (expiresAt != null) {
-        await _storage.saveExpiresAt(expiresAt);
-      }
-
-      final user = AuthUser.fromJson(data['user'] as Map<String, dynamic>);
-      await _storage.saveUser(user);
-
-      return user;
+      return AuthUser.fromJson(data['user'] as Map<String, dynamic>);
     } on DioException catch (error) {
       debugPrint('HTTP STATUS: ${error.response?.statusCode}');
       debugPrint('HTTP RESPONSE: ${error.response?.data}');
       debugPrint('DIO ERROR: $error');
 
       final responseData = error.response?.data;
-
       if (responseData is Map && responseData['message'] != null) {
         throw Exception(responseData['message']);
       }
-
       throw Exception('Unable to connect to Loyola servers');
     }
   }
 
   /// Exchanges Loyola ERP credentials for a backend session (JWT).
-  Future<AuthUser> loginWithErp({required String username, required String password}) async {
+  Future<AuthUser> loginWithErp({
+    required String username,
+    required String password,
+  }) async {
     try {
       final response = await _apiClient.dio.post(
         ApiConstants.erpLogin,
@@ -76,16 +62,15 @@ class AuthService {
       if (data['status'] != 'success') {
         throw Exception(data['message'] ?? 'ERP login failed');
       }
+
       final authentication = data['authentication'];
-      if (authentication == null || authentication['token'] == null) {
+      final token = authentication?['token'];
+      if (token is! String || token.isEmpty) {
         throw Exception('Authentication token missing from response');
       }
-      await _storage.saveToken(authentication['token']);
-      final expiresAt = authentication['expiresAt'];
-      if (expiresAt != null) await _storage.saveExpiresAt(expiresAt);
-      final user = AuthUser.fromJson(data['user'] as Map<String, dynamic>);
-      await _storage.saveUser(user);
-      return user;
+
+      await _storage.saveToken(token);
+      return AuthUser.fromJson(data['user'] as Map<String, dynamic>);
     } on DioException catch (error) {
       final responseData = error.response?.data;
       if (responseData is Map && responseData['message'] != null) {
@@ -95,6 +80,19 @@ class AuthService {
     }
   }
 
+  /// Restores the current account from the backend. The server resolves the
+  /// user from the authenticated JWT, so no duplicate user snapshot is stored.
+  Future<AuthUser> getCurrentUser() async {
+    final response = await _apiClient.dio.get(ApiConstants.me);
+    final data = response.data;
+
+    if (data is! Map || data['status'] != 'success' || data['user'] is! Map) {
+      throw Exception('Unable to restore account');
+    }
+
+    return AuthUser.fromJson(Map<String, dynamic>.from(data['user'] as Map));
+  }
+
   /// Fetches the student's ERP photo using the authenticated backend session.
   Future<String?> fetchStudentPhoto() async {
     final response = await _apiClient.dio.get(ApiConstants.studentPhoto);
@@ -102,7 +100,9 @@ class AuthService {
 
     if (data is! Map || data['status'] != 'success') {
       throw Exception(
-        data is Map ? data['message'] ?? 'Unable to fetch student photo' : 'Invalid student photo response',
+        data is Map
+            ? data['message'] ?? 'Unable to fetch student photo'
+            : 'Invalid student photo response',
       );
     }
 
@@ -115,57 +115,24 @@ class AuthService {
     return photo;
   }
 
-  /// Re-issues the session JWT using the existing (still valid) token.
-  Future<AuthUser?> refresh() async {
-    final token = await _storage.getToken();
-
-    if (token == null || token.isEmpty) {
-      throw Exception('No session to refresh');
-    }
-
-    final response = await _apiClient.dio.post(ApiConstants.refresh);
-
-    final data = response.data;
-
-    if (data['status'] != 'success') {
-      throw Exception(data['message'] ?? 'Refresh failed');
-    }
-
-    final authentication = data['authentication'];
-    final newToken = authentication['token'];
-
-    if (newToken == null) {
-      throw Exception('Token missing from refresh response');
-    }
-
-    await _storage.saveToken(newToken);
-
-    final expiresAt = authentication['expiresAt'];
-
-    if (expiresAt != null) {
-      await _storage.saveExpiresAt(expiresAt);
-    }
-
-    final storedUser = await _storage.getUser();
-    return storedUser;
-  }
-
-  Future<AuthUser?> getUser() => _storage.getUser();
-
+  /// Checks the JWT's standard exp claim; no separate expiry value is needed.
   Future<bool> hasValidSession() async {
     final token = await _storage.getToken();
-    final expiresAt = await _storage.getExpiresAt();
+    if (token == null || token.isEmpty) return false;
 
-    if (token == null || token.isEmpty) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return false;
+
+      final normalized = base64Url.normalize(parts[1]);
+      final payload = jsonDecode(utf8.decode(base64Url.decode(normalized)));
+      if (payload is! Map || payload['exp'] is! num) return false;
+
+      final expiresAtMs = (payload['exp'] as num).toInt() * 1000;
+      return expiresAtMs > DateTime.now().millisecondsSinceEpoch;
+    } catch (_) {
       return false;
     }
-
-    if (expiresAt != null &&
-        expiresAt < DateTime.now().millisecondsSinceEpoch) {
-      return false;
-    }
-
-    return true;
   }
 
   Future<void> logout() async {
@@ -177,4 +144,7 @@ class AuthService {
       await _storage.clear();
     }
   }
+
+  /// Clears the local JWT after a failed session restoration.
+  Future<void> clearLocalSession() => _storage.clear();
 }
