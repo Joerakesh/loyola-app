@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../app/app_router.dart';
@@ -24,49 +25,77 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with TickerProviderStateMixin {
-  static const Duration _minimumShowTime = Duration(milliseconds: 650);
+    with SingleTickerProviderStateMixin {
+  // Long enough for the entrance to finish before we navigate.
+  static const Duration _minimumShowTime = Duration(milliseconds: 1100);
 
-  late final AnimationController _entranceController;
-  late final Animation<double> _logoScale;
-  late final Animation<double> _textFade;
-  late final Animation<Offset> _textSlide;
+  // The college's own typographic voice for the wordmark and motto.
+  static const _serif = TextStyle(
+    fontFamily: 'serif',
+    fontFamilyFallback: ['Georgia', 'Times New Roman'],
+  );
+
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  );
+
+  // One orchestrated sequence: light blooms, crest settles, name, motto.
+  late final Animation<double> _bloom = CurvedAnimation(
+    parent: _c,
+    curve: const Interval(0, .6, curve: Curves.easeOutCubic),
+  );
+  late final Animation<double> _crest = CurvedAnimation(
+    parent: _c,
+    curve: const Interval(.08, .55, curve: Curves.easeOutCubic),
+  );
+  late final Animation<double> _name = CurvedAnimation(
+    parent: _c,
+    curve: const Interval(.40, .80, curve: Curves.easeOutCubic),
+  );
+  late final Animation<double> _motto = CurvedAnimation(
+    parent: _c,
+    curve: const Interval(.60, 1, curve: Curves.easeOut),
+  );
+
+  bool _started = false;
 
   @override
   void initState() {
     super.initState();
-    _entranceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 750),
-    );
-    _logoScale = CurvedAnimation(
-      parent: _entranceController,
-      curve: const Interval(0, .6, curve: Curves.easeOutCubic),
-    );
-    _textFade = CurvedAnimation(
-      parent: _entranceController,
-      curve: const Interval(.45, 1, curve: Curves.easeOut),
-    );
-    _textSlide = Tween<Offset>(
-      begin: const Offset(0, .15),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(.45, 1, curve: Curves.easeOutCubic),
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: AppTheme.background,
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
     );
-
-    _entranceController.forward();
     _bootstrap();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    // Respect the system "reduce motion" setting.
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _c.value = 1;
+    } else {
+      _c.forward();
+    }
+  }
+
+  @override
   void dispose() {
-    _entranceController.dispose();
+    _c.dispose();
     super.dispose();
   }
 
+  // ---------------------------------------------------------------------------
+  // BOOTSTRAP (same logic as before)
+  // ---------------------------------------------------------------------------
   Future<void> _bootstrap() async {
     final start = DateTime.now();
     final logged = await widget.authProvider.autoLogin();
@@ -89,165 +118,219 @@ class _SplashScreenState extends State<SplashScreen>
     final destination = !logged
         ? AppRoutes.login
         : widget.authProvider.requiresErpSetup
-            ? AppRoutes.erpSetup
-            : AppRoutes.home;
+        ? AppRoutes.erpSetup
+        : AppRoutes.home;
     context.go(destination);
   }
 
+  // ---------------------------------------------------------------------------
+  // BUILD
+  // ---------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF111920),
-              AppTheme.background,
-              Color(0xFF0B1014),
-            ],
-          ),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final height = constraints.maxHeight;
-            final compact = width < 360 || height < 560;
-            final orb = (width * .55).clamp(220.0, 420.0);
-            final logo = compact ? (width * .30).clamp(84.0, 130.0) : 130.0;
+      backgroundColor: AppTheme.background,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final h = constraints.maxHeight;
+          final compact = w < 360 || h < 560;
+          final crest = compact ? (w * .28).clamp(76.0, 110.0) : 116.0;
+          final bloom = (w * 1.25).clamp(320.0, 620.0);
 
-            return Stack(
-              children: [
-                Positioned(
-                  top: -orb * .35,
-                  right: -orb * .25,
-                  child: Container(
-                    width: orb,
-                    height: orb,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0x1FB9F36B),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: -orb * .38,
-                  left: -orb * .30,
-                  child: Container(
-                    width: orb * 1.2,
-                    height: orb * 1.2,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0x1472E4D2),
-                    ),
-                  ),
-                ),
-                Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(vertical: 32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ScaleTransition(
-                          scale: _logoScale,
-                          child: Container(
-                            width: logo,
-                            height: logo,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppTheme.glass,
-                              border: Border.all(
-                                color: AppTheme.crimson,
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppTheme.crimson.withValues(alpha: .16),
-                                  blurRadius: 22,
-                                  spreadRadius: 1,
-                                ),
+          return AnimatedBuilder(
+            animation: _c,
+            builder: (context, _) {
+              return Stack(
+                children: [
+                  // The one light source: "Luceat lux vestra", let your light shine.
+                  Align(
+                    alignment: const Alignment(0, -0.22),
+                    child: Opacity(
+                      opacity: _bloom.value,
+                      child: Transform.scale(
+                        scale: .6 + .4 * _bloom.value,
+                        child: Container(
+                          width: bloom,
+                          height: bloom,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                AppTheme.crimson.withValues(alpha: .20),
+                                AppTheme.gold.withValues(alpha: .07),
+                                Colors.transparent,
                               ],
-                            ),
-                            child: ClipOval(
-                              child: Image.asset(
-                                'assets/images/loyola_logo.png',
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Icon(
-                                  Icons.school_rounded,
-                                  size: logo * .43,
-                                  color: AppTheme.white,
-                                ),
-                              ),
+                              stops: const [0, .45, 1],
                             ),
                           ),
                         ),
-                        SizedBox(height: compact ? height * .04 : 48),
-                        FadeTransition(
-                          opacity: _textFade,
-                          child: SlideTransition(
-                            position: _textSlide,
+                      ),
+                    ),
+                  ),
+
+                  // Crest, name and motto
+                  Align(
+                    alignment: const Alignment(0, -0.12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Opacity(
+                            opacity: _crest.value,
+                            child: Transform.scale(
+                              scale: .9 + .1 * _crest.value,
+                              child: _crestTile(crest),
+                            ),
+                          ),
+                          SizedBox(height: compact ? 22 : 30),
+                          Opacity(
+                            opacity: _name.value,
+                            child: Transform.translate(
+                              offset: Offset(0, (1 - _name.value) * 12),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Loyola College',
+                                    textAlign: TextAlign.center,
+                                    style: _serif.copyWith(
+                                      color: AppTheme.white,
+                                      fontSize: Responsive.sp(context, 32),
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: -0.4,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Chennai',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: AppTheme.white54,
+                                      fontSize: Responsive.sp(context, 14),
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: .6,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: compact ? 18 : 26),
+                          Opacity(
+                            opacity: _motto.value,
                             child: Column(
                               children: [
                                 Text(
-                                  'LOYOLA COLLEGE',
+                                  'Luceat lux vestra',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: AppTheme.white,
-                                    fontSize: Responsive.sp(context, 26),
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 4.5,
+                                  style: _serif.copyWith(
+                                    color: AppTheme.crimson.withValues(
+                                      alpha: .92,
+                                    ),
+                                    fontSize: Responsive.sp(context, 16),
+                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 4),
                                 Text(
-                                  'C H E N N A I',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: AppTheme.gold,
-                                    fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 8,
-                                  ),
-                                ),
-                                SizedBox(height: Responsive.dp(context, 14)),
-                                Text(
-                                  'Autonomous · Affiliated to University of Madras',
+                                  'Let your light shine',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: AppTheme.white38,
-                                    fontSize: Responsive.sp(context, 11),
-                                    letterSpacing: .5,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: Responsive.sp(context, 11.5),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                        SizedBox(height: compact ? height * .03 : 50),
-                        FadeTransition(
-                          opacity: _textFade,
-                          child: SizedBox(
-                            width: 76,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: const LinearProgressIndicator(
-                                minHeight: 4,
-                                backgroundColor: AppTheme.outline,
-                                color: AppTheme.gold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+
+                  // Footer: honest status, thin progress line
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 36),
+                        child: Opacity(
+                          opacity: _motto.value,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 56,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(2),
+                                  child: const LinearProgressIndicator(
+                                    minHeight: 2,
+                                    backgroundColor: Color(0x1FFFFFFF),
+                                    color: AppTheme.crimson,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Signing you in',
+                                style: TextStyle(
+                                  color: AppTheme.white38,
+                                  fontSize: 12,
+                                  letterSpacing: .2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  /// Crest on a soft disc with the same top-lit hairline used by the cards
+  /// and the navigation dock.
+  Widget _crestTile(double size) {
+    return Container(
+      width: size,
+      height: size,
+      padding: const EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withValues(alpha: .30),
+            Colors.white.withValues(alpha: .06),
+          ],
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppTheme.backgroundSoft,
+        ),
+        padding: EdgeInsets.all(size * .16),
+        child: Image.asset(
+          'assets/images/loyola_logo.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.school_rounded,
+            size: size * .42,
+            color: AppTheme.white,
+          ),
         ),
       ),
     );
