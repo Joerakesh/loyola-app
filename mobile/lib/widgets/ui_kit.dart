@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 
 /// Fade + slide-up entrance. Use [delay] to stagger a column of sections.
 class FadeSlideIn extends StatefulWidget {
@@ -222,8 +222,8 @@ class _SkeletonBoxState extends State<SkeletonBox>
         width: widget.width,
         decoration: BoxDecoration(
           color: Color.lerp(
-            AppColors.glass,
-            AppColors.outline,
+            AppTheme.colors.glass,
+            AppTheme.colors.outline,
             Curves.easeInOut.transform(_c.value),
           ),
           borderRadius: BorderRadius.circular(widget.radius),
