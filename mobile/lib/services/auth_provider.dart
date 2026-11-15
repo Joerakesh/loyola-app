@@ -86,7 +86,7 @@ class AuthProvider extends ChangeNotifier {
   String _friendly(Object e)=>e.toString().replaceFirst('Exception: ','');
   Future<void> logout() async {
     await _authService.logout();await _googleAuthService.signOut();await DataCache.instance.clearAll();
-    _user=null;_studentPhotoDataUri=null;_isAuthenticated=false;notifyListeners();
+    _isLoading=false;_error=null;_user=null;_studentPhotoDataUri=null;_isAuthenticated=false;notifyListeners();
   }
   Future<void> _loadCachedStudentPhoto() async {
     final c=await DataCache.instance.load(CacheKeys.studentPhoto);
