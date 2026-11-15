@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 
 class GlassGlow {
   const GlassGlow({
@@ -50,7 +50,7 @@ class GlassBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF111920), AppColors.background, Color(0xFF0B1014)],
+          colors: [Color(0xFF111920), AppTheme.colors.background, Color(0xFF0B1014)],
           stops: [0, .52, 1],
         ),
       ),
