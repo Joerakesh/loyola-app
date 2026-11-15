@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 import '../core/theme/responsive.dart';
 import '../models/marks_model.dart';
 import '../services/marks_service.dart';
@@ -85,8 +85,8 @@ class _MarksScreenState extends State<MarksScreen> {
       body: GlassBackground(
         child: RefreshIndicator(
           onRefresh: _refreshData,
-          color: AppColors.white,
-          backgroundColor: AppColors.glass,
+          color: AppTheme.colors.white,
+          backgroundColor: AppTheme.colors.glass,
           // We move the AnimatedSwitcher to the root of the scroll view
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
@@ -201,16 +201,16 @@ class _MarksScreenState extends State<MarksScreen> {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
-            color: selected ? AppColors.crimson : AppColors.backgroundSoft,
+            color: selected ? AppTheme.colors.crimson : AppTheme.colors.backgroundSoft,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? AppColors.crimson : AppColors.outline,
+              color: selected ? AppTheme.colors.crimson : AppTheme.colors.outline,
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? AppColors.background : AppColors.white70,
+              color: selected ? AppTheme.colors.background : AppTheme.colors.white70,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
@@ -253,13 +253,13 @@ class _MarksScreenState extends State<MarksScreen> {
           Icon(
             Icons.leaderboard_rounded,
             size: 48,
-            color: AppColors.white.withValues(alpha: 0.2),
+            color: AppTheme.colors.white.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 16),
           Text(
             'No marks available yet',
             style: TextStyle(
-              color: AppColors.white.withValues(alpha: 0.5),
+              color: AppTheme.colors.white.withValues(alpha: 0.5),
               fontSize: 16,
             ),
           ),
@@ -280,7 +280,7 @@ class _MarksScreenState extends State<MarksScreen> {
           Text(
             '${course.courseCode} - ${course.courseName}',
             style: TextStyle(
-              color: AppColors.white,
+              color: AppTheme.colors.white,
               fontWeight: FontWeight.bold,
               fontSize: Responsive.sp(context, 15),
               letterSpacing: 0.3,
@@ -292,21 +292,21 @@ class _MarksScreenState extends State<MarksScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.white.withValues(alpha: 0.05),
+                color: AppTheme.colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Row(
                 children: [
                   Icon(
                     Icons.pending_actions_rounded,
-                    color: AppColors.white54,
+                    color: AppTheme.colors.white54,
                     size: 20,
                   ),
                   SizedBox(width: 12),
                   Text(
                     'Marks pending',
                     style: TextStyle(
-                      color: AppColors.white54,
+                      color: AppTheme.colors.white54,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -338,7 +338,7 @@ class _MarksScreenState extends State<MarksScreen> {
                 const Text(
                   'Total Score',
                   style: TextStyle(
-                    color: AppColors.white54,
+                    color: AppTheme.colors.white54,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -349,16 +349,16 @@ class _MarksScreenState extends State<MarksScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.crimson.withValues(alpha: 0.15),
+                    color: AppTheme.colors.crimson.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppColors.crimson.withValues(alpha: 0.3),
+                      color: AppTheme.colors.crimson.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
                     '${course.totals?.outOf100.toStringAsFixed(1) ?? '--'} / 100',
                     style: const TextStyle(
-                      color: AppColors.crimson,
+                      color: AppTheme.colors.crimson,
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
                       letterSpacing: 0.5,
@@ -382,10 +382,10 @@ class _MarksScreenState extends State<MarksScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.05),
+        color: AppTheme.colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.white.withValues(alpha: 0.1),
+          color: AppTheme.colors.white.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -397,7 +397,7 @@ class _MarksScreenState extends State<MarksScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: AppColors.white54,
+              color: AppTheme.colors.white54,
               fontSize: 11,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -407,7 +407,7 @@ class _MarksScreenState extends State<MarksScreen> {
           Text(
             hasMark ? '${component.mark}' : '--',
             style: TextStyle(
-              color: hasMark ? AppColors.white : AppColors.white38,
+              color: hasMark ? AppTheme.colors.white : AppTheme.colors.white38,
               fontWeight: FontWeight.w800,
               fontSize: 18,
             ),
@@ -416,7 +416,7 @@ class _MarksScreenState extends State<MarksScreen> {
           Text(
             '/ ${component.maxMark.toInt()}',
             style: TextStyle(
-              color: AppColors.white.withValues(alpha: 0.3),
+              color: AppTheme.colors.white.withValues(alpha: 0.3),
               fontSize: 10,
             ),
           ),
