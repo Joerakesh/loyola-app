@@ -8,12 +8,14 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.actions,
     this.showBackButton = true,
+    this.onBackPressed,
     this.bottomPadding = false,
   });
 
   final String title;
   final List<Widget>? actions;
   final bool showBackButton;
+  final VoidCallback? onBackPressed;
   final bool bottomPadding;
 
   @override
@@ -35,7 +37,7 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               if (showBackButton) ...[
-                BackButton(color: AppTheme.white),
+                BackButton(color: AppTheme.white, onPressed: onBackPressed),
                 const SizedBox(width: 8),
               ],
               Expanded(
