@@ -14,18 +14,26 @@ const _itemGap = 4.0;
 const _motion = Duration(milliseconds: 420);
 const _curve = Curves.easeOutCubic;
 
-typedef _NavItem = ({
-  IconData icon,
-  IconData selectedIcon,
-  String label,
-});
+typedef _NavItem = ({IconData icon, IconData selectedIcon, String label});
 
 const List<_NavItem> _navItems = [
   (icon: Icons.home_outlined, selectedIcon: Icons.home_rounded, label: 'Home'),
-  (icon: Icons.school_outlined, selectedIcon: Icons.school_rounded, label: 'Academics'),
-  (icon: Icons.explore_outlined, selectedIcon: Icons.explore_rounded, label: 'Campus'),
-  (icon: Icons.person_outline_rounded, selectedIcon: Icons.person_rounded, label: 'Profile'),
-  (icon: Icons.settings_outlined, selectedIcon: Icons.settings_rounded, label: 'Settings'),
+  (
+    icon: Icons.school_outlined,
+    selectedIcon: Icons.school_rounded,
+    label: 'Academics',
+  ),
+  (
+    icon: Icons.explore_outlined,
+    selectedIcon: Icons.explore_rounded,
+    label: 'Campus',
+  ),
+  (
+    icon: Icons.person_outline_rounded,
+    selectedIcon: Icons.person_rounded,
+    label: 'Profile',
+  ),
+  // (icon: Icons.settings_outlined, selectedIcon: Icons.settings_rounded, label: 'Settings'),
 ];
 
 class AppShell extends StatelessWidget {
@@ -38,7 +46,9 @@ class AppShell extends StatelessWidget {
     return Scaffold(
       extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: _buildDock(context),
+      bottomNavigationBar: navigationShell.currentIndex == 4
+          ? null
+          : _buildDock(context),
     );
   }
 
@@ -82,10 +92,7 @@ class AppShell extends StatelessWidget {
           compact ? 8 : 12,
         ),
         child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: outer,
-            boxShadow: [shadow],
-          ),
+          decoration: BoxDecoration(borderRadius: outer, boxShadow: [shadow]),
           child: Container(
             padding: const EdgeInsets.all(1),
             decoration: BoxDecoration(

@@ -176,7 +176,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   subtitle: 'App preferences and appearance',
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    // Add your settings navigation here.
+                    context.go(AppRoutes.settings);
                   },
                 ),
 
@@ -226,34 +226,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }) {
     final itemColor = color ?? AppTheme.white;
 
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      leading: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: itemColor.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(14),
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        leading: Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: itemColor.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Icon(icon, color: itemColor, size: 21),
         ),
-        child: Icon(icon, color: itemColor, size: 21),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: itemColor,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
+        title: Text(
+          title,
+          style: TextStyle(
+            color: itemColor,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(color: AppTheme.white54, fontSize: 11),
-      ),
-      trailing: const Icon(
-        Icons.chevron_right_rounded,
-        color: AppTheme.white38,
-        size: 20,
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(color: AppTheme.white54, fontSize: 11),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          color: AppTheme.white38,
+          size: 20,
+        ),
       ),
     );
   }

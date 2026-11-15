@@ -1,0 +1,8 @@
+.git
+mobile/
+**/node_modules/
+**/.dart_tool/
+**/build/
+**/.gradle/
+**/.idea/
+**/coverage/

@@ -29,3 +29,5 @@ backend/firebase-service-account.json
 firebase-service-account.json
 
 google-services.json
+.vercel
+.env*

@@ -1,70 +1,732 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import '../app/app_router.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/responsive.dart';
 import '../services/auth_provider.dart';
+import '../widgets/app_card.dart';
+import '../widgets/glass_background.dart';
+import '../widgets/ui_kit.dart';
 
-class AccountSettingsScreen extends StatefulWidget {
- const AccountSettingsScreen({super.key});
- @override State<AccountSettingsScreen> createState()=>_AccountSettingsScreenState();
+class AccountSettingsScreen extends StatelessWidget {
+  const AccountSettingsScreen({super.key});
+
+  // ---------------------------------------------------------------------------
+  // ACTIONS (same behaviour as before)
+  // ---------------------------------------------------------------------------
+  void _snack(BuildContext context, String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<bool> _confirm(
+    BuildContext context, {
+    required String title,
+    required String body,
+    required String action,
+  }) async {
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        backgroundColor: AppTheme.backgroundSoft,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: AppTheme.white,
+            fontSize: 19,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Text(
+          body,
+          style: const TextStyle(
+            color: AppTheme.white70,
+            fontSize: 14,
+            height: 1.45,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(c, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(action),
+          ),
+        ],
+      ),
+    );
+    return yes == true;
+  }
+
+  Future<void> _unlinkErp(BuildContext context) async {
+    final yes = await _confirm(
+      context,
+      title: 'Unlink ERP account?',
+      body:
+          'Attendance, marks and other academic data will stop loading until you connect your ERP credentials again.',
+      action: 'Unlink',
+    );
+    if (!yes || !context.mounted) return;
+    final auth = context.read<AuthProvider>();
+    final ok = await auth.unbindErp();
+    if (!context.mounted) return;
+    if (ok) {
+      context.go(AppRoutes.erpSetup);
+    } else {
+      _snack(context, auth.error ?? 'Unable to unlink ERP');
+    }
+  }
+
+  Future<void> _revokeGoogle(BuildContext context) async {
+    final yes = await _confirm(
+      context,
+      title: 'Revoke Google sign-in?',
+      body:
+          'This removes Google sign-in from this account and signs you out. You can still get back in with your ERP credentials. Signing in with a different Google account creates a separate app account.',
+      action: 'Revoke',
+    );
+    if (!yes || !context.mounted) return;
+    final auth = context.read<AuthProvider>();
+    final ok = await auth.unbindGoogle();
+    if (!context.mounted) return;
+    if (ok) {
+      context.go(AppRoutes.login);
+    } else {
+      _snack(context, auth.error ?? 'Unable to revoke Google sign-in');
+    }
+  }
+
+  Future<void> _changeGoogle(BuildContext context) async {
+    await context.read<AuthProvider>().logout();
+    if (!context.mounted) return;
+    context.go(AppRoutes.login);
+  }
+
+  Future<void> _signOut(BuildContext context) async {
+    await context.read<AuthProvider>().logout();
+    if (context.mounted) context.go(AppRoutes.login);
+  }
+
+  Future<bool?> _openSheet(BuildContext context, Widget sheet) {
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: AppTheme.backgroundSoft,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (_) => sheet,
+    );
+  }
+
+  Future<void> _updatePassword(BuildContext context) async {
+    final auth = context.read<AuthProvider>();
+    final done = await _openSheet(
+      context,
+      _CredentialSheet(
+        title: 'Update ERP password',
+        description:
+            'Enter the new password you set on the Loyola ERP. It is verified with ERP before it is saved.',
+        action: 'Verify and update',
+        showRegistration: false,
+        onSubmit: (reg, pass) async {
+          final ok = await auth.updateErpPassword(pass);
+          return ok ? null : (auth.error ?? 'Unable to update password');
+        },
+      ),
+    );
+    if (done == true && context.mounted) {
+      _snack(context, 'ERP password updated and verified');
+    }
+  }
+
+  Future<void> _changeErp(BuildContext context) async {
+    final auth = context.read<AuthProvider>();
+    final done = await _openSheet(
+      context,
+      _CredentialSheet(
+        title: 'Switch ERP account',
+        description:
+            'Replace the linked registration number and password. The new account is verified before it replaces the old one.',
+        action: 'Verify and switch',
+        showRegistration: true,
+        onSubmit: (reg, pass) async {
+          final ok = await auth.bindErp(
+            registrationNumber: reg,
+            password: pass,
+          );
+          return ok ? null : (auth.error ?? 'Unable to update ERP');
+        },
+      ),
+    );
+    if (done == true && context.mounted) {
+      _snack(context, 'ERP account updated');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // BUILD
+  // ---------------------------------------------------------------------------
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final user = auth.user;
+    final erp = user?.erpLinked == true;
+    final googleLinked = user?.googleId.isNotEmpty == true;
+    final email = user?.email.isNotEmpty == true ? user!.email : '';
+    final side = Responsive.dp(context, 20);
+
+    return Scaffold(
+      body: GlassBackground(
+        child: SafeArea(
+          bottom: false,
+          child: Stack(
+            children: [
+              ListView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(side, 10, side, 40),
+                children: [
+                  _header(context),
+                  const SizedBox(height: 22),
+                  _identityCard(email, googleLinked, erp),
+                  if (auth.error != null) ...[
+                    const SizedBox(height: 14),
+                    AppCard(
+                      rail: AppTheme.red,
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: AppTheme.red,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              auth.error!,
+                              style: const TextStyle(
+                                color: AppTheme.white70,
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 28),
+                  _heading('Google sign-in'),
+                  AppListGroup(
+                    children: [
+                      AppListTile(
+                        icon: Icons.account_circle_outlined,
+                        title: email.isNotEmpty ? email : 'Google account',
+                        subtitle: 'Used to sign in to this app',
+                        trailing: StatusChip(
+                          label: googleLinked ? 'Connected' : 'Not connected',
+                          color: googleLinked
+                              ? AppTheme.green
+                              : AppTheme.white54,
+                        ),
+                      ),
+                      AppListTile(
+                        icon: Icons.swap_horiz_rounded,
+                        title: 'Switch Google account',
+                        subtitle: 'Sign out, then sign in with another account',
+                        onTap: () => _changeGoogle(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+                  _heading('Loyola ERP'),
+                  AppListGroup(
+                    children: [
+                      AppListTile(
+                        icon: Icons.school_outlined,
+                        title: 'ERP connection',
+                        subtitle: erp
+                            ? 'Attendance, marks and subjects are syncing'
+                            : 'Needed for attendance, marks and account recovery',
+                        trailing: StatusChip(
+                          label: erp ? 'Connected' : 'Not connected',
+                          color: erp ? AppTheme.green : AppTheme.orange,
+                        ),
+                      ),
+                      if (erp) ...[
+                        AppListTile(
+                          icon: Icons.lock_reset_rounded,
+                          title: 'Update password',
+                          subtitle: 'Changed it on the ERP? Update it here',
+                          onTap: auth.isLoading
+                              ? null
+                              : () => _updatePassword(context),
+                        ),
+                        AppListTile(
+                          icon: Icons.manage_accounts_outlined,
+                          title: 'Switch ERP account',
+                          subtitle: 'Use a different registration number',
+                          onTap: auth.isLoading
+                              ? null
+                              : () => _changeErp(context),
+                        ),
+                      ] else
+                        AppListTile(
+                          icon: Icons.link_rounded,
+                          title: 'Connect ERP account',
+                          subtitle: 'Link your registration number',
+                          onTap: () => context.go(AppRoutes.erpSetup),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+                  _heading(
+                    'Disconnect',
+                    note: 'These change how you can sign in.',
+                  ),
+                  AppListGroup(
+                    children: [
+                      Opacity(
+                        opacity: erp ? 1 : 0.45,
+                        child: AppListTile(
+                          icon: Icons.link_off_rounded,
+                          iconColor: AppTheme.red,
+                          title: 'Revoke Google sign-in',
+                          subtitle: erp
+                              ? 'Keep access with your ERP credentials'
+                              : 'Connect ERP first to enable this',
+                          onTap: (erp && !auth.isLoading)
+                              ? () => _revokeGoogle(context)
+                              : null,
+                        ),
+                      ),
+                      if (erp)
+                        AppListTile(
+                          icon: Icons.power_settings_new_rounded,
+                          iconColor: AppTheme.red,
+                          title: 'Unlink ERP account',
+                          subtitle: 'Stops academic data from loading',
+                          onTap: auth.isLoading
+                              ? null
+                              : () => _unlinkErp(context),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _signOut(context),
+                      icon: const Icon(Icons.logout_rounded, size: 18),
+                      label: const Text(
+                        'Sign out',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.red,
+                        side: BorderSide(
+                          color: AppTheme.red.withValues(alpha: 0.7),
+                        ),
+                        backgroundColor: AppTheme.red.withValues(alpha: 0.08),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppRadius.surface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (auth.isLoading)
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: LinearProgressIndicator(
+                    minHeight: 2,
+                    color: AppTheme.crimson,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // PIECES
+  // ---------------------------------------------------------------------------
+  Widget _header(BuildContext context) {
+    return Row(
+      children: [
+        PressableScale(
+          onTap: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.home);
+            }
+          },
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.backgroundSoft,
+              border: Border.all(color: AppTheme.outline),
+            ),
+            child: const Icon(
+              Icons.arrow_back_rounded,
+              color: AppTheme.white,
+              size: 20,
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Text(
+            'Account & security',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: AppTheme.white,
+              fontSize: Responsive.sp(context, 24),
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.6,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _identityCard(String email, bool googleLinked, bool erp) {
+    final initial = email.isNotEmpty ? email[0].toUpperCase() : 'S';
+    return AppCard(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.crimson,
+                ),
+                child: Text(
+                  initial,
+                  style: const TextStyle(
+                    color: AppTheme.background,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      email.isNotEmpty ? email : 'Your account',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppTheme.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      googleLinked
+                          ? 'Signed in with Google'
+                          : 'Signed in with ERP',
+                      style: const TextStyle(
+                        color: AppTheme.white54,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              StatusChip(
+                label: googleLinked ? 'Google linked' : 'Google not linked',
+                color: googleLinked ? AppTheme.green : AppTheme.white54,
+                icon: googleLinked
+                    ? Icons.check_circle_rounded
+                    : Icons.remove_circle_outline_rounded,
+              ),
+              StatusChip(
+                label: erp ? 'ERP linked' : 'ERP not linked',
+                color: erp ? AppTheme.green : AppTheme.orange,
+                icon: erp
+                    ? Icons.check_circle_rounded
+                    : Icons.error_outline_rounded,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _heading(String title, {String? note}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppTheme.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+            ),
+          ),
+          if (note != null) ...[
+            const SizedBox(height: 3),
+            Text(
+              note,
+              style: const TextStyle(color: AppTheme.white54, fontSize: 12),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }
-class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
- final _registration=TextEditingController(),_password=TextEditingController();bool _hide=true;
- @override void dispose(){_registration.dispose();_password.dispose();super.dispose();}
- Future<void> _changePassword() async {
-  final value=_password.text;if(value.isEmpty)return;
-  final auth=context.read<AuthProvider>();final ok=await auth.updateErpPassword(value);
-  if(!mounted)return;_password.clear();
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(ok?'ERP password updated and verified':auth.error??'Unable to update password')));
- }
- Future<void> _unlinkErp() async {
-  final yes=await showDialog<bool>(context:context,builder:(c)=>AlertDialog(title:const Text('Unlink ERP account?'),content:const Text('Academic data access will stop until you connect ERP credentials again.'),actions:[TextButton(onPressed:()=>Navigator.pop(c,false),child:const Text('Cancel')),FilledButton(onPressed:()=>Navigator.pop(c,true),child:const Text('Unlink'))]));
-  if(yes!=true||!mounted)return;final auth=context.read<AuthProvider>();final ok=await auth.unbindErp();
-  if(!mounted)return;if(ok)context.go(AppRoutes.erpSetup);else ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(auth.error??'Unable to unlink ERP')));
- }
- Future<void> _revokeGoogle() async {
-  final yes=await showDialog<bool>(context:context,builder:(c)=>AlertDialog(title:const Text('Revoke Google sign-in?'),content:const Text('This removes Google sign-in from this account. You will be signed out and can access this existing account with ERP credentials. Signing in with another Google account creates a separate app account.'),actions:[TextButton(onPressed:()=>Navigator.pop(c,false),child:const Text('Cancel')),FilledButton(onPressed:()=>Navigator.pop(c,true),child:const Text('Revoke'))]));
-  if(yes!=true||!mounted)return;final auth=context.read<AuthProvider>();final ok=await auth.unbindGoogle();
-  if(!mounted)return;if(!ok)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(auth.error??'Unable to revoke Google sign-in')));else context.go(AppRoutes.login);
- }
- Future<void> _changeGoogle() async {
-  await context.read<AuthProvider>().logout();if(!mounted)return;context.go(AppRoutes.login);
- }
- @override Widget build(BuildContext context) {
-  final auth=context.watch<AuthProvider>();final user=auth.user;
-  return Scaffold(backgroundColor:AppTheme.background,appBar:AppBar(title:const Text('Account & security')),body:ListView(padding:const EdgeInsets.all(18),children:[
-   _section('GOOGLE ACCOUNT',[
-    ListTile(leading:const Icon(Icons.account_circle_outlined),title:Text(user?.email.isNotEmpty==true?user!.email:'Google account'),subtitle:Text(user?.googleId.isNotEmpty==true?'Connected':'Not connected'),trailing:const Icon(Icons.verified_user_outlined)),
-    ListTile(leading:const Icon(Icons.swap_horiz),title:const Text('Change Google account'),subtitle:const Text('Sign out and sign in with a different Google account'),onTap:_changeGoogle),
-    ListTile(leading:const Icon(Icons.link_off),title:const Text('Revoke Google sign-in'),subtitle:const Text('Available when ERP sign-in is configured'),enabled:user?.erpLinked==true,onTap:auth.isLoading?null:_revokeGoogle),
-   ]),
-   const SizedBox(height:16),
-   _section('LOYOLA ERP ACCOUNT',[
-    ListTile(leading:const Icon(Icons.school_outlined),title:const Text('ERP connection'),subtitle:Text(user?.erpLinked==true?'Connected':'Not connected'),trailing:Icon(user?.erpLinked==true?Icons.check_circle:Icons.error_outline,color:user?.erpLinked==true?AppTheme.gold:null)),
-    if(user?.erpLinked==true) ...[
-     const SizedBox(height:8),TextField(controller:_password,obscureText:_hide,decoration:InputDecoration(labelText:'New ERP password',prefixIcon:const Icon(Icons.lock_outline),suffixIcon:IconButton(onPressed:()=>setState(()=>_hide=!_hide),icon:Icon(_hide?Icons.visibility:Icons.visibility_off)))),
-     const SizedBox(height:10),FilledButton.tonal(onPressed:auth.isLoading?_noop:_changePassword,child:const Text('Verify and update password')),
-     ListTile(contentPadding:EdgeInsets.zero,leading:const Icon(Icons.edit_outlined),title:const Text('Change ERP account'),subtitle:const Text('Replace the registration number and password'),onTap:()=>_showChangeErp(context)),
-     ListTile(contentPadding:EdgeInsets.zero,leading:const Icon(Icons.link_off),title:const Text('Unlink ERP account'),onTap:auth.isLoading?null:_unlinkErp),
-    ] else const Padding(padding:EdgeInsets.all(12),child:Text('Connect ERP to enable student services and account recovery.')),
-   ]),
-   const SizedBox(height:16),
-   _section('SESSION',[
-    ListTile(leading:const Icon(Icons.logout),title:const Text('Sign out'),onTap:()=>auth.logout().then((_) {if(context.mounted)context.go(AppRoutes.login);})),
-   ]),
-   if(auth.error!=null)Padding(padding:const EdgeInsets.all(12),child:Text(auth.error!,style:const TextStyle(color:Colors.redAccent))),
-  ]));
- }
- void _noop(){}
- Future<void> _showChangeErp(BuildContext context) async {
-  final form=GlobalKey<FormState>();final reg=TextEditingController(),pass=TextEditingController();
-  final ok=await showDialog<bool>(context:context,builder:(c)=>AlertDialog(title:const Text('Change ERP account'),content:Form(key:form,child:Column(mainAxisSize:MainAxisSize.min,children:[
-   TextFormField(controller:reg,decoration:const InputDecoration(labelText:'Registration number'),validator:(v)=>v==null||v.trim().isEmpty?'Required':null),
-   TextFormField(controller:pass,obscureText:true,decoration:const InputDecoration(labelText:'ERP password'),validator:(v)=>v==null||v.isEmpty?'Required':null),
-  ])),actions:[TextButton(onPressed:()=>Navigator.pop(c,false),child:const Text('Cancel')),FilledButton(onPressed:()=>Navigator.pop(c,form.currentState!.validate()),child:const Text('Verify'))]));
-  if(ok==true&&mounted){final auth=context.read<AuthProvider>();final success=await auth.bindErp(registrationNumber:reg.text,password:pass.text);if(!mounted)return;ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(success?'ERP account updated':auth.error??'Unable to update ERP')));}
-  reg.dispose();pass.dispose();
- }
- Widget _section(String title,List<Widget> children)=>Card(color:AppTheme.glass,child:Padding(padding:const EdgeInsets.all(12),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Padding(padding:const EdgeInsets.all(8),child:Text(title,style:const TextStyle(color:AppTheme.gold,fontSize:11,fontWeight:FontWeight.w800,letterSpacing:1.2))),...children])));
+
+// =============================================================================
+// CREDENTIAL BOTTOM SHEET (password only, or registration number + password)
+// =============================================================================
+class _CredentialSheet extends StatefulWidget {
+  const _CredentialSheet({
+    required this.title,
+    required this.description,
+    required this.action,
+    required this.showRegistration,
+    required this.onSubmit,
+  });
+
+  final String title;
+  final String description;
+  final String action;
+  final bool showRegistration;
+
+  /// Returns null on success, or an error message to show inline.
+  final Future<String?> Function(String registration, String password) onSubmit;
+
+  @override
+  State<_CredentialSheet> createState() => _CredentialSheetState();
+}
+
+class _CredentialSheetState extends State<_CredentialSheet> {
+  final _form = GlobalKey<FormState>();
+  final _reg = TextEditingController();
+  final _pass = TextEditingController();
+  bool _hide = true;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _reg.dispose();
+    _pass.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_form.currentState!.validate() || _busy) return;
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final error = await widget.onSubmit(_reg.text.trim(), _pass.text);
+    if (!mounted) return;
+    if (error == null) {
+      Navigator.pop(context, true);
+    } else {
+      setState(() {
+        _busy = false;
+        _error = error;
+      });
+    }
+  }
+
+  InputDecoration _decoration(String label, IconData icon, {Widget? suffix}) {
+    OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppRadius.inner),
+      borderSide: BorderSide(color: c, width: w),
+    );
+
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: AppTheme.white54, fontSize: 14),
+      prefixIcon: Icon(icon, color: AppTheme.white54, size: 20),
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: Colors.white.withValues(alpha: 0.05),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      border: border(Colors.white.withValues(alpha: 0.10)),
+      enabledBorder: border(Colors.white.withValues(alpha: 0.10)),
+      focusedBorder: border(AppTheme.crimson, 1.4),
+      errorBorder: border(AppTheme.red),
+      focusedErrorBorder: border(AppTheme.red, 1.4),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        4,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 28,
+      ),
+      child: Form(
+        key: _form,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.title,
+              style: const TextStyle(
+                color: AppTheme.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              widget.description,
+              style: const TextStyle(
+                color: AppTheme.white54,
+                fontSize: 13,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (widget.showRegistration) ...[
+              TextFormField(
+                controller: _reg,
+                enabled: !_busy,
+                autocorrect: false,
+                textInputAction: TextInputAction.next,
+                style: const TextStyle(color: AppTheme.white, fontSize: 15),
+                decoration: _decoration(
+                  'Registration number',
+                  Icons.badge_outlined,
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+            ],
+            TextFormField(
+              controller: _pass,
+              enabled: !_busy,
+              obscureText: _hide,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _submit(),
+              style: const TextStyle(color: AppTheme.white, fontSize: 15),
+              decoration: _decoration(
+                widget.showRegistration ? 'ERP password' : 'New ERP password',
+                Icons.lock_outline_rounded,
+                suffix: IconButton(
+                  onPressed: () => setState(() => _hide = !_hide),
+                  icon: Icon(
+                    _hide
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: AppTheme.white54,
+                    size: 20,
+                  ),
+                ),
+              ),
+              validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: AppTheme.red,
+                    size: 17,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(
+                        color: AppTheme.red,
+                        fontSize: 12.5,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _busy ? null : _submit,
+                child: _busy
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppTheme.background,
+                        ),
+                      )
+                    : Text(widget.action),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
