@@ -71,34 +71,40 @@ export class AcademicCalendarController {
       message?: string;
     }> = [];
 
-    // Loyola's academic year runs June through May.
-    for (let offset = 0; offset < 12; offset += 1) {
+    // Loyola's academic year runs June through May. Use small batches to
+    // avoid flooding the public website while staying within serverless limits.
+    const months = Array.from({ length: 12 }, (_, offset) => {
       const date = new Date(Date.UTC(startYear, 5 + offset, 1));
-      const year = date.getUTCFullYear();
-      const month = date.getUTCMonth() + 1;
+      return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
+    });
 
-      try {
-        const scraped = await academicCalendarService.scrapeMonth(year, month);
-        const archived = await academicCalendarRepository.archiveMonth(scraped);
-        results.push({
-          year,
-          month,
-          status: archived.changed
-            ? (archived.version === 1 ? "created" : "updated")
-            : "unchanged",
-          version: archived.version,
-          entries: scraped.entries.length,
-        });
-      } catch (error) {
-        // Keep the last known good MongoDB snapshot when the source is
-        // temporarily unavailable or a page cannot be parsed.
-        results.push({
-          year,
-          month,
-          status: "failed",
-          message: error instanceof Error ? error.message : String(error),
-        });
-      }
+    for (let offset = 0; offset < months.length; offset += 4) {
+      const batch = months.slice(offset, offset + 4);
+      const batchResults = await Promise.all(batch.map(async ({ year, month }) => {
+        try {
+          const scraped = await academicCalendarService.scrapeMonth(year, month);
+          const archived = await academicCalendarRepository.archiveMonth(scraped);
+          return {
+            year,
+            month,
+            status: archived.changed
+              ? (archived.version === 1 ? "created" as const : "updated" as const)
+              : "unchanged" as const,
+            version: archived.version,
+            entries: scraped.entries.length,
+          };
+        } catch (error) {
+          // Keep the last known good MongoDB snapshot when the source is
+          // temporarily unavailable or a page cannot be parsed.
+          return {
+            year,
+            month,
+            status: "failed" as const,
+            message: error instanceof Error ? error.message : String(error),
+          };
+        }
+      }));
+      results.push(...batchResults);
     }
 
     const failed = results.filter((item) => item.status === "failed").length;
