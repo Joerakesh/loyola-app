@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 
 class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
   const GlassAppBar({
@@ -35,14 +35,14 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               if (showBackButton) ...[
-                BackButton(color: AppColors.white),
+                BackButton(color: AppTheme.colors.white),
                 const SizedBox(width: 8),
               ],
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
-                    color: AppColors.white,
+                    color: AppTheme.colors.white,
                     fontSize: 23,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.7,
