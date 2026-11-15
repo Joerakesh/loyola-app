@@ -10,8 +10,9 @@ export class AuthService {
   if(existing){if(profile.avatarUrl)await userRepository.updateAvatar(existing._id,profile.avatarUrl);const refreshed=await userRepository.findById(existing._id.toHexString());return userRepository.toPublicUser(refreshed??existing);}
   // If an email belongs to another Google identity, keep the new account separate
   // and omit the colliding email rather than merging or violating the unique index.
-  const emailOwner=profile.email?await userRepository.findByEmail(profile.email):null;
-  return userRepository.toPublicUser(await userRepository.create({googleId:profile.googleId,...(emailOwner?{}:{email:profile.email}),name:profile.name,avatarUrl:profile.avatarUrl}));
+  const normalizedEmail=profile.email?.trim().toLowerCase();
+  const emailOwner=normalizedEmail?await userRepository.findByEmail(normalizedEmail):null;
+  return userRepository.toPublicUser(await userRepository.create({googleId:profile.googleId,...(emailOwner?{}:(normalizedEmail?{email:normalizedEmail}:{})),name:profile.name,avatarUrl:profile.avatarUrl}));
  }
  async loginWithErp(registrationNumber:string,password:string):Promise<PublicUser>{
   const registration=registrationNumber.trim();if(!registration||!password)throw new Error("ERP username and password are required");
