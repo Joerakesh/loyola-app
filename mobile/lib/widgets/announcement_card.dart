@@ -30,13 +30,13 @@ class AnnouncementCard extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: (isPdf ? AppTheme.colors.red : AppTheme.colors.crimson)
+                color: (isPdf ? AppTheme.red : AppTheme.crimson)
                     .withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(13),
               ),
               child: Icon(
                 isPdf ? Icons.picture_as_pdf_rounded : Icons.campaign_rounded,
-                color: isPdf ? AppTheme.colors.red : AppTheme.colors.crimson,
+                color: isPdf ? AppTheme.red : AppTheme.crimson,
                 size: 21,
               ),
             ),
@@ -50,7 +50,7 @@ class AnnouncementCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: AppTheme.colors.white,
+                      color: AppTheme.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       height: 1.3,
@@ -62,7 +62,7 @@ class AnnouncementCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: AppTheme.colors.white54,
+                      color: AppTheme.white54,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -73,7 +73,7 @@ class AnnouncementCard extends StatelessWidget {
             const SizedBox(width: 8),
             Icon(
               isPdf ? Icons.open_in_new_rounded : Icons.arrow_forward_rounded,
-              color: AppTheme.colors.white54,
+              color: AppTheme.white54,
               size: 18,
             ),
           ],
