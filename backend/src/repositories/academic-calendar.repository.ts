@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import type { Collection, Document } from "mongodb";
 import { getDb } from "../config/mongo.js";
-import type { AcademicCalendarMonth } from "./academic-calendar.service.js";
+import type { AcademicCalendarMonth } from "../services/academic-calendar.service.js";
 
 interface StoredMonth extends AcademicCalendarMonth {
   _id?: unknown;
