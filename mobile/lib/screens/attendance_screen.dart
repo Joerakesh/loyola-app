@@ -149,7 +149,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               SliverToBoxAdapter(
                 child: GlassAppBar(
                   title: 'Attendance',
-                  showBackButton: false,
+                  showBackButton: true,
                   bottomPadding: true,
                   actions: [
                     if (!_isLoading &&
