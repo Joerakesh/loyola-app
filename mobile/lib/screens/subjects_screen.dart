@@ -121,7 +121,7 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
               const SliverToBoxAdapter(
                 child: GlassAppBar(
                   title: 'Subjects',
-                  showBackButton: false, // Handled by AppShell
+                  showBackButton: true,
                   bottomPadding: true,
                 ),
               ),
