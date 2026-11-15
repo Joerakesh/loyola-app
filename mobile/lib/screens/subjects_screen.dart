@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_theme.dart';
 import '../core/theme/responsive.dart';
@@ -122,6 +123,13 @@ class _SubjectsScreenState extends State<SubjectsScreen> {
                 child: GlassAppBar(
                   title: 'Subjects',
                   showBackButton: true,
+                  onBackPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/home');
+                    }
+                  },
                   bottomPadding: true,
                 ),
               ),
