@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
+import 'app_card.dart';
 
+/// Legacy name retained so existing screens share the standard AppCard surface.
+@Deprecated('Use AppCard for new UI.')
 class GlassContainer extends StatelessWidget {
   const GlassContainer({
     super.key,
@@ -22,23 +24,13 @@ class GlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final r = borderRadius ?? BorderRadius.circular(22);
-    final fill = color ?? AppColors.glass;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: r,
-        border: Border.all(color: borderColor ?? AppColors.outline),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: r,
-          child: Padding(padding: padding, child: child),
-        ),
-      ),
+    return AppCard(
+      padding: padding,
+      radius: borderRadius?.topLeft.x ?? 22,
+      color: color,
+      borderColor: borderColor,
+      onTap: onTap,
+      child: child,
     );
   }
 }
