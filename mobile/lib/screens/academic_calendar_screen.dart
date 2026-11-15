@@ -179,9 +179,9 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.colors.background,
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        backgroundColor: AppTheme.colors.background,
+        backgroundColor: AppTheme.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         title: const Text(
@@ -203,8 +203,8 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
           ? _errorView()
           : RefreshIndicator(
               onRefresh: () => _load(refresh: true),
-              color: AppTheme.colors.crimson,
-              backgroundColor: AppTheme.colors.backgroundSoft,
+              color: AppTheme.crimson,
+              backgroundColor: AppTheme.backgroundSoft,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
@@ -221,7 +221,7 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
                     Text(
                       'Dates provided by Loyola College',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppTheme.colors.white38, fontSize: 11),
+                      style: TextStyle(color: AppTheme.white38, fontSize: 11),
                     ),
                   ],
                 ],
@@ -240,13 +240,13 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
             children: [
               const Text(
                 'Academic schedule',
-                style: TextStyle(color: AppTheme.colors.white54, fontSize: 12),
+                style: TextStyle(color: AppTheme.white54, fontSize: 12),
               ),
               const SizedBox(height: 4),
               Text(
                 monthLabel,
                 style: const TextStyle(
-                  color: AppTheme.colors.white,
+                  color: AppTheme.white,
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                 ),
@@ -255,7 +255,7 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
               Text(
                 '${_entriesByDay.length} scheduled days',
                 style: const TextStyle(
-                  color: AppTheme.colors.crimson,
+                  color: AppTheme.crimson,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
@@ -267,13 +267,13 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
           tooltip: 'Previous month',
           onPressed: _loading ? null : () => _changeMonth(-1),
           icon: const Icon(Icons.chevron_left_rounded),
-          color: AppTheme.colors.white,
+          color: AppTheme.white,
         ),
         IconButton(
           tooltip: 'Next month',
           onPressed: _loading ? null : () => _changeMonth(1),
           icon: const Icon(Icons.chevron_right_rounded),
-          color: AppTheme.colors.white,
+          color: AppTheme.white,
         ),
       ],
     );
@@ -289,9 +289,9 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
       decoration: BoxDecoration(
-        color: AppTheme.colors.backgroundSoft,
+        color: AppTheme.backgroundSoft,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.colors.outline),
+        border: Border.all(color: AppTheme.outline),
       ),
       child: Column(
         children: [
@@ -303,7 +303,7 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
                     child: Text(
                       weekday,
                       style: const TextStyle(
-                        color: AppTheme.colors.white38,
+                        color: AppTheme.white38,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
@@ -339,12 +339,12 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: selected
-                        ? AppTheme.colors.crimson
-                        : AppTheme.colors.white.withValues(alpha: 0.025),
+                        ? AppTheme.crimson
+                        : AppTheme.white.withValues(alpha: 0.025),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isToday && !selected
-                          ? AppTheme.colors.crimson.withValues(alpha: 0.55)
+                          ? AppTheme.crimson.withValues(alpha: 0.55)
                           : Colors.transparent,
                     ),
                   ),
@@ -354,7 +354,7 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
                       Text(
                         '$day',
                         style: TextStyle(
-                          color: selected ? AppTheme.colors.background : AppTheme.colors.white,
+                          color: selected ? AppTheme.background : AppTheme.white,
                           fontSize: 13,
                           fontWeight: selected || isToday
                               ? FontWeight.w800
@@ -369,8 +369,8 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
                           shape: BoxShape.circle,
                           color: hasEntries
                               ? selected
-                                    ? AppTheme.colors.background
-                                    : AppTheme.colors.crimson
+                                    ? AppTheme.background
+                                    : AppTheme.crimson
                               : Colors.transparent,
                         ),
                       ),
@@ -383,11 +383,11 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
           const SizedBox(height: 10),
           const Row(
             children: [
-              Icon(Icons.circle, size: 7, color: AppTheme.colors.crimson),
+              Icon(Icons.circle, size: 7, color: AppTheme.crimson),
               SizedBox(width: 6),
               Text(
                 'Academic item scheduled',
-                style: TextStyle(color: AppTheme.colors.white54, fontSize: 11),
+                style: TextStyle(color: AppTheme.white54, fontSize: 11),
               ),
             ],
           ),
@@ -408,7 +408,7 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
         Text(
           dateLabel,
           style: const TextStyle(
-            color: AppTheme.colors.white,
+            color: AppTheme.white,
             fontSize: 18,
             fontWeight: FontWeight.w800,
           ),
@@ -446,9 +446,9 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: AppTheme.colors.backgroundSoft,
+        color: AppTheme.backgroundSoft,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: AppTheme.colors.outline),
+        border: Border.all(color: AppTheme.outline),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,10 +457,10 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: AppTheme.colors.crimson.withValues(alpha: 0.12),
+              color: AppTheme.crimson.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(11),
             ),
-            child: Icon(icon, color: AppTheme.colors.crimson, size: 19),
+            child: Icon(icon, color: AppTheme.crimson, size: 19),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -470,7 +470,7 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: AppTheme.colors.white,
+                    color: AppTheme.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     height: 1.4,
@@ -481,7 +481,7 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      color: AppTheme.colors.crimson,
+                      color: AppTheme.crimson,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
@@ -502,12 +502,12 @@ class _AcademicCalendarScreenState extends State<AcademicCalendarScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_outlined, size: 38, color: AppTheme.colors.white54),
+            const Icon(Icons.cloud_off_outlined, size: 38, color: AppTheme.white54),
             const SizedBox(height: 12),
             Text(
               _error ?? 'Unable to load the academic calendar.',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.colors.white70, fontSize: 13),
+              style: const TextStyle(color: AppTheme.white70, fontSize: 13),
             ),
             const SizedBox(height: 14),
             FilledButton(
