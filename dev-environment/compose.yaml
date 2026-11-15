@@ -36,6 +36,31 @@ services:
     cpus: 2
     profiles: ["node"]
 
+  backend:
+    image: loyola-dev/node:local
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    working_dir: /workspace/backend
+    init: true
+    command: ["bash", "-lc", "npm ci && npm run dev"]
+    user: root
+    volumes:
+      - ..:/workspace
+      - backend-node-modules:/workspace/backend/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: "3000"
+      MONGODB_URI: mongodb://mongo:27017
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    mem_limit: 1g
+    cpus: 2
+    profiles: ["backend"]
+
   python:
     image: loyola-dev/python:local
     build:
@@ -71,18 +96,24 @@ services:
 
   mongo:
     image: mongo:7
-    profiles: ["mongo"]
+    profiles: ["backend", "mongo"]
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
     mem_limit: 768m
     cpus: 1
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   flutter-pub-cache:
   gradle-cache:
   npm-cache:
+  backend-node-modules:
   pip-cache:
   postgres-data:
   mongo-data:
