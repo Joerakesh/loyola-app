@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_theme.dart';
 import '../core/theme/responsive.dart';
@@ -140,6 +141,13 @@ class _MarksScreenState extends State<MarksScreen> {
           child: GlassAppBar(
             title: 'CIA Marks',
             showBackButton: true,
+                  onBackPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/home');
+                    }
+                  },
             bottomPadding: true,
           ),
         ),
@@ -233,6 +241,13 @@ class _MarksScreenState extends State<MarksScreen> {
           child: GlassAppBar(
             title: 'CIA Marks',
             showBackButton: true,
+                  onBackPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/home');
+                    }
+                  },
             bottomPadding: true,
           ),
         ),
