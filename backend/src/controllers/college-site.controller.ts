@@ -56,6 +56,9 @@ export class CollegeSiteController {
         });
       }
       const snapshot = await collegeSiteService.scrapeForArchive();
+      if (snapshot.announcements.length === 0 && snapshot.events.length === 0) {
+        throw new Error("Homepage parser returned no announcements or events; refusing to overwrite the last good archive");
+      }
       const result = await collegeUpdatesRepository.archive(snapshot);
       return res.json({
         status: "success",
