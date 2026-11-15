@@ -137,7 +137,7 @@ class _MarksScreenState extends State<MarksScreen> {
         parent: AlwaysScrollableScrollPhysics(),
       ),
       slivers: [
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: GlassAppBar(
             title: 'CIA Marks',
             showBackButton: true,
@@ -237,7 +237,7 @@ class _MarksScreenState extends State<MarksScreen> {
         parent: AlwaysScrollableScrollPhysics(),
       ),
       slivers: [
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: GlassAppBar(
             title: 'CIA Marks',
             showBackButton: true,
