@@ -26,7 +26,7 @@ class SectionHeader extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  color: AppTheme.colors.white,
+                  color: AppTheme.white,
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
@@ -37,7 +37,7 @@ class SectionHeader extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: const TextStyle(
-                    color: AppTheme.colors.white54,
+                    color: AppTheme.white54,
                     fontSize: 12,
                   ),
                 ),
