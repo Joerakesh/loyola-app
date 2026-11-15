@@ -16,7 +16,6 @@ function hashMonth(month: AcademicCalendarMonth): string {
     monthNumber: month.monthNumber,
     month: month.month,
     entries: month.entries,
-    sourceUrl: month.sourceUrl,
   };
   return createHash("sha256").update(JSON.stringify(stable)).digest("hex");
 }
