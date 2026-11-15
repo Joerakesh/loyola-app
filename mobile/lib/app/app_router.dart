@@ -88,22 +88,6 @@ class AppRouter {
                   subjectService: subjectService,
                   marksService: marksService,
                 ),
-                routes: [
-                  GoRoute(
-                    path: 'attendance',
-                    builder: (c, s) =>
-                        AttendanceScreen(attendanceService: attendanceService),
-                  ),
-                  GoRoute(
-                    path: 'subjects',
-                    builder: (c, s) =>
-                        SubjectsScreen(subjectService: subjectService),
-                  ),
-                  GoRoute(
-                    path: 'marks',
-                    builder: (c, s) => MarksScreen(marksService: marksService),
-                  ),
-                ],
               ),
             ],
           ),
@@ -113,18 +97,6 @@ class AppRouter {
                 path: AppRoutes.campus,
                 builder: (c, s) =>
                     CampusHubScreen(service: collegeUpdatesService),
-                routes: [
-                  GoRoute(
-                    path: 'updates',
-                    builder: (c, s) =>
-                        CollegeUpdatesScreen(service: collegeUpdatesService),
-                  ),
-                  GoRoute(
-                    path: 'calendar',
-                    builder: (c, s) =>
-                        AcademicCalendarScreen(service: collegeUpdatesService),
-                  ),
-                ],
               ),
             ],
           ),
@@ -137,15 +109,34 @@ class AppRouter {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.settings,
-                builder: (c, s) => const AccountSettingsScreen(),
-              ),
-            ],
-          ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.attendance,
+        builder: (c, s) =>
+            AttendanceScreen(attendanceService: attendanceService),
+      ),
+      GoRoute(
+        path: AppRoutes.subjects,
+        builder: (c, s) => SubjectsScreen(subjectService: subjectService),
+      ),
+      GoRoute(
+        path: AppRoutes.marks,
+        builder: (c, s) => MarksScreen(marksService: marksService),
+      ),
+      GoRoute(
+        path: AppRoutes.updates,
+        builder: (c, s) =>
+            CollegeUpdatesScreen(service: collegeUpdatesService),
+      ),
+      GoRoute(
+        path: AppRoutes.calendar,
+        builder: (c, s) =>
+            AcademicCalendarScreen(service: collegeUpdatesService),
+      ),
+      GoRoute(
+        path: AppRoutes.settings,
+        builder: (c, s) => const AccountSettingsScreen(),
       ),
     ],
   );
