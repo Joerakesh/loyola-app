@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 import '../core/theme/responsive.dart';
 import '../models/attendance_model.dart';
 import '../services/attendance_service.dart';
@@ -132,15 +132,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     final isGoodStanding = displayPercentage >= 75.0;
 
     final statusColor = isGoodStanding
-        ? AppColors.green
-        : AppColors.red;
+        ? AppTheme.colors.green
+        : AppTheme.colors.red;
 
     return Scaffold(
       body: GlassBackground(
         child: RefreshIndicator(
           onRefresh: _refreshData,
-          color: AppColors.white,
-          backgroundColor: AppColors.glass,
+          color: AppTheme.colors.white,
+          backgroundColor: AppTheme.colors.glass,
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
@@ -256,7 +256,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Widget _buildFilterChip(String label, AttendanceFilter filter) {
     final isSelected = _selectedFilter == filter;
-    const accentColor = AppColors.crimson;
+    const accentColor = AppTheme.colors.crimson;
 
     return GestureDetector(
       onTap: () {
@@ -269,12 +269,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         decoration: BoxDecoration(
           color: isSelected
               ? accentColor.withValues(alpha: 0.25)
-              : AppColors.white.withValues(alpha: 0.05),
+              : AppTheme.colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? accentColor.withValues(alpha: 0.5)
-                : AppColors.white.withValues(alpha: 0.1),
+                : AppTheme.colors.white.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -282,7 +282,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? AppColors.white : AppColors.white54,
+              color: isSelected ? AppTheme.colors.white : AppTheme.colors.white54,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               fontSize: 13,
             ),
@@ -301,13 +301,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             Icon(
               Icons.history_rounded,
               size: 48,
-              color: AppColors.white.withValues(alpha: 0.2),
+              color: AppTheme.colors.white.withValues(alpha: 0.2),
             ),
             const SizedBox(height: 16),
             Text(
               message,
               style: TextStyle(
-                color: AppColors.white.withValues(alpha: 0.5),
+                color: AppTheme.colors.white.withValues(alpha: 0.5),
                 fontSize: 15,
               ),
             ),
@@ -338,7 +338,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: AppColors.white,
+                    color: AppTheme.colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: Responsive.sp(context, 14),
                   ),
@@ -349,7 +349,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                       ? 'Day ${record.dayOrder}'
                       : 'No Schedule',
                   style: const TextStyle(
-                    color: AppColors.white54,
+                    color: AppTheme.colors.white54,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -361,7 +361,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             width: 1,
             height: 40,
             margin: const EdgeInsets.symmetric(horizontal: 12),
-            color: AppColors.white.withValues(alpha: 0.1),
+            color: AppTheme.colors.white.withValues(alpha: 0.1),
           ),
           Expanded(
             child: Row(
@@ -383,15 +383,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     switch (hour.status) {
       case AttendanceStatus.present:
-        color = AppColors.green;
+        color = AppTheme.colors.green;
         icon = Icons.task_alt_rounded;
         break;
       case AttendanceStatus.absent:
-        color = AppColors.red;
+        color = AppTheme.colors.red;
         icon = Icons.highlight_off_rounded;
         break;
       case AttendanceStatus.notScheduled:
-        color = AppColors.white30;
+        color = AppTheme.colors.white30;
         icon = Icons.more_horiz_rounded;
         break;
     }
@@ -402,7 +402,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         Text(
           'H${hour.hour}',
           style: TextStyle(
-            color: AppColors.white54,
+            color: AppTheme.colors.white54,
             fontSize: Responsive.sp(context, 11),
             fontWeight: FontWeight.w600,
           ),
