@@ -22,6 +22,7 @@ class AppTheme {
   static const textDisabled = Color(0xFF5C6D74);
   static const onPrimary = Color(0xFF0B1014);
   static const overlay = Color(0x33FFFFFF);
+  static const colors = AppPalette();
 
   static ThemeData dark() {
     final scheme = ColorScheme.fromSeed(
@@ -97,4 +98,41 @@ class AppTheme {
       ),
     );
   }
+}
+
+/// Read-only grouped access to the semantic tokens for existing UI widgets.
+class AppPalette {
+  const AppPalette();
+
+  final Color background = AppTheme.background;
+  final Color backgroundSoft = AppTheme.backgroundSoft;
+  final Color surface = AppTheme.surface;
+  final Color outline = AppTheme.outline;
+  final Color primary = AppTheme.primary;
+  final Color secondary = AppTheme.secondary;
+  final Color blue = AppTheme.blue;
+  final Color purple = AppTheme.purple;
+  final Color orange = AppTheme.orange;
+  final Color success = AppTheme.success;
+  final Color error = AppTheme.error;
+  final Color textPrimary = AppTheme.textPrimary;
+  final Color textSecondary = AppTheme.textSecondary;
+  final Color textMuted = AppTheme.textMuted;
+  final Color textSubtle = AppTheme.textSubtle;
+  final Color textDisabled = AppTheme.textDisabled;
+  final Color onPrimary = AppTheme.onPrimary;
+  final Color overlay = AppTheme.overlay;
+
+  Color get crimson => primary;
+  Color get gold => secondary;
+  Color get glass => surface;
+  Color get green => success;
+  Color get red => error;
+  Color get white => textPrimary;
+  Color get white70 => textSecondary;
+  Color get white60 => const Color(0xFFB0BEC1);
+  Color get white54 => textMuted;
+  Color get white38 => textSubtle;
+  Color get white30 => textDisabled;
+  Color get white24 => const Color(0xFF4A5B62);
 }
