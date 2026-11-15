@@ -35,14 +35,14 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               if (showBackButton) ...[
-                BackButton(color: AppTheme.colors.white),
+                BackButton(color: AppTheme.white),
                 const SizedBox(width: 8),
               ],
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
-                    color: AppTheme.colors.white,
+                    color: AppTheme.white,
                     fontSize: 23,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.7,
