@@ -930,6 +930,9 @@
           "200": {
             "description": "Scrape completed; includes changed status, version, and item counts"
           },
+          "429": {
+            "description": "A refresh is already in its cooldown window"
+          },
           "502": {
             "description": "Unable to fetch or parse the college homepage"
           }
@@ -944,6 +947,9 @@
         "responses": {
           "200": {
             "description": "Scrape completed"
+          },
+          "429": {
+            "description": "A refresh is already in its cooldown window"
           },
           "502": {
             "description": "Unable to fetch or parse the college homepage"
