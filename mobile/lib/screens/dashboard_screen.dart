@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../app/app_router.dart';
 import '../core/cache/data_cache.dart';
-import '../core/constants/app_colors.dart';
+import '../core/theme/app_theme.dart';
 import '../core/theme/responsive.dart';
 import '../models/attendance_model.dart';
 import '../models/college_announcement.dart';
@@ -254,8 +254,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bottom: false,
       child: RefreshIndicator(
         onRefresh: _refreshAll,
-        color: AppColors.crimson,
-        backgroundColor: AppColors.glass,
+        color: AppTheme.colors.crimson,
+        backgroundColor: AppTheme.colors.glass,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
@@ -319,7 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 _formatTodayDate().toUpperCase(),
                 style: TextStyle(
-                  color: AppColors.white54,
+                  color: AppTheme.colors.white54,
                   fontSize: Responsive.sp(context, 11),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.3,
@@ -329,7 +329,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 _greeting(),
                 style: TextStyle(
-                  color: AppColors.white70,
+                  color: AppTheme.colors.white70,
                   fontSize: Responsive.sp(context, 15),
                   fontWeight: FontWeight.w500,
                 ),
@@ -339,7 +339,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: AppColors.white,
+                  color: AppTheme.colors.white,
                   fontSize: Responsive.sp(context, 30),
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.9,
@@ -352,10 +352,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         PopupMenuButton<String>(
           tooltip: 'Account options',
           offset: const Offset(0, 58),
-          color: AppColors.backgroundSoft,
+          color: AppTheme.colors.backgroundSoft,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: AppColors.outline),
+            side: BorderSide(color: AppTheme.colors.outline),
           ),
           onSelected: (value) async {
             if (value == 'logout') {
@@ -373,12 +373,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               value: 'logout',
               child: Row(
                 children: [
-                  Icon(Icons.logout_rounded, color: AppColors.red, size: 20),
+                  Icon(Icons.logout_rounded, color: AppTheme.colors.red, size: 20),
                   SizedBox(width: 12),
                   Text(
                     'Logout',
                     style: TextStyle(
-                      color: AppColors.red,
+                      color: AppTheme.colors.red,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -402,7 +402,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final hasSummary = _attendanceSummary != null;
     final percentage = _getAttendancePercentage();
     final onTrack = percentage >= 75;
-    final color = onTrack ? AppColors.crimson : AppColors.red;
+    final color = onTrack ? AppTheme.colors.crimson : AppTheme.colors.red;
     final hours = record?.hours.take(8).toList() ?? [];
 
     return PressableScale(
@@ -417,8 +417,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             end: Alignment.bottomRight,
             colors: [
               color.withValues(alpha: 0.16),
-              AppColors.glass,
-              AppColors.backgroundSoft,
+              AppTheme.colors.glass,
+              AppTheme.colors.backgroundSoft,
             ],
             stops: const [0, 0.55, 1],
           ),
@@ -447,7 +447,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Text(
                         hasSummary ? percentage.toStringAsFixed(0) : '—',
                         style: TextStyle(
-                          color: AppColors.white,
+                          color: AppTheme.colors.white,
                           fontSize: Responsive.sp(context, 28),
                           fontWeight: FontWeight.w900,
                           letterSpacing: -1,
@@ -457,7 +457,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const Text(
                         'PERCENT',
                         style: TextStyle(
-                          color: AppColors.white54,
+                          color: AppTheme.colors.white54,
                           fontSize: 8,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.2,
@@ -474,7 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const Text(
                         'Overall attendance',
                         style: TextStyle(
-                          color: AppColors.white,
+                          color: AppTheme.colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.2,
@@ -484,7 +484,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const Text(
                         'Minimum requirement 75%',
                         style: TextStyle(
-                          color: AppColors.white54,
+                          color: AppTheme.colors.white54,
                           fontSize: 12,
                         ),
                       ),
@@ -502,25 +502,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 const Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.white38,
+                  color: AppTheme.colors.white38,
                 ),
               ],
             ),
             const SizedBox(height: 18),
-            Divider(color: AppColors.white.withValues(alpha: 0.08), height: 1),
+            Divider(color: AppTheme.colors.white.withValues(alpha: 0.08), height: 1),
             const SizedBox(height: 14),
             Row(
               children: [
                 const Icon(
                   Icons.today_rounded,
                   size: 15,
-                  color: AppColors.white54,
+                  color: AppTheme.colors.white54,
                 ),
                 const SizedBox(width: 7),
                 const Text(
                   'TODAY',
                   style: TextStyle(
-                    color: AppColors.white54,
+                    color: AppTheme.colors.white54,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
@@ -530,7 +530,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   _todaySummary(record),
                   style: const TextStyle(
-                    color: AppColors.white70,
+                    color: AppTheme.colors.white70,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -588,9 +588,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   (Color, IconData) _statusStyle(AttendanceStatus status) => switch (status) {
-    AttendanceStatus.present => (AppColors.green, Icons.check_rounded),
-    AttendanceStatus.absent => (AppColors.red, Icons.close_rounded),
-    AttendanceStatus.notScheduled => (AppColors.white30, Icons.remove_rounded),
+    AttendanceStatus.present => (AppTheme.colors.green, Icons.check_rounded),
+    AttendanceStatus.absent => (AppTheme.colors.red, Icons.close_rounded),
+    AttendanceStatus.notScheduled => (AppTheme.colors.white30, Icons.remove_rounded),
   };
 
   // ---------------------------------------------------------------------------
@@ -601,25 +601,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
       (
         icon: Icons.fact_check_rounded,
         label: 'Attendance',
-        color: AppColors.crimson,
+        color: AppTheme.colors.crimson,
         route: AppRoutes.attendance,
       ),
       (
         icon: Icons.menu_book_rounded,
         label: 'Subjects',
-        color: AppColors.blue,
+        color: AppTheme.colors.blue,
         route: AppRoutes.subjects,
       ),
       (
         icon: Icons.grading_rounded,
         label: 'Marks',
-        color: AppColors.purple,
+        color: AppTheme.colors.purple,
         route: AppRoutes.marks,
       ),
       (
         icon: Icons.calendar_month_rounded,
         label: 'Calendar',
-        color: AppColors.orange,
+        color: AppTheme.colors.orange,
         route: AppRoutes.calendar,
       ),
     ];
@@ -634,9 +634,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundSoft,
+                  color: AppTheme.colors.backgroundSoft,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.outline),
+                  border: Border.all(color: AppTheme.colors.outline),
                 ),
                 child: Column(
                   children: [
@@ -659,7 +659,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: AppColors.white70,
+                        color: AppTheme.colors.white70,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
@@ -689,7 +689,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           trailing: TextButton(
             onPressed: () => context.push(AppRoutes.updates),
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.crimson,
+              foregroundColor: AppTheme.colors.crimson,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               visualDensity: VisualDensity.compact,
             ),
@@ -715,14 +715,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 const Icon(
                   Icons.cloud_off_rounded,
-                  color: AppColors.white54,
+                  color: AppTheme.colors.white54,
                   size: 20,
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
                     'Updates are unavailable right now.',
-                    style: TextStyle(color: AppColors.white54, fontSize: 13),
+                    style: TextStyle(color: AppTheme.colors.white54, fontSize: 13),
                   ),
                 ),
                 TextButton(
@@ -737,7 +737,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             padding: EdgeInsets.all(18),
             child: Text(
               'No campus announcements are available.',
-              style: TextStyle(color: AppColors.white54, fontSize: 13),
+              style: TextStyle(color: AppTheme.colors.white54, fontSize: 13),
             ),
           )
         else
@@ -768,7 +768,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           trailing: TextButton(
             onPressed: () => context.go(AppRoutes.attendance),
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.crimson,
+              foregroundColor: AppTheme.colors.crimson,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               visualDensity: VisualDensity.compact,
             ),
@@ -787,7 +787,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildRecentLogItem(recent[i]),
                 if (i < recent.length - 1)
                   Divider(
-                    color: AppColors.white.withValues(alpha: 0.07),
+                    color: AppTheme.colors.white.withValues(alpha: 0.07),
                     height: 1,
                   ),
               ],
@@ -815,7 +815,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: AppColors.white,
+                    color: AppTheme.colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -826,7 +826,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ? 'Day order ${record.dayOrder}'
                       : 'No schedule',
                   style: const TextStyle(
-                    color: AppColors.white54,
+                    color: AppTheme.colors.white54,
                     fontSize: 11.5,
                   ),
                 ),
@@ -858,7 +858,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           else
             const Text(
               '—',
-              style: TextStyle(color: AppColors.white30, fontSize: 16),
+              style: TextStyle(color: AppTheme.colors.white30, fontSize: 16),
             ),
         ],
       ),
@@ -984,7 +984,7 @@ class GlassAvatar extends StatelessWidget {
       child: Text(
         initial,
         style: TextStyle(
-          color: AppColors.background,
+          color: AppTheme.colors.background,
           fontSize: Responsive.sp(context, 20),
           fontWeight: FontWeight.w800,
         ),
@@ -1002,14 +1002,14 @@ class GlassAvatar extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.crimson,
+        color: AppTheme.colors.crimson,
         border: Border.all(
-          color: AppColors.white.withValues(alpha: 0.22),
+          color: AppTheme.colors.white.withValues(alpha: 0.22),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.crimson.withValues(alpha: 0.28),
+            color: AppTheme.colors.crimson.withValues(alpha: 0.28),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
