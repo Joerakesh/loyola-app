@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/theme/responsive.dart';
 
 const _dockRadius = 34.0;
@@ -47,8 +47,8 @@ class AppShell extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppColors.background.withValues(alpha: 0),
-            AppColors.background.withValues(alpha: 0.82),
+            AppTheme.colors.background.withValues(alpha: 0),
+            AppTheme.colors.background.withValues(alpha: 0.82),
           ],
         ),
       ),
@@ -91,7 +91,7 @@ class AppShell extends StatelessWidget {
                 child: Container(
                   height: compact ? 62 : 66,
                   padding: const EdgeInsets.all(_dockPadding),
-                  color: AppColors.backgroundSoft.withValues(alpha: 0.62),
+                  color: AppTheme.colors.backgroundSoft.withValues(alpha: 0.62),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final selectedIndex = navigationShell.currentIndex;
@@ -159,9 +159,9 @@ class _DockItemState extends State<_DockItem> {
   @override
   Widget build(BuildContext context) {
     final selected = widget.selected;
-    final accent = AppColors.crimson;
+    final accent = AppTheme.colors.crimson;
     final accentLight = Color.lerp(accent, Colors.white, 0.22)!;
-    final contentColor = selected ? AppColors.background : AppColors.white54;
+    final contentColor = selected ? AppTheme.colors.background : AppTheme.colors.white54;
 
     return Semantics(
       button: true,
