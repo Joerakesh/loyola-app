@@ -85,8 +85,8 @@ class _MarksScreenState extends State<MarksScreen> {
       body: GlassBackground(
         child: RefreshIndicator(
           onRefresh: _refreshData,
-          color: AppTheme.colors.white,
-          backgroundColor: AppTheme.colors.glass,
+          color: AppTheme.white,
+          backgroundColor: AppTheme.glass,
           // We move the AnimatedSwitcher to the root of the scroll view
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
@@ -201,16 +201,16 @@ class _MarksScreenState extends State<MarksScreen> {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
           decoration: BoxDecoration(
-            color: selected ? AppTheme.colors.crimson : AppTheme.colors.backgroundSoft,
+            color: selected ? AppTheme.crimson : AppTheme.backgroundSoft,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? AppTheme.colors.crimson : AppTheme.colors.outline,
+              color: selected ? AppTheme.crimson : AppTheme.outline,
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? AppTheme.colors.background : AppTheme.colors.white70,
+              color: selected ? AppTheme.background : AppTheme.white70,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
@@ -253,13 +253,13 @@ class _MarksScreenState extends State<MarksScreen> {
           Icon(
             Icons.leaderboard_rounded,
             size: 48,
-            color: AppTheme.colors.white.withValues(alpha: 0.2),
+            color: AppTheme.white.withValues(alpha: 0.2),
           ),
           const SizedBox(height: 16),
           Text(
             'No marks available yet',
             style: TextStyle(
-              color: AppTheme.colors.white.withValues(alpha: 0.5),
+              color: AppTheme.white.withValues(alpha: 0.5),
               fontSize: 16,
             ),
           ),
@@ -280,7 +280,7 @@ class _MarksScreenState extends State<MarksScreen> {
           Text(
             '${course.courseCode} - ${course.courseName}',
             style: TextStyle(
-              color: AppTheme.colors.white,
+              color: AppTheme.white,
               fontWeight: FontWeight.bold,
               fontSize: Responsive.sp(context, 15),
               letterSpacing: 0.3,
@@ -292,21 +292,21 @@ class _MarksScreenState extends State<MarksScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.colors.white.withValues(alpha: 0.05),
+                color: AppTheme.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Row(
                 children: [
                   Icon(
                     Icons.pending_actions_rounded,
-                    color: AppTheme.colors.white54,
+                    color: AppTheme.white54,
                     size: 20,
                   ),
                   SizedBox(width: 12),
                   Text(
                     'Marks pending',
                     style: TextStyle(
-                      color: AppTheme.colors.white54,
+                      color: AppTheme.white54,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -338,7 +338,7 @@ class _MarksScreenState extends State<MarksScreen> {
                 const Text(
                   'Total Score',
                   style: TextStyle(
-                    color: AppTheme.colors.white54,
+                    color: AppTheme.white54,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -349,16 +349,16 @@ class _MarksScreenState extends State<MarksScreen> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppTheme.colors.crimson.withValues(alpha: 0.15),
+                    color: AppTheme.crimson.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppTheme.colors.crimson.withValues(alpha: 0.3),
+                      color: AppTheme.crimson.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
                     '${course.totals?.outOf100.toStringAsFixed(1) ?? '--'} / 100',
                     style: const TextStyle(
-                      color: AppTheme.colors.crimson,
+                      color: AppTheme.crimson,
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
                       letterSpacing: 0.5,
@@ -382,10 +382,10 @@ class _MarksScreenState extends State<MarksScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
       decoration: BoxDecoration(
-        color: AppTheme.colors.white.withValues(alpha: 0.05),
+        color: AppTheme.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.colors.white.withValues(alpha: 0.1),
+          color: AppTheme.white.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -397,7 +397,7 @@ class _MarksScreenState extends State<MarksScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: AppTheme.colors.white54,
+              color: AppTheme.white54,
               fontSize: 11,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -407,7 +407,7 @@ class _MarksScreenState extends State<MarksScreen> {
           Text(
             hasMark ? '${component.mark}' : '--',
             style: TextStyle(
-              color: hasMark ? AppTheme.colors.white : AppTheme.colors.white38,
+              color: hasMark ? AppTheme.white : AppTheme.white38,
               fontWeight: FontWeight.w800,
               fontSize: 18,
             ),
@@ -416,7 +416,7 @@ class _MarksScreenState extends State<MarksScreen> {
           Text(
             '/ ${component.maxMark.toInt()}',
             style: TextStyle(
-              color: AppTheme.colors.white.withValues(alpha: 0.3),
+              color: AppTheme.white.withValues(alpha: 0.3),
               fontSize: 10,
             ),
           ),
