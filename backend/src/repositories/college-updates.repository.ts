@@ -35,14 +35,14 @@ function contentHash(snapshot: CollegeUpdatesSnapshot): string {
   return createHash("sha256").update(JSON.stringify(stable)).digest("hex");
 }
 
-function publicSnapshot(doc: StoredSnapshot): CollegeUpdatesSnapshot {
+function publicSnapshot(doc: StoredSnapshot): CollegeUpdatesSnapshot & { announcementVersion: number } {
   const {
     contentHash: _hash,
     version: _version,
     archivedAt: _archivedAt,
     ...snapshot
   } = doc;
-  return snapshot;
+  return { ...snapshot, announcementVersion: doc.version };
 }
 
 export class CollegeUpdatesRepository {
@@ -80,7 +80,7 @@ export class CollegeUpdatesRepository {
     return result.modifiedCount === 1;
   }
 
-  async getLatest(): Promise<CollegeUpdatesSnapshot | null> {
+  async getLatest(): Promise<(CollegeUpdatesSnapshot & { announcementVersion: number }) | null> {
     const { latest } = await this.collections();
     const doc = await latest.findOne({ key: "loyola-homepage" });
     return doc ? publicSnapshot(doc as unknown as StoredSnapshot) : null;
