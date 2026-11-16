@@ -18,7 +18,8 @@ No student login or LRMS link is required because these are public college notic
 {
   "status": "success",
   "data": {
-    "announcementVersion": 4,\n    "announcements": [
+    "announcementVersion": 4,
+    "announcements": [
       { "id": "...", "title": "...", "url": "...", "source": "Loyola College" }
     ],
     "events": [
@@ -57,5 +58,10 @@ and parses the HTML with Cheerio; it does not call an undocumented endpoint or
 reuse the LRMS student session.
 
 The scraper caches the combined result for five minutes to avoid repeatedly
-requesting the college website. The mobile app opens the College Updates screen
-from the campaign icon in the dashboard header.
+requesting the college website. Each successful archive exposes an
+`announcementVersion`. The mobile app stores the notices with that version:
+when the API returns the same version it keeps the existing local notices;
+when the version changes it replaces them with the latest API notices. This is
+version-based and does not filter announcements by publication date or a time
+window. The mobile app opens the College Updates screen from the campaign icon
+in the dashboard header.
