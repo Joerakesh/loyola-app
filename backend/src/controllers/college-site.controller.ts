@@ -6,9 +6,10 @@ import { academicCalendarRepository } from "../repositories/academic-calendar.re
 export class CollegeSiteController {
   async updates(_req: Request, res: Response) {
     try {
-      // The app reads the last successful MongoDB archive. It never scrapes
-      // Loyola's website as part of a normal read request.
+      // Serve the last known good MongoDB snapshot immediately. Refresh the
+      // source asynchronously so college website latency never blocks the app.
       const snapshot = await collegeUpdatesRepository.getLatest();
+      void this.refreshArchiveInBackground();
       if (!snapshot) {
         return res.status(404).json({
           status: "error",
@@ -43,6 +44,33 @@ export class CollegeSiteController {
         status: "error",
         message: "Unable to read college updates from storage",
       });
+    }
+  }
+
+  private async refreshArchiveInBackground(): Promise<void> {
+    try {
+      const acquired = await collegeUpdatesRepository.acquireScrapeSlot();
+      if (!acquired) return;
+
+      const snapshot = await collegeSiteService.scrapeForArchive();
+      if (snapshot.announcements.length === 0 && snapshot.events.length === 0) {
+        throw new Error("Homepage parser returned no announcements or events; refusing to overwrite the last good archive");
+      }
+
+      const result = await collegeUpdatesRepository.archive(snapshot);
+      if (result.changed) {
+        console.info("College updates archive refreshed:", {
+          version: result.version,
+          announcements: result.announcements,
+          events: result.events,
+        });
+      }
+    } catch (error) {
+      // Keep serving MongoDB's last successful snapshot when Loyola is down.
+      console.error(
+        "Background college updates refresh failed; keeping MongoDB archive:",
+        error instanceof Error ? error.message : error,
+      );
     }
   }
 
