@@ -18,7 +18,7 @@ No student login or LRMS link is required because these are public college notic
 {
   "status": "success",
   "data": {
-    "announcements": [
+    "announcementVersion": 4,\n    "announcements": [
       { "id": "...", "title": "...", "url": "...", "source": "Loyola College" }
     ],
     "events": [
