@@ -11,6 +11,8 @@ class CollegeUpdatesService {
   CollegeUpdatesService(this._apiClient);
 
   static const _calendarCacheTtl = Duration(minutes: 30);
+  static const _announcementVersionKey = 'college_updates.announcement_version';
+  static const _announcementDataKey = 'college_updates.announcements';
 
   final ApiClient _apiClient;
   final Map<String, Timer> _calendarExpiryTimers = {};
@@ -35,7 +37,36 @@ class CollegeUpdatesService {
       throw Exception('The college updates API returned an invalid response');
     }
 
-    return data.cast<String, dynamic>();
+    final updates = data.cast<String, dynamic>();
+    await _applyAnnouncementVersion(updates);
+    return updates;
+  }
+
+  /// Keeps the locally displayed notices when the archive version is unchanged.
+  /// A changed version replaces the cached notices with the new server snapshot.
+  Future<void> _applyAnnouncementVersion(Map<String, dynamic> updates) async {
+    final version = int.tryParse(updates['announcementVersion']?.toString() ?? '');
+    final remoteAnnouncements = updates['announcements'];
+    if (version == null || remoteAnnouncements is! List) return;
+
+    final preferences = await SharedPreferences.getInstance();
+    final cachedVersion = preferences.getInt(_announcementVersionKey);
+    final cachedRaw = preferences.getString(_announcementDataKey);
+
+    if (cachedVersion == version && cachedRaw != null) {
+      try {
+        final cached = jsonDecode(cachedRaw);
+        if (cached is List) {
+          updates['announcements'] = cached;
+          return;
+        }
+      } catch (_) {
+        // Replace malformed local data with the valid API response below.
+      }
+    }
+
+    await preferences.setString(_announcementDataKey, jsonEncode(remoteAnnouncements));
+    await preferences.setInt(_announcementVersionKey, version);
   }
 
   Future<List<CollegeAnnouncement>> fetchAnnouncements({bool refresh = false}) async {
