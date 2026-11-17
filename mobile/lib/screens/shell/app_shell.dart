@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../app/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/responsive.dart';
+import '../../core/theme/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 const _dockRadius = 34.0;
 const _dockPadding = 6.0;
@@ -53,6 +55,8 @@ class AppShell extends StatelessWidget {
   }
 
   Widget _buildDock(BuildContext context) {
+    final activeTheme = context.watch<ThemeProvider>().selected;
+    final colors = Theme.of(context).colorScheme;
     final compact = Responsive.isCompact(context);
     const outer = BorderRadius.all(Radius.circular(_dockRadius));
     const inner = BorderRadius.all(Radius.circular(_dockRadius - 1));
@@ -61,8 +65,8 @@ class AppShell extends StatelessWidget {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        AppTheme.background.withValues(alpha: 0),
-        AppTheme.background.withValues(alpha: .82),
+        activeTheme.background.withValues(alpha: 0),
+        activeTheme.background.withValues(alpha: .82),
       ],
     );
 
@@ -106,7 +110,7 @@ class AppShell extends StatelessWidget {
                 child: Container(
                   height: compact ? 62 : 66,
                   padding: const EdgeInsets.all(_dockPadding),
-                  color: AppTheme.backgroundSoft.withValues(alpha: .62),
+                  color: activeTheme.surface.withValues(alpha: .82),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final selected = navigationShell.currentIndex;
@@ -168,9 +172,10 @@ class _DockItemState extends State<_DockItem> {
   @override
   Widget build(BuildContext context) {
     final selected = widget.selected;
-    final accent = AppTheme.crimson;
+    final colors = Theme.of(context).colorScheme;
+    final accent = colors.primary;
     final light = Color.lerp(accent, Colors.white, .22)!;
-    final content = selected ? AppTheme.background : AppTheme.white54;
+    final content = selected ? colors.onPrimary : colors.onSurfaceVariant;
 
     return Semantics(
       button: true,
