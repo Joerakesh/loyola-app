@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../core/theme/theme_provider.dart';
 
@@ -49,6 +50,8 @@ class _GlassBackgroundState extends State<GlassBackground> with SingleTickerProv
               accent: theme.primary.withValues(alpha: .10),
             )),
           ))
+        if (theme.id == 'spider')
+          Positioned.fill(child: IgnorePointer(child: SvgPicture.asset('assets/themes/spider_web_overlay.svg', fit: BoxFit.cover)))
         else
           Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _AmbientPatternPainter(
             color: theme.primary.withValues(alpha: .055),
