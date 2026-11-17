@@ -514,6 +514,7 @@ class AppListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final lead =
         leading ??
         (icon == null
@@ -522,13 +523,13 @@ class AppListTile extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
+                  color: colors.surfaceContainerHighest.withValues(alpha: 0.72),
                   borderRadius: BorderRadius.circular(AppRadius.inner - 2),
                 ),
                 child: Icon(
                   icon,
                   size: 20,
-                  color: iconColor ?? Colors.white.withValues(alpha: 0.78),
+                  color: iconColor ?? colors.onSurfaceVariant,
                 ),
               ));
 
@@ -539,8 +540,8 @@ class AppListTile extends StatelessWidget {
               HapticFeedback.selectionClick();
               onTap!();
             },
-      splashColor: Colors.white.withValues(alpha: 0.06),
-      highlightColor: Colors.white.withValues(alpha: 0.03),
+      splashColor: colors.primary.withValues(alpha: 0.10),
+      highlightColor: colors.primary.withValues(alpha: 0.05),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         child: Row(
@@ -554,8 +555,8 @@ class AppListTile extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: colors.onSurface,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -567,7 +568,7 @@ class AppListTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.54),
+                        color: colors.onSurfaceVariant,
                         fontSize: 12,
                       ),
                     ),
@@ -580,7 +581,7 @@ class AppListTile extends StatelessWidget {
               Text(
                 value!,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.78),
+                  color: colors.onSurface,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
@@ -591,7 +592,7 @@ class AppListTile extends StatelessWidget {
               const SizedBox(width: 4),
               Icon(
                 Icons.chevron_right_rounded,
-                color: Colors.white.withValues(alpha: 0.32),
+                color: colors.onSurfaceVariant.withValues(alpha: 0.65),
                 size: 22,
               ),
             ],
