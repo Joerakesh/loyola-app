@@ -559,7 +559,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final percentage = _getAttendancePercentage();
     final onTrack = percentage >= 75;
     final color = onTrack ? AppTheme.crimson : AppTheme.red;
-    final hours = record?.hours.take(8).toList() ?? [];
+    final hours = record?.hours.take(5).toList() ?? [];
 
     return AppTicketCard(
       onTap: () => context.go(AppRoutes.attendance),
@@ -927,7 +927,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildRecentLogItem(AttendanceRecord record) {
-    final hours = record.hours.take(8).toList();
+    final hours = record.hours.take(5).toList();
     final hasClasses = record.scheduledCount > 0;
 
     return Padding(
