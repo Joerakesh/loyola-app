@@ -182,6 +182,7 @@ class AccountSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final palette = Theme.of(context).colorScheme;
     final user = auth.user;
     final googlePhotoUrl = user?.avatarUrl?.trim();
     final erp = user?.erpLinked == true;
@@ -257,8 +258,8 @@ class AccountSettingsScreen extends StatelessWidget {
                         trailing: StatusChip(
                           label: googleLinked ? 'Connected' : 'Not connected',
                           color: googleLinked
-                              ? AppTheme.green
-                              : AppTheme.white54,
+                              ? palette.primary
+                              : palette.onSurfaceVariant,
                         ),
                       ),
                       AppListTile(
@@ -281,7 +282,7 @@ class AccountSettingsScreen extends StatelessWidget {
                             : 'Needed for attendance, marks and account recovery',
                         trailing: StatusChip(
                           label: erp ? 'Connected' : 'Not connected',
-                          color: erp ? AppTheme.green : AppTheme.orange,
+                          color: erp ? palette.primary : palette.secondary,
                         ),
                       ),
                       if (erp) ...[
@@ -380,7 +381,7 @@ class AccountSettingsScreen extends StatelessWidget {
                   right: 0,
                   child: LinearProgressIndicator(
                     minHeight: 2,
-                    color: AppTheme.crimson,
+                    color: Theme.of(context).colorScheme.primary,
                     backgroundColor: Colors.transparent,
                   ),
                 ),
@@ -454,7 +455,7 @@ class AccountSettingsScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 26,
-                backgroundColor: AppTheme.crimson,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 backgroundImage:
                     googlePhotoUrl != null && googlePhotoUrl.isNotEmpty
                     ? NetworkImage(googlePhotoUrl)
@@ -508,14 +509,14 @@ class AccountSettingsScreen extends StatelessWidget {
             children: [
               StatusChip(
                 label: googleLinked ? 'Google linked' : 'Google not linked',
-                color: googleLinked ? AppTheme.green : AppTheme.white54,
+                color: googleLinked ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
                 icon: googleLinked
                     ? Icons.check_circle_rounded
                     : Icons.remove_circle_outline_rounded,
               ),
               StatusChip(
                 label: erp ? 'ERP linked' : 'ERP not linked',
-                color: erp ? AppTheme.green : AppTheme.orange,
+                color: erp ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
                 icon: erp
                     ? Icons.check_circle_rounded
                     : Icons.error_outline_rounded,
@@ -629,7 +630,7 @@ class _CredentialSheetState extends State<_CredentialSheet> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       border: border(Colors.white.withValues(alpha: 0.10)),
       enabledBorder: border(Colors.white.withValues(alpha: 0.10)),
-      focusedBorder: border(AppTheme.crimson, 1.4),
+      focusedBorder: border(Theme.of(context).colorScheme.primary, 1.4),
       errorBorder: border(AppTheme.red),
       focusedErrorBorder: border(AppTheme.red, 1.4),
     );
