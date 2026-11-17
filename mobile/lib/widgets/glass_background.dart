@@ -49,7 +49,7 @@ class _GlassBackgroundState extends State<GlassBackground> with SingleTickerProv
               progress: _motion.value,
               accent: theme.primary.withValues(alpha: .10),
             )),
-          ))
+          )),
         if (theme.id == 'spider')
           Positioned.fill(child: IgnorePointer(child: SvgPicture.asset('assets/themes/spider_web_overlay.svg', fit: BoxFit.cover)))
         else
