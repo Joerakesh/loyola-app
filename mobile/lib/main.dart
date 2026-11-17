@@ -6,6 +6,7 @@ import 'app/app_router.dart';
 import 'core/firebase/firebase_init.dart';
 import 'core/network/api_client.dart';
 import 'core/storage/secure_storage.dart';
+import 'core/theme/theme_provider.dart';
 import 'services/auth_provider.dart';
 import 'services/auth_service.dart';
 import 'services/google_auth_service.dart';
@@ -20,6 +21,8 @@ Future<void> main() async {
   final authService = AuthService(apiClient, storage);
   final googleAuthService = GoogleAuthService();
   final authProvider = AuthProvider(authService, googleAuthService);
+  final themeProvider = ThemeProvider();
+  await themeProvider.load();
 
   final appRouter = AppRouter(
     apiClient: apiClient,
@@ -30,8 +33,11 @@ Future<void> main() async {
   authProvider.addListener(appRouter.refresh);
 
   runApp(
-    ChangeNotifierProvider.value(
-      value: authProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: authProvider),
+        ChangeNotifierProvider.value(value: themeProvider),
+      ],
       child: LoyolaApp(appRouter: appRouter),
     ),
   );
