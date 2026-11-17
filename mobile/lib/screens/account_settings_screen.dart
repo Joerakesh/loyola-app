@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../app/app_router.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/theme_provider.dart';
+import 'theme_selection_screen.dart';
 import '../core/theme/responsive.dart';
 import '../services/auth_provider.dart';
 import '../widgets/app_card.dart';
@@ -200,6 +202,23 @@ class AccountSettingsScreen extends StatelessWidget {
                 children: [
                   _header(context),
                   const SizedBox(height: 22),
+                  _heading('Personalization'),
+                  AppListGroup(
+                    children: [
+                      AppListTile(
+                        icon: Icons.palette_outlined,
+                        title: 'Themes',
+                        subtitle: 'Choose a colour style for your Loyola app',
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ThemeSelectionScreen(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
                   _identityCard(email, googleLinked, erp, googlePhotoUrl),
                   if (auth.error != null) ...[
                     const SizedBox(height: 14),
