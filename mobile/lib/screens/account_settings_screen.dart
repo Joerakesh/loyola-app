@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../app/app_router.dart';
 import '../core/theme/app_theme.dart';
-import '../core/theme/theme_provider.dart';
 import 'theme_selection_screen.dart';
 import '../core/theme/responsive.dart';
 import '../services/auth_provider.dart';
