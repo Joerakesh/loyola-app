@@ -111,7 +111,7 @@ class _AmbientPatternPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 1;
     for (var i=0;i<7;i++) {
-      final rect = Rect.fromCircle(center: Offset(size.width*(i.isEven?.12:.88), size.height*(i.isEven?.18:.78)), radius: 34.0+i*23);
+      final rect = Rect.fromCircle(center: Offset(size.width * (i.isEven ? 0.12 : 0.88), size.height * (i.isEven ? 0.18 : 0.78)), radius: 34.0+i*23);
       canvas.drawCircle(rect.center, rect.width/2, paint);
     }
   }
