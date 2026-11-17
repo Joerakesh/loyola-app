@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/app_router.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/theme/responsive.dart';
 import '../../core/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
