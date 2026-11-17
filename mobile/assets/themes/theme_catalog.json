@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "source": "Original Loyola theme configuration inspired by the visual categories observed in the supplied Campus App APK. This is not a copy of its proprietary cast manifest.",
+  "themes": {
+    "classic": {"background":"#0B1014","surface":"#18232B","surfaceVariant":"#111920","primary":"#B9F36B","secondary":"#72E4D2","foreground":"#F3F7F4","muted":"#94A5AA","effect":"ambient"},
+    "spider": {"background":"#090F1C","surface":"#151F32","surfaceVariant":"#202D43","primary":"#E63946","secondary":"#42A5F5","foreground":"#F5F7FC","muted":"#9EACC2","effect":"animated_web"},
+    "gotham": {"background":"#090B10","surface":"#171B24","surfaceVariant":"#222936","primary":"#F4C542","secondary":"#8FA3B8","foreground":"#F2F4F7","muted":"#9AA5B4","effect":"ambient"},
+    "grand-line": {"background":"#071923","surface":"#102B3A","surfaceVariant":"#193B4B","primary":"#FFC857","secondary":"#42C6D8","foreground":"#F4FAFC","muted":"#A0BBC5","effect":"ambient"},
+    "cursed-energy": {"background":"#0D0B1B","surface":"#1C1830","surfaceVariant":"#292341","primary":"#9B7BFF","secondary":"#55D6E8","foreground":"#F5F1FF","muted":"#B2A9CE","effect":"ambient"},
+    "inferno": {"background":"#130C0B","surface":"#251613","surfaceVariant":"#38201A","primary":"#FF6542","secondary":"#FFB454","foreground":"#FFF4EF","muted":"#C5A69B","effect":"ambient"},
+    "halloween": {"background":"#100B1B","surface":"#21162F","surfaceVariant":"#30203F","primary":"#FF8A3D","secondary":"#B18CFF","foreground":"#FFF6F0","muted":"#B9A8C8","effect":"ambient"},
+    "winter": {"background":"#091522","surface":"#142638","surfaceVariant":"#20374A","primary":"#78C8FF","secondary":"#72D6A1","foreground":"#F1F8FF","muted":"#A6BBCB","effect":"ambient"},
+    "paper": {"background":"#F5F6F8","surface":"#FFFFFF","surfaceVariant":"#E9EDF2","primary":"#315DAB","secondary":"#168779","foreground":"#182230","muted":"#657386","effect":"ambient"}
+  }
+}
