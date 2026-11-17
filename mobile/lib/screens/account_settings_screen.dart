@@ -219,7 +219,7 @@ class AccountSettingsScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  _identityCard(email, googleLinked, erp, googlePhotoUrl),
+                  _identityCard(context, email, googleLinked, erp, googlePhotoUrl),
                   if (auth.error != null) ...[
                     const SizedBox(height: 14),
                     AppCard(
@@ -375,7 +375,7 @@ class AccountSettingsScreen extends StatelessWidget {
                 ],
               ),
               if (auth.isLoading)
-                const Positioned(
+                Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
@@ -440,6 +440,7 @@ class AccountSettingsScreen extends StatelessWidget {
   }
 
   Widget _identityCard(
+    BuildContext context,
     String email,
     bool googleLinked,
     bool erp,
